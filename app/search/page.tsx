@@ -19,6 +19,7 @@ export default function SearchPage() {
   const [searchType, setSearchType] = useState<'people' | 'location'>('people')
   const [trustFilter, setTrustFilter] = useState<number>(0)
   const [showFilters, setShowFilters] = useState(false)
+  const [startX, setStartX] = useState(0)
 
   const filteredUsers = sampleUsers.filter(user => {
     const matchesQuery = searchQuery === '' || 
@@ -44,6 +45,30 @@ export default function SearchPage() {
     { name: 'Service Providers', icon: '🔧', count: 189 },
     { name: 'Venues', icon: '🏢', count: 67 }
   ]
+
+  // Tab order for swipe navigation
+  const tabOrder: ('people' | 'location')[] = ['people', 'location']
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setStartX(e.touches[0].clientX)
+  }
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const endX = e.changedTouches[0].clientX
+    const diff = startX - endX
+
+    if (Math.abs(diff) > 50) { // Minimum swipe distance
+      const currentIndex = tabOrder.indexOf(searchType)
+      
+      if (diff > 0 && currentIndex < tabOrder.length - 1) {
+        // Swipe left - next tab
+        setSearchType(tabOrder[currentIndex + 1])
+      } else if (diff < 0 && currentIndex > 0) {
+        // Swipe right - previous tab
+        setSearchType(tabOrder[currentIndex - 1])
+      }
+    }
+  }
 
   return (
     <Layout>
@@ -73,7 +98,7 @@ export default function SearchPage() {
             </button>
           </div>
 
-          {/* Search Type Toggle */}
+          {/* Search Type Toggle - Swipeable */}
           <div className="flex space-x-1 mb-4 bg-slate-100 p-1 rounded-xl">
             <button
               onClick={() => setSearchType('people')}
@@ -97,6 +122,11 @@ export default function SearchPage() {
               <MapPinIcon className="w-4 h-4" />
               <span>Location</span>
             </button>
+          </div>
+          
+          {/* Swipe instruction for mobile */}
+          <div className="text-center text-sm text-slate-500 mb-4 md:hidden">
+            ← Swipe to switch between People and Location →
           </div>
 
           {/* Filters */}
@@ -135,7 +165,11 @@ export default function SearchPage() {
           )}
         </div>
 
-        {/* Search Results */}
+        {/* Search Results - Swipeable */}
+        <div
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+        >
         {searchQuery ? (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
@@ -270,6 +304,7 @@ export default function SearchPage() {
             </div>
           </>
         )}
+        </div>
       </div>
     </Layout>
   )

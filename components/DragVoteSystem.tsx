@@ -134,8 +134,8 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
       onMouseLeave={handleMouseUp}
     >
       {/* Upvote Zone Indicator */}
-      <div className={`w-full h-8 rounded-t-lg flex items-center justify-center transition-all duration-200 ${
-        isDragging && dragPosition.y < -20 ? 'bg-green-200/50' : ''
+      <div className={`w-full h-6 rounded-t-lg flex items-center justify-center transition-all duration-200 ${
+        !isDragging ? 'opacity-30' : ''
       }`}>
         <span className="text-xs text-green-600 opacity-50">↑</span>
       </div>
@@ -144,8 +144,8 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
       <div
         ref={coneRef}
         className={`absolute cursor-grab active:cursor-grabbing transition-all duration-200 ${
-          isDragging ? 'scale-110 z-10' : 'z-0'
-        }`}
+          isDragging ? 'scale-110 z-50' : 'z-20'
+        } hover:scale-105`}
         style={{
           top: `50%`,
           left: '50%',
@@ -157,11 +157,12 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
         onTouchEnd={handleTouchEnd}
       >
         <svg 
-          width="32" 
-          height="48" 
+          width="36" 
+          height="52" 
           viewBox="0 0 32 48" 
           xmlns="http://www.w3.org/2000/svg"
-          className={`drop-shadow-md ${isDragging ? 'animate-pulse' : ''}`}
+          className={`drop-shadow-lg ${isDragging ? 'animate-pulse' : 'animate-bounce'}`}
+          style={{ animationDuration: isDragging ? '0.5s' : '2s', animationIterationCount: isDragging ? 'infinite' : '3' }}
         >
           {/* Ice Cream Cone */}
           <defs>
@@ -223,8 +224,8 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
         </svg>
       </div>
 
-      {/* Vote Score Display */}
-      <div className="bg-white/80 backdrop-blur-sm rounded-lg px-2 py-2 z-0">
+      {/* Vote Score Display - positioned behind the ice cream */}
+      <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 bg-white/90 backdrop-blur-sm rounded-lg px-2 py-1 z-10 shadow-sm">
         <div className="text-xs font-bold text-slate-800 text-center">
           {adjustedUpvotes - adjustedDownvotes}
         </div>
@@ -234,19 +235,36 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
       </div>
 
       {/* Downvote Zone Indicator */}
-      <div className={`w-full h-8 rounded-b-lg flex items-center justify-center transition-all duration-200 ${
-        isDragging && dragPosition.y > 20 ? 'bg-red-200/50' : ''
+      <div className={`w-full h-6 rounded-b-lg flex items-center justify-center transition-all duration-200 ${
+        !isDragging ? 'opacity-30' : ''
       }`}>
         <span className="text-xs text-red-600 opacity-50">↓</span>
       </div>
 
-      {/* Drag Instructions */}
+      {/* Drag Instructions - Always visible when not dragging */}
       {!isDragging && (
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="text-xs text-slate-400 text-center opacity-0 hover:opacity-100 transition-opacity duration-200">
+        <div className="absolute top-1 left-1/2 transform -translate-x-1/2 pointer-events-none z-30">
+          <div className="text-xs text-slate-500 text-center bg-white/80 backdrop-blur-sm px-2 py-1 rounded-md shadow-sm">
             Drag 🍦
           </div>
         </div>
+      )}
+      
+      {/* Enhanced Zone Indicators */}
+      {isDragging && (
+        <>
+          <div className={`absolute top-0 left-0 right-0 h-1/3 rounded-t-xl transition-all duration-200 ${
+            dragPosition.y < -20 ? 'bg-green-300/40 border-2 border-green-400' : 'bg-green-100/20'
+          } flex items-center justify-center z-5`}>
+            <span className="text-sm">👍 UPVOTE</span>
+          </div>
+          
+          <div className={`absolute bottom-0 left-0 right-0 h-1/3 rounded-b-xl transition-all duration-200 ${
+            dragPosition.y > 20 ? 'bg-red-300/40 border-2 border-red-400' : 'bg-red-100/20'
+          } flex items-center justify-center z-5`}>
+            <span className="text-sm">👎 DOWNVOTE</span>
+          </div>
+        </>
       )}
     </div>
   )

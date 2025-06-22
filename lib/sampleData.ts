@@ -65,6 +65,8 @@ export interface Event {
   imageUrl: string
   tags: string[]
   rsvpStatus?: 'going' | 'interested' | 'not-going'
+  userAttended?: boolean
+  isPast?: boolean
 }
 
 export interface Comment {
@@ -340,7 +342,7 @@ export const sampleReviews: Review[] = [
     downvotes: 1,
     hasVoted: false,
     isEventReview: true,
-    eventId: '1',
+    eventId: 'past-1',
     trustScore: 92,
     communityValidation: 94,
   },
@@ -356,7 +358,7 @@ export const sampleReviews: Review[] = [
     downvotes: 0,
     hasVoted: false,
     isEventReview: true,
-    eventId: '2',
+    eventId: 'past-2',
     trustScore: 76,
     communityValidation: 87,
   },
@@ -372,7 +374,7 @@ export const sampleReviews: Review[] = [
     downvotes: 0,
     hasVoted: false,
     isEventReview: true,
-    eventId: '3',
+    eventId: 'past-3',
     trustScore: 85,
     communityValidation: 96,
   }
@@ -380,6 +382,113 @@ export const sampleReviews: Review[] = [
 
 // Sample Events
 export const sampleEvents: Event[] = [
+  // Past Events (that current user attended and can review)
+  {
+    id: 'past-1',
+    title: 'Sunday Brunch & Networking',
+    description: 'Join us for a relaxed brunch and networking session with local professionals. Great food, great company, and meaningful connections.',
+    hostId: '3',
+    date: '2025-06-15',
+    time: '11:00 AM',
+    location: 'Verde Kitchen',
+    address: '123 Main St, New York, NY 10001',
+    coordinates: [-74.006, 40.7128],
+    attendeeCount: 28,
+    maxAttendees: 30,
+    trustRequirement: 75,
+    isPrivate: false,
+    category: 'Networking',
+    price: 25,
+    imageUrl: 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=600',
+    tags: ['brunch', 'networking', 'professionals'],
+    userAttended: true,
+    isPast: true,
+  },
+  {
+    id: 'past-2',
+    title: 'Mountain Photography Workshop',
+    description: 'Learn landscape photography techniques in the beautiful Rocky Mountains. All skill levels welcome. Equipment provided.',
+    hostId: '4',
+    date: '2025-06-10',
+    time: '6:00 AM',
+    location: 'Rocky Mountain National Park',
+    address: 'Estes Park, CO 80517',
+    coordinates: [-105.6836, 40.3428],
+    attendeeCount: 12,
+    maxAttendees: 12,
+    trustRequirement: 60,
+    isPrivate: false,
+    category: 'Workshop',
+    price: 75,
+    imageUrl: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600',
+    tags: ['photography', 'outdoors', 'workshop'],
+    userAttended: true,
+    isPast: true,
+  },
+  {
+    id: 'past-3',
+    title: 'Tech Meetup: AI & Machine Learning',
+    description: 'Monthly tech meetup discussing the latest in AI and ML. Presentations, demos, and networking with fellow developers.',
+    hostId: '5',
+    date: '2025-06-08',
+    time: '7:00 PM',
+    location: 'Seattle Tech Hub',
+    address: '456 Tech Ave, Seattle, WA 98101',
+    coordinates: [-122.3321, 47.6062],
+    attendeeCount: 52,
+    maxAttendees: 60,
+    trustRequirement: 70,
+    isPrivate: false,
+    category: 'Technology',
+    price: 0,
+    imageUrl: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=600',
+    tags: ['tech', 'AI', 'networking', 'developers'],
+    userAttended: true,
+    isPast: true,
+  },
+  {
+    id: 'past-4',
+    title: 'Morning Fitness Bootcamp',
+    description: 'High-energy outdoor workout session in the park. All fitness levels welcome. Bring water and a positive attitude!',
+    hostId: '2',
+    date: '2025-06-05',
+    time: '7:00 AM',
+    location: 'Zilker Park',
+    address: 'Austin, TX 78746',
+    coordinates: [-97.7731, 30.2672],
+    attendeeCount: 18,
+    maxAttendees: 20,
+    trustRequirement: 65,
+    isPrivate: false,
+    category: 'Fitness',
+    price: 15,
+    imageUrl: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600',
+    tags: ['fitness', 'outdoors', 'morning'],
+    userAttended: false,
+    isPast: true,
+  },
+  {
+    id: 'past-5',
+    title: 'Wine Tasting & Design Talk',
+    description: 'An evening of fine wines paired with insights into modern design trends. Perfect blend of sophistication and creativity.',
+    hostId: '1',
+    date: '2025-06-01',
+    time: '6:30 PM',
+    location: 'The Design Studio',
+    address: '789 Design Blvd, San Francisco, CA 94102',
+    coordinates: [-122.4194, 37.7749],
+    attendeeCount: 22,
+    maxAttendees: 25,
+    trustRequirement: 80,
+    isPrivate: true,
+    category: 'Social',
+    price: 45,
+    imageUrl: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=600',
+    tags: ['wine', 'design', 'networking'],
+    userAttended: false,
+    isPast: true,
+  },
+  // Upcoming Events
   {
     id: '1',
     title: 'Sunday Brunch & Networking',
@@ -399,6 +508,7 @@ export const sampleEvents: Event[] = [
     imageUrl: 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=600',
     tags: ['brunch', 'networking', 'professionals'],
     rsvpStatus: 'interested',
+    isPast: false,
   },
   {
     id: '2',
@@ -418,6 +528,7 @@ export const sampleEvents: Event[] = [
     price: 75,
     imageUrl: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600',
     tags: ['photography', 'outdoors', 'workshop'],
+    isPast: false,
   },
   {
     id: '3',
@@ -438,6 +549,7 @@ export const sampleEvents: Event[] = [
     imageUrl: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=600',
     tags: ['tech', 'AI', 'networking', 'developers'],
     rsvpStatus: 'going',
+    isPast: false,
   },
   {
     id: '4',
@@ -457,6 +569,7 @@ export const sampleEvents: Event[] = [
     price: 15,
     imageUrl: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600',
     tags: ['fitness', 'outdoors', 'morning'],
+    isPast: false,
   },
   {
     id: '5',
@@ -476,6 +589,7 @@ export const sampleEvents: Event[] = [
     price: 45,
     imageUrl: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=600',
     tags: ['wine', 'design', 'networking'],
+    isPast: false,
   },
   {
     id: '6',
@@ -495,6 +609,7 @@ export const sampleEvents: Event[] = [
     price: 35,
     imageUrl: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=600',
     tags: ['networking', 'summer', 'professionals', 'mixer', 'ice-cream'],
+    isPast: false,
   },
   {
     id: '7',
@@ -514,6 +629,7 @@ export const sampleEvents: Event[] = [
     price: 45,
     imageUrl: 'https://images.unsplash.com/photo-1551524164-6cf6ac833fb4?w=600',
     tags: ['hiking', 'summer', 'outdoors', 'adventure'],
+    isPast: false,
   },
   {
     id: '8',
@@ -533,6 +649,7 @@ export const sampleEvents: Event[] = [
     price: 85,
     imageUrl: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600',
     tags: ['cooking', 'desserts', 'workshop', 'ice-cream'],
+    isPast: false,
   },
   {
     id: '9',
@@ -552,6 +669,7 @@ export const sampleEvents: Event[] = [
     price: 25,
     imageUrl: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600',
     tags: ['fitness', 'strength', 'bootcamp', 'morning'],
+    isPast: false,
   }
 ]
 

@@ -6,7 +6,7 @@ import Link from 'next/link'
 import Layout from '@/components/Layout'
 import TrustBadge from '@/components/TrustBadge'
 import FlagModal from '@/components/FlagModal'
-import { sampleUsers, sampleEvents } from '@/lib/sampleData'
+import { sampleUsers, sampleEvents, sampleReviews } from '@/lib/sampleData'
 import { 
   CalendarIcon,
   MapPinIcon,
@@ -76,8 +76,8 @@ export default function EventsPage() {
     }
   }
 
-  const upcomingEvents = sampleEvents.filter(event => getEventDate(event.date).isUpcoming)
-  const pastEvents = sampleEvents.filter(event => !getEventDate(event.date).isUpcoming)
+  const upcomingEvents = sampleEvents.filter(event => event.isPast === false)
+  const pastEvents = sampleEvents.filter(event => event.isPast === true)
 
   // Tab order for swipe navigation
   const tabOrder: ('upcoming' | 'past' | 'discover')[] = ['upcoming', 'past', 'discover']
@@ -236,14 +236,14 @@ export default function EventsPage() {
 
         {/* Event Actions */}
         <div className="flex items-center space-x-3">
-          {isPast && event.rsvpStatus === 'going' ? (
+          {isPast && event.userAttended ? (
             // Show review button for past events the user attended
             <Link
               href={`/create-post?event=${event.id}`}
               className="flex-1 bg-gradient-to-r from-cyan-500 to-teal-600 text-white py-2 px-4 rounded-xl text-center font-medium hover:from-cyan-600 hover:to-teal-700 transition-all duration-200 flex items-center justify-center space-x-2"
             >
               <StarIcon className="w-4 h-4" />
-              <span>Leave your review</span>
+              <span>Review?</span>
             </Link>
           ) : (
             <Link

@@ -21,6 +21,7 @@ export default function FriendsPage() {
     { ...sampleUsers[3], mutualFriends: 3 },
     { ...sampleUsers[4], mutualFriends: 1 }
   ])
+  const [startX, setStartX] = useState(0)
 
   const currentUser = sampleUsers[0] // Using Sarah as current user
   const friends = sampleUsers.slice(1, 4) // Marcus, Elena, Alex as friends
@@ -32,6 +33,30 @@ export default function FriendsPage() {
 
   const handleDeclineRequest = (userId: string) => {
     setFriendRequests(prev => prev.filter(user => user.id !== userId))
+  }
+
+  // Tab order for swipe navigation
+  const tabOrder: ('friends' | 'requests' | 'suggestions')[] = ['friends', 'requests', 'suggestions']
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setStartX(e.touches[0].clientX)
+  }
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const endX = e.changedTouches[0].clientX
+    const diff = startX - endX
+
+    if (Math.abs(diff) > 50) { // Minimum swipe distance
+      const currentIndex = tabOrder.indexOf(activeTab)
+      
+      if (diff > 0 && currentIndex < tabOrder.length - 1) {
+        // Swipe left - next tab
+        setActiveTab(tabOrder[currentIndex + 1])
+      } else if (diff < 0 && currentIndex > 0) {
+        // Swipe right - previous tab
+        setActiveTab(tabOrder[currentIndex - 1])
+      }
+    }
   }
 
   const renderUserCard = (user: any, type: 'friend' | 'request' | 'suggestion') => (
@@ -170,8 +195,17 @@ export default function FriendsPage() {
           ))}
         </div>
 
-        {/* Content */}
-        <div className="space-y-4">
+        {/* Swipe instruction for mobile */}
+        <div className="text-center text-sm text-slate-500 mb-4 md:hidden">
+          ← Swipe to navigate between tabs →
+        </div>
+
+        {/* Content - Swipeable */}
+        <div 
+          className="space-y-4"
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+        >
           {activeTab === 'friends' && (
             <>
               {friends.length > 0 ? (
