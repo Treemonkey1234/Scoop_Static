@@ -485,7 +485,7 @@ export default function SearchPage() {
                 <button
                   onClick={() => setSearchType('map')}
                   className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center space-x-2 ${
-                    searchType === 'map'
+                    (searchType as SearchType) === 'map'
                       ? 'bg-white text-primary-600 shadow-soft'
                       : 'text-slate-600 hover:text-slate-800'
                   }`}
