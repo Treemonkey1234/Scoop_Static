@@ -18,6 +18,8 @@ export default function SignUpPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState<{[key: string]: string}>({})
+  const [showVerification, setShowVerification] = useState(false)
+  const [verificationCode, setVerificationCode] = useState(['', '', '', '', '', ''])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target
@@ -29,6 +31,20 @@ export default function SignUpPage() {
     // Clear errors when user starts typing
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }))
+    }
+  }
+
+  const handleVerificationChange = (index: number, value: string) => {
+    if (value.length <= 1) {
+      const newCode = [...verificationCode]
+      newCode[index] = value
+      setVerificationCode(newCode)
+      
+      // Auto-focus next input
+      if (value && index < 5) {
+        const nextInput = document.getElementById(`verification-${index + 1}`)
+        nextInput?.focus()
+      }
     }
   }
 
@@ -84,32 +100,116 @@ export default function SignUpPage() {
     // Simulate API call
     setTimeout(() => {
       setIsLoading(false)
-      // Redirect to home page
-      window.location.href = '/'
+      setShowVerification(true)
     }, 1500)
   }
 
+  const handleVerificationSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsLoading(true)
+    
+    // Simulate verification
+    setTimeout(() => {
+      setIsLoading(false)
+      // Redirect to home page
+      window.location.href = '/'
+    }, 1000)
+  }
+
+  if (showVerification) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-blue-50 to-teal-50 flex items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <div className="flex items-center justify-center space-x-3 mb-4">
+              <div className="w-12 h-12 bg-gradient-to-r from-cyan-500 to-teal-600 rounded-2xl flex items-center justify-center shadow-lg">
+                <span className="text-white font-bold text-xl">S</span>
+              </div>
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-cyan-600 to-teal-600 bg-clip-text text-transparent">ScoopSocials</h1>
+            </div>
+            <p className="text-slate-600 mb-2">Trust-Based Social</p>
+          </div>
+
+          {/* Phone Verification Form */}
+          <div className="card-soft bg-white/80 backdrop-blur-sm border-cyan-200/50 shadow-xl">
+            <form onSubmit={handleVerificationSubmit} className="space-y-6">
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 bg-cyan-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <span className="text-3xl">📱</span>
+                </div>
+                <h2 className="text-xl font-semibold text-slate-800 mb-2">Verify Your Phone</h2>
+                <p className="text-slate-600">Enter the 6-digit code sent to {formData.phone}</p>
+                <p className="text-sm text-cyan-600 mt-2">Phone verification helps keep our community secure and boosts your Trust Score!</p>
+              </div>
+
+              {/* Verification Code Inputs */}
+              <div className="flex justify-center space-x-3">
+                {verificationCode.map((digit, index) => (
+                  <input
+                    key={index}
+                    id={`verification-${index}`}
+                    type="text"
+                    maxLength={1}
+                    value={digit}
+                    onChange={(e) => handleVerificationChange(index, e.target.value)}
+                    className="w-12 h-12 text-center text-xl font-bold border-2 border-cyan-200 rounded-xl focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 transition-all duration-200"
+                    required
+                  />
+                ))}
+              </div>
+
+              {/* Continue Button */}
+              <button
+                type="submit"
+                disabled={isLoading || verificationCode.some(digit => !digit)}
+                className={`w-full btn-primary bg-gradient-to-r from-cyan-500 to-teal-600 hover:from-cyan-600 hover:to-teal-700 ${isLoading ? 'opacity-75 cursor-not-allowed' : ''}`}
+              >
+                {isLoading ? (
+                  <div className="flex items-center justify-center space-x-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <span>Creating Account...</span>
+                  </div>
+                ) : (
+                  'Complete Registration'
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowVerification(false)}
+                className="w-full text-sm text-cyan-600 hover:text-cyan-700 font-medium"
+              >
+                ← Back to Registration
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-primary-100/50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-blue-50 to-teal-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center space-x-3 mb-4">
-            <div className="w-12 h-12 bg-gradient-to-r from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center shadow-lg">
+            <div className="w-12 h-12 bg-gradient-to-r from-cyan-500 to-teal-600 rounded-2xl flex items-center justify-center shadow-lg">
               <span className="text-white font-bold text-xl">S</span>
             </div>
-            <h1 className="text-3xl font-bold gradient-text">ScoopSocials</h1>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-cyan-600 to-teal-600 bg-clip-text text-transparent">ScoopSocials</h1>
           </div>
           <p className="text-slate-600 mb-2">Trust-Based Social</p>
           
-          <div className="card-soft mt-6">
+          <div className="card-soft bg-white/80 backdrop-blur-sm border-cyan-200/50 shadow-xl mt-6">
             <h2 className="text-xl font-semibold text-slate-800 mb-2">Join the Trust</h2>
             <p className="text-slate-600">Community</p>
           </div>
         </div>
 
         {/* Sign Up Form */}
-        <div className="card-soft">
+        <div className="card-soft bg-white/80 backdrop-blur-sm border-cyan-200/50 shadow-xl">
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Full Name */}
             <div className="space-y-2">
@@ -123,7 +223,7 @@ export default function SignUpPage() {
                 value={formData.fullName}
                 onChange={handleInputChange}
                 placeholder="John Doe"
-                className={`input-field ${errors.fullName ? 'border-red-500' : ''}`}
+                className={`input-field border-cyan-200/50 focus:border-cyan-500 focus:ring-cyan-200 ${errors.fullName ? 'border-red-500' : ''}`}
                 required
               />
               {errors.fullName && (
@@ -143,7 +243,7 @@ export default function SignUpPage() {
                 value={formData.email}
                 onChange={handleInputChange}
                 placeholder="john.doe@email.com"
-                className={`input-field ${errors.email ? 'border-red-500' : ''}`}
+                className={`input-field border-cyan-200/50 focus:border-cyan-500 focus:ring-cyan-200 ${errors.email ? 'border-red-500' : ''}`}
                 required
               />
               {errors.email && (
@@ -163,7 +263,7 @@ export default function SignUpPage() {
                 value={formData.phone}
                 onChange={handleInputChange}
                 placeholder="+1 (555) 123-4567"
-                className={`input-field ${errors.phone ? 'border-red-500' : ''}`}
+                className={`input-field border-cyan-200/50 focus:border-cyan-500 focus:ring-cyan-200 ${errors.phone ? 'border-red-500' : ''}`}
                 required
               />
               {errors.phone && (
@@ -184,7 +284,7 @@ export default function SignUpPage() {
                   value={formData.password}
                   onChange={handleInputChange}
                   placeholder="••••••••••••••"
-                  className={`input-field pr-12 ${errors.password ? 'border-red-500' : ''}`}
+                  className={`input-field pr-12 border-cyan-200/50 focus:border-cyan-500 focus:ring-cyan-200 ${errors.password ? 'border-red-500' : ''}`}
                   required
                 />
                 <button
@@ -217,7 +317,7 @@ export default function SignUpPage() {
                   value={formData.confirmPassword}
                   onChange={handleInputChange}
                   placeholder="••••••••••••••"
-                  className={`input-field pr-12 ${errors.confirmPassword ? 'border-red-500' : ''}`}
+                  className={`input-field pr-12 border-cyan-200/50 focus:border-cyan-500 focus:ring-cyan-200 ${errors.confirmPassword ? 'border-red-500' : ''}`}
                   required
                 />
                 <button
@@ -245,11 +345,11 @@ export default function SignUpPage() {
                   name="agreeToTerms"
                   checked={formData.agreeToTerms}
                   onChange={handleInputChange}
-                  className="rounded border-slate-300 text-primary-600 focus:ring-primary-500 mt-0.5"
+                  className="rounded border-slate-300 text-cyan-600 focus:ring-cyan-500 mt-0.5"
                 />
                 <div className="flex-1">
                   <span className="text-sm text-slate-700">
-                    I agree to <Link href="/terms" className="text-primary-600 hover:text-primary-700 font-medium">Terms of Service</Link> & <Link href="/privacy" className="text-primary-600 hover:text-primary-700 font-medium">Privacy Policy</Link>
+                    I agree to <Link href="/terms" className="text-cyan-600 hover:text-cyan-700 font-medium">Terms of Service</Link> & <Link href="/privacy" className="text-cyan-600 hover:text-cyan-700 font-medium">Privacy Policy</Link>
                   </span>
                   {errors.agreeToTerms && (
                     <p className="text-xs text-red-600 mt-1">{errors.agreeToTerms}</p>
@@ -263,7 +363,7 @@ export default function SignUpPage() {
                   name="over18"
                   checked={formData.over18}
                   onChange={handleInputChange}
-                  className="rounded border-slate-300 text-primary-600 focus:ring-primary-500 mt-0.5"
+                  className="rounded border-slate-300 text-cyan-600 focus:ring-cyan-500 mt-0.5"
                 />
                 <div className="flex-1">
                   <span className="text-sm text-slate-700">I'm 18+ years old</span>
@@ -278,7 +378,7 @@ export default function SignUpPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className={`w-full btn-primary ${isLoading ? 'opacity-75 cursor-not-allowed' : ''}`}
+              className={`w-full btn-primary bg-gradient-to-r from-cyan-500 to-teal-600 hover:from-cyan-600 hover:to-teal-700 ${isLoading ? 'opacity-75 cursor-not-allowed' : ''}`}
             >
               {isLoading ? (
                 <div className="flex items-center justify-center space-x-2">
@@ -305,7 +405,7 @@ export default function SignUpPage() {
               <p className="text-sm text-slate-600 mb-4">Already have an account?</p>
               <Link
                 href="/signin"
-                className="w-full btn-secondary block text-center"
+                className="w-full btn-secondary block text-center border-cyan-200 text-cyan-700 hover:bg-cyan-50"
               >
                 Sign In
               </Link>
@@ -314,7 +414,7 @@ export default function SignUpPage() {
         </div>
 
         {/* Features */}
-        <div className="card-soft mt-6">
+        <div className="card-soft bg-white/80 backdrop-blur-sm border-cyan-200/50 shadow-xl mt-6">
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
               <span className="text-2xl block mb-2">🎯</span>
@@ -333,7 +433,7 @@ export default function SignUpPage() {
 
         {/* Footer */}
         <div className="text-center mt-8 text-xs text-slate-500">
-          © 2024 ScoopSocials • <Link href="/terms" className="hover:text-primary-600">Terms</Link> • <Link href="/privacy" className="hover:text-primary-600">Privacy</Link>
+          © 2024 ScoopSocials • <Link href="/terms" className="hover:text-cyan-600">Terms</Link> • <Link href="/privacy" className="hover:text-cyan-600">Privacy</Link>
         </div>
       </div>
     </div>

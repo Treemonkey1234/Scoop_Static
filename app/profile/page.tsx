@@ -17,7 +17,9 @@ import {
   DocumentTextIcon,
   TrophyIcon,
   CheckBadgeIcon,
-  StarIcon
+  StarIcon,
+  ChevronDownIcon,
+  ChevronUpIcon
 } from '@heroicons/react/24/outline'
 import { CheckBadgeIcon as CheckBadgeIconSolid } from '@heroicons/react/24/solid'
 
@@ -27,6 +29,7 @@ export default function ProfilePage() {
   const userReviews = sampleReviews.filter(r => r.reviewedId === currentUser.id)
   
   const [showAllSocials, setShowAllSocials] = useState(false)
+  const [showTrustBreakdown, setShowTrustBreakdown] = useState(false)
   const [flagModal, setFlagModal] = useState<{
     isOpen: boolean
     contentType: 'post' | 'event' | 'social'
@@ -38,7 +41,6 @@ export default function ProfilePage() {
     contentId: '',
     contentTitle: ''
   })
-  const visibleSocials = showAllSocials ? currentUser.socialAccounts : currentUser.socialAccounts.slice(0, 3)
 
   const handleFlag = (contentType: 'post' | 'event' | 'social', contentId: string, contentTitle?: string) => {
     console.log('Profile flag clicked:', { contentType, contentId, contentTitle })
@@ -59,12 +61,19 @@ export default function ProfilePage() {
     })
   }
 
+  // Updated Trust Score Breakdown with 11 components and proper weightings
   const trustBreakdown = [
-    { category: 'Professional Reviews', score: 94, count: 12 },
-    { category: 'Social Interactions', score: 89, count: 8 },
-    { category: 'Event Hosting', score: 96, count: 5 },
-    { category: 'Community Participation', score: 88, count: 15 },
-    { category: 'Verified Connections', score: 92, count: 234 }
+    { category: 'Time Spent on App', score: 94, weight: 10, count: '120+ hours' },
+    { category: 'Recent Activity', score: 89, weight: 10, count: 'Active daily' },
+    { category: 'Postings Quality', score: 96, weight: 15, count: '42 posts' },
+    { category: 'Comments Engagement', score: 88, weight: 10, count: '156 comments' },
+    { category: 'Community Engagement', score: 92, weight: 15, count: '234 interactions' },
+    { category: 'Friends Network', score: 95, weight: 10, count: '89 connections' },
+    { category: 'Events Attended', score: 87, weight: 5, count: '12 events' },
+    { category: 'Social Media Connected', score: 98, weight: 20, count: '8/8 accounts' },
+    { category: 'Flagging Accuracy', score: 91, weight: 5, count: '23/25 accurate' },
+    { category: 'Positive Reactions', score: 93, weight: 15, count: '89% positive' },
+    { category: 'Profile Completeness', score: 100, weight: 5, count: '100% complete' }
   ]
 
   const achievements = [
@@ -74,35 +83,25 @@ export default function ProfilePage() {
     { title: 'Early Adopter', icon: '🚀', description: 'Joined in 2023' }
   ]
 
+  // Social media icons mapping
+  const socialIcons = {
+    'Facebook': '📘',
+    'Twitter': '🐦',
+    'Instagram': '📷',
+    'LinkedIn': '💼',
+    'Spotify': '🎵',
+    'YouTube': '▶️',
+    'TikTok': '📱',
+    'Discord': '🎮'
+  }
+
+  const visibleSocials = showAllSocials ? currentUser.socialAccounts : currentUser.socialAccounts.slice(0, 6)
+
   return (
     <Layout>
       <div className="p-4 space-y-6">
         {/* Profile Header */}
-        <div className="card-soft">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center space-x-2">
-              <h1 className="text-2xl font-bold text-slate-800">Profile</h1>
-              {currentUser.isVerified && (
-                <CheckBadgeIconSolid className="w-6 h-6 text-primary-500" />
-              )}
-            </div>
-            <div className="flex items-center space-x-2">
-              <Link
-                href="/notifications"
-                className="p-2 rounded-xl hover:bg-slate-100 transition-colors duration-200"
-              >
-                <BellIcon className="w-5 h-5 text-slate-600" />
-              </Link>
-              <Link
-                href="/settings"
-                className="p-2 rounded-xl hover:bg-slate-100 transition-colors duration-200"
-              >
-                <Cog6ToothIcon className="w-5 h-5 text-slate-600" />
-              </Link>
-            </div>
-          </div>
-
-          {/* Profile Info */}
+        <div className="card-soft bg-gradient-to-r from-cyan-50 to-teal-50 border-cyan-200">
           <div className="flex items-start space-x-4 mb-6">
             <div className="relative">
               <Image
@@ -113,7 +112,7 @@ export default function ProfilePage() {
                 className="rounded-2xl"
               />
               {currentUser.isVerified && (
-                <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-primary-500 rounded-full flex items-center justify-center">
+                <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-cyan-500 rounded-full flex items-center justify-center">
                   <CheckBadgeIcon className="w-4 h-4 text-white" />
                 </div>
               )}
@@ -167,97 +166,141 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Trust Score Breakdown */}
-        <div className="card-soft">
-          <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center">
-            <TrophyIcon className="w-5 h-5 mr-2 text-primary-500" />
-            Trust Score Breakdown
-          </h3>
-          <div className="space-y-4">
-            {trustBreakdown.map((item, index) => (
-              <div key={index} className="flex items-center justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm font-medium text-slate-700">{item.category}</span>
-                    <span className="text-sm font-semibold text-slate-800">{item.score}/100</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="flex-1 bg-slate-200 rounded-full h-2">
-                      <div 
-                        className="bg-gradient-to-r from-primary-500 to-primary-600 h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${item.score}%` }}
-                      />
-                    </div>
-                    <span className="text-xs text-slate-500">({item.count})</span>
-                  </div>
-                </div>
+        {/* Trust Score Section - Collapsed by Default */}
+        <div className="card-soft bg-gradient-to-r from-cyan-50 to-teal-50 border-cyan-200">
+          <div 
+            className="flex items-center justify-between cursor-pointer"
+            onClick={() => setShowTrustBreakdown(!showTrustBreakdown)}
+          >
+            <div className="flex items-center space-x-3">
+              <TrophyIcon className="w-5 h-5 text-cyan-500" />
+              <div>
+                <div className="text-3xl font-bold text-cyan-700">{currentUser.trustScore}</div>
+                <div className="text-sm text-slate-600">Trust Score</div>
               </div>
-            ))}
+            </div>
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-slate-500">
+                {showTrustBreakdown ? 'Hide breakdown' : 'View breakdown'}
+              </span>
+              {showTrustBreakdown ? (
+                <ChevronUpIcon className="w-5 h-5 text-slate-500" />
+              ) : (
+                <ChevronDownIcon className="w-5 h-5 text-slate-500" />
+              )}
+            </div>
           </div>
+
+          {/* Expanded Trust Score Breakdown */}
+          {showTrustBreakdown && (
+            <div className="mt-6 pt-6 border-t border-cyan-200">
+              <h4 className="text-lg font-semibold text-slate-800 mb-4">Trust Score Components</h4>
+              <div className="space-y-4">
+                {trustBreakdown.map((item, index) => (
+                  <div key={index} className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="flex items-center space-x-2">
+                          <span className="text-sm font-medium text-slate-700">{item.category}</span>
+                          <span className="text-xs text-cyan-600 bg-cyan-100 px-2 py-1 rounded-full">
+                            {item.weight}%
+                          </span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <span className="text-sm font-semibold text-slate-800">{item.score}</span>
+                          <span className="text-xs text-slate-500">({item.count})</span>
+                        </div>
+                      </div>
+                      <div className="w-full bg-slate-200 rounded-full h-2">
+                        <div 
+                          className="bg-gradient-to-r from-cyan-500 to-teal-600 h-2 rounded-full transition-all duration-300"
+                          style={{ width: `${item.score}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              <div className="mt-6 p-4 bg-white/80 rounded-xl border border-cyan-200">
+                <h5 className="text-sm font-semibold text-slate-800 mb-2">Trust Score Calculation</h5>
+                <p className="text-xs text-slate-600">
+                  Your trust score is calculated using a weighted average of 11 key factors. 
+                  Social media verification and community engagement carry the highest weights 
+                  at 20% and 15% respectively.
+                </p>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Social Accounts */}
+        {/* Connected Accounts - Redesigned with Icons Only */}
         <div className="card-soft">
-          <h3 className="text-lg font-semibold text-slate-800 mb-4">Connected Accounts</h3>
-          <div className="space-y-3">
-            {visibleSocials.map((social, index) => (
-              <div key={index} className="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
-                <div className="flex items-center space-x-3">
-                  <span className="text-2xl">{social.icon}</span>
-                  <div>
-                    <div className="flex items-center space-x-2">
-                      <span className="font-medium text-slate-800">{social.platform}</span>
-                      {social.verified && (
-                        <CheckBadgeIconSolid className="w-4 h-4 text-primary-500" />
-                      )}
-                    </div>
-                    <span className="text-sm text-slate-600">{social.handle}</span>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-2">
-                  {social.verified && (
-                    <span className="text-xs bg-trust-excellent/10 text-trust-excellent px-2 py-1 rounded-full">
-                      Verified
-                    </span>
-                  )}
-                  <button 
-                    onClick={(e) => {
-                      e.preventDefault()
-                      e.stopPropagation()
-                      handleFlag('social', `${social.platform}-${social.handle}`, `${social.platform} account: ${social.handle}`)
-                    }}
-                    className="p-1 rounded-lg hover:bg-orange-100 transition-colors duration-200"
-                  >
-                    <svg className="w-4 h-4 text-slate-400 hover:text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6v1a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
-                    </svg>
-                  </button>
-                </div>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-slate-800 flex items-center">
+              <span className="mr-2">🌐</span>
+              Connected Accounts
+            </h3>
+            <span className="text-sm text-cyan-600 bg-cyan-100 px-2 py-1 rounded-full">
+              {currentUser.socialAccounts.length}/8
+            </span>
+          </div>
+          
+          {/* Icons Only View */}
+          <div className="flex flex-wrap gap-3 mb-4">
+            {visibleSocials.map((account, index) => (
+              <div 
+                key={index}
+                className="w-12 h-12 bg-gradient-to-br from-cyan-100 to-teal-100 rounded-xl flex items-center justify-center text-2xl hover:scale-110 transition-transform duration-200 cursor-pointer border border-cyan-200"
+                                 title={`${account.platform}: ${account.handle}`}
+              >
+                {socialIcons[account.platform as keyof typeof socialIcons] || '🔗'}
               </div>
             ))}
             
-            {currentUser.socialAccounts.length > 3 && (
-              <button
-                onClick={() => setShowAllSocials(!showAllSocials)}
-                className="w-full text-center py-2 text-primary-600 hover:text-primary-700 font-medium text-sm"
-              >
-                {showAllSocials 
-                  ? 'Show Less' 
-                  : `and ${currentUser.socialAccounts.length - 3} more...`
-                }
-              </button>
-            )}
+            {/* Add Account Button */}
+            <div className="w-12 h-12 bg-slate-100 hover:bg-slate-200 rounded-xl flex items-center justify-center text-xl cursor-pointer transition-all duration-200 border-2 border-dashed border-slate-300">
+              ➕
+            </div>
+          </div>
+
+          {/* View More / View Less Button */}
+          {currentUser.socialAccounts.length > 6 && (
+            <button
+              onClick={() => setShowAllSocials(!showAllSocials)}
+              className="text-sm text-cyan-600 hover:text-cyan-700 font-medium"
+            >
+              {showAllSocials ? 'View Less' : `View More (${currentUser.socialAccounts.length - 6} more)`}
+            </button>
+          )}
+
+          {/* Link to Detailed View */}
+          <div className="mt-4 pt-4 border-t border-slate-200">
+            <Link 
+              href="/profile/connected-accounts"
+              className="text-sm text-cyan-600 hover:text-cyan-700 font-medium"
+            >
+              Manage connected accounts →
+            </Link>
           </div>
         </div>
 
         {/* Achievements */}
         <div className="card-soft">
-          <h3 className="text-lg font-semibold text-slate-800 mb-4">Achievements</h3>
+          <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center">
+            <TrophyIcon className="w-5 h-5 mr-2 text-amber-500" />
+            Achievements
+          </h3>
           <div className="grid grid-cols-2 gap-3">
             {achievements.map((achievement, index) => (
-              <div key={index} className="p-3 bg-gradient-to-br from-primary-50 to-primary-100/50 rounded-xl">
-                <div className="text-2xl mb-2">{achievement.icon}</div>
-                <h4 className="font-semibold text-slate-800 text-sm mb-1">{achievement.title}</h4>
+              <div 
+                key={index} 
+                className="p-3 bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl border border-amber-200"
+              >
+                <div className="flex items-center space-x-2 mb-1">
+                  <span className="text-lg">{achievement.icon}</span>
+                  <span className="text-sm font-semibold text-slate-800">{achievement.title}</span>
+                </div>
                 <p className="text-xs text-slate-600">{achievement.description}</p>
               </div>
             ))}
@@ -268,69 +311,40 @@ export default function ProfilePage() {
         <div className="card-soft">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-slate-800 flex items-center">
-              <StarIcon className="w-5 h-5 mr-2 text-primary-500" />
+              <StarIcon className="w-5 h-5 mr-2 text-cyan-500" />
               Recent Reviews
             </h3>
-            <Link 
-              href="/reviews" 
-              className="text-sm text-primary-600 hover:text-primary-700 font-medium"
-            >
-              View All
+            <Link href="/profile/reviews" className="text-sm text-cyan-600 hover:text-cyan-700 font-medium">
+              View all →
             </Link>
           </div>
-          
-          <div className="space-y-4">
-            {userReviews.slice(0, 3).map((review, index) => {
+          <div className="space-y-3">
+            {userReviews.slice(0, 3).map((review) => {
               const reviewer = sampleUsers.find(u => u.id === review.reviewerId)
-              if (!reviewer) return null
-              
               return (
-                <div key={index} className="p-4 bg-slate-50 rounded-xl">
-                  <div className="flex items-start space-x-3">
-                    <Image
-                      src={reviewer.avatar}
-                      alt={reviewer.name}
-                      width={40}
-                      height={40}
-                      className="rounded-full"
-                    />
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-2 mb-1">
-                        <span className="font-medium text-slate-800">{reviewer.name}</span>
-                        <span className="text-xs bg-primary-50 text-primary-600 px-2 py-1 rounded-full">
-                          {review.category}
-                        </span>
-                      </div>
-                      <p className="text-sm text-slate-600 mb-2">{review.content}</p>
-                      <div className="flex items-center space-x-2 text-xs text-slate-500">
-                        <span>Community validation: {review.communityValidation}%</span>
-                        <span>•</span>
-                        <span>{new Date(review.timestamp).toLocaleDateString()}</span>
-                      </div>
-                    </div>
+                <div key={review.id} className="p-3 bg-slate-50 rounded-xl">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <span className="text-sm font-medium text-slate-800">{reviewer?.name}</span>
+                    <span className="text-xs text-cyan-600 bg-cyan-100 px-2 py-1 rounded-full">
+                      {review.category}
+                    </span>
                   </div>
+                  <p className="text-sm text-slate-700">"{review.content}"</p>
                 </div>
               )
             })}
           </div>
         </div>
 
-        {/* Quick Actions */}
-        <div className="card-soft">
-          <h3 className="text-lg font-semibold text-slate-800 mb-4">Quick Actions</h3>
-          <div className="grid grid-cols-2 gap-3">
-            <Link
-              href="/edit-profile"
-              className="flex items-center justify-center space-x-2 p-4 bg-primary-50 hover:bg-primary-100 rounded-xl transition-colors duration-200"
-            >
-              <DocumentTextIcon className="w-5 h-5 text-primary-600" />
-              <span className="font-medium text-primary-700">Edit Profile</span>
-            </Link>
-            <button className="flex items-center justify-center space-x-2 p-4 bg-slate-50 hover:bg-slate-100 rounded-xl transition-colors duration-200">
-              <ShareIcon className="w-5 h-5 text-slate-600" />
-              <span className="font-medium text-slate-700">Share Profile</span>
-            </button>
-          </div>
+        {/* Settings Link */}
+        <div className="text-center">
+          <Link
+            href="/settings"
+            className="inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-cyan-500 to-teal-600 text-white rounded-xl hover:from-cyan-600 hover:to-teal-700 transition-all duration-200 shadow-lg"
+          >
+            <Cog6ToothIcon className="w-5 h-5" />
+            <span className="font-medium">Settings</span>
+          </Link>
         </div>
       </div>
 

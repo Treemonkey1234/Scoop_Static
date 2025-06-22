@@ -1,0 +1,235 @@
+SCOOP PLATFORM - COMPREHENSIVE WALKTHROUGH GUIDE
+===============================================
+
+STEP 1: HEADER ORIENTATION 
+📍 Location: HOME PAGE
+┌────────────────────────────────────────────────────────────┐
+│ 🍦 Scoop                    [📊 Analytics] [➕ Create]    │ ← HIGHLIGHTED
+└────────────────────────────────────────────────────────────┘
+│ ████████████████████████████████████████████████████████ │ ← Loading Bar
+├────────────────────────────────────────────────────────────┤
+│ "Welcome to Scoop! Use the Analytics button to track your │
+│  community engagement, and Create to share your scoops!"  │
+└────────────────────────────────────────────────────────────┘
+
+STEP 2: LATEST SCOOPS DISCOVERY 
+📍 Location: HOME PAGE
+┌─────────────────────────────────────┐
+│           Latest Scoops             │ ← HIGHLIGHTED
+│                                     │
+│  📸 Alex's Coffee Adventures        │
+│  🎵 Maria's Music Taste            │
+│  🏃 Sam's Fitness Journey          │
+│  🍕 Jamie's Food Reviews           │
+│                                     │
+│  [View All Scoops]                 │
+└─────────────────────────────────────┘
+│ "These are community scoops - authentic insights about    │
+│  people shared by friends. Click any to see full details!"│
+└─────────────────────────────────────┘
+
+STEP 3: UNDERSTANDING POSTS & COMPONENTS
+📍 Location: POST DETAIL VIEW (Click on a scoop)
+┌─────────────────────────────────────┐
+│ 👤 @alex_coffee                    │ ← Username
+│ ⏰ 2 hours ago                     │ ← Timestamp
+│                                     │
+│ "Just discovered this hidden gem    │ ← Post Content
+│  coffee shop! The barista made     │   (Text/Media)
+│  perfect latte art ☕✨"           │
+│                                     │
+│ 📷 [Coffee Shop Photo]             │ ← Media Attachment
+│ 📍 Downtown Coffee Co.             │ ← Location Tag
+│ #coffee #local #hidden gems        │ ← Hashtags
+│                                     │
+│ 👍 24  💬 8  🚩 Flag  ↗️ Share     │ ← Reaction Buttons
+│ ⭐ +2 Trust Score Impact           │ ← Score Effect
+└─────────────────────────────────────┘
+│ "Posts have usernames, timestamps, content, media,       │
+│  location, hashtags, and reactions that affect scores!"  │
+└─────────────────────────────────────┘
+
+STEP 4: CREATING YOUR FIRST POST 
+📍 Location: CREATE POST PAGE (Click Create button)
+┌─────────────────────────────────────┐
+│          Create New Post            │ ← HIGHLIGHTED
+│  What's on your mind?               │
+│  ┌─────────────────────────────────┐ │
+│  │ Share something authentic...    │ │ ← Text Input
+│  └─────────────────────────────────┘ │
+│  📷 Photo  🎵 Music  📍 Location    │ ← Media Options
+│  #️⃣ Hashtags  👥 Tag Friends       │ ← Social Features
+│  [Save Draft] [Post Now]           │ ← Action Buttons
+└─────────────────────────────────────┘
+│ "Share authentic content! Add photos, music, location,    │
+│  or hashtags. Quality posts boost your Trust Score!"     │
+└─────────────────────────────────────┘
+
+STEP 5: COMMUNITY SAFETY - FLAGGING SYSTEM
+📍 Location: FLAG MODAL (Click Flag on any post)
+┌─────────────────────────────────────┐
+│           🚩 Flag Content           │ ← HIGHLIGHTED
+│  Why are you flagging this post?    │
+│                                     │
+│  ○ Spam or repetitive content      │
+│  ○ Inappropriate/offensive content │
+│  ○ False or misleading information │
+│  ○ Harassment or bullying          │
+│  ○ Privacy violation               │
+│                                     │
+│  [Cancel] [Submit Flag]            │
+└─────────────────────────────────────┘
+│ "Accurate flagging keeps our community safe and boosts   │
+│  your Trust Score. False flags can hurt your score!"     │
+└─────────────────────────────────────┘
+
+STEP 6: EVENTS DISCOVERY - DEMO EVENT
+📍 Location: EVENTS PAGE
+┌─────────────────────────────────────┐
+│         📅 Coffee Meetup            │ ← HIGHLIGHTED
+│                                     │
+│  📅 Date: Saturday, March 15        │ ← Event Date
+│  ⏰ Time: 2:00 PM - 4:00 PM        │ ← Event Time
+│  📍 Location: Central Park Café     │ ← Event Location
+│  👤 Host: @alex_coffee             │ ← Event Organizer
+│  👥 Attendees: 12/20               │ ← Attendance Count
+│                                     │
+│  "Join fellow coffee lovers for    │ ← Event Description
+│   tastings and local recommendations│
+│   from our community experts!"     │
+│                                     │
+│  [Join Event] [Share] [Flag]       │ ← Action Buttons
+│  💬 Comments (5)                   │ ← Event Discussion
+└─────────────────────────────────────┘
+│ "Events show date, time, location, host, attendance,     │
+│  and description. Join to meet people in real life!"     │
+└─────────────────────────────────────┘
+
+STEP 7: CREATING EVENTS 
+📍 Location: CREATE EVENT PAGE
+┌─────────────────────────────────────┐
+│            Create Event             │ ← HIGHLIGHTED
+│  Event Name: ________________       │
+│  Date: ___________  Time: _______   │
+│  Location: _____________________   │
+│  Max Attendees: _______________     │
+│  Description: __________________   │
+│  ______________________________   │
+│  Event Type: ○ Public ○ Private    │
+│  [Save Draft] [Create Event]       │
+└─────────────────────────────────────┘
+│ "Organize events to bring your community together!      │
+│  Successful events boost your Trust Score significantly!"│
+└─────────────────────────────────────┘
+
+STEP 8: YOUR TRUST SCORE 
+📍 Location: PROFILE PAGE
+┌─────────────────────────────────────┐
+│            Trust Score              │ ← HIGHLIGHTED
+│               ⭐ 78                 │
+│        [Click to expand ▼]         │
+└─────────────────────────────────────┘
+│ "Your Trust Score reflects your community standing.      │
+│  It's calculated from 11 factors including social       │
+│  connections, engagement quality, and platform activity!"│
+└─────────────────────────────────────┘
+
+STEP 9: CONNECTED ACCOUNTS 
+📍 Location: PROFILE PAGE (Scroll down)
+┌─────────────────────────────────────┐
+│        Connected Accounts           │ ← HIGHLIGHTED
+│  📘 🐦 📷 💼 🎵 ▶️              │
+│      [View More...]                 │
+└─────────────────────────────────────┘
+│ "Connect at least 5 social accounts to maximize your    │
+│  Trust Score. More connections = higher authenticity!"   │
+└─────────────────────────────────────┘
+
+STEP 10: PROFESSIONAL TIER PROFILE
+📍 Location: PROFILE PAGE (Upgrade section)
+┌─────────────────────────────────────┐
+│       🏢 Professional Profile       │ ← HIGHLIGHTED
+│                                     │
+│  ✨ Enhanced Features:              │
+│  • Business verification badge      │
+│  • Custom profile themes           │
+│  • Advanced analytics access       │
+│  • Priority event listings         │
+│  • Direct messaging capabilities   │
+│  • Professional networking tools   │
+│                                     │
+│  Current: Standard                  │
+│  [Upgrade to Professional] [$9.99] │
+└─────────────────────────────────────┘
+│ "Professional profiles get enhanced features, higher   │
+│  Trust Score weighting, and business networking tools!" │
+└─────────────────────────────────────┘
+
+STEP 11: BUILDING FRIENDSHIPS 
+📍 Location: FRIENDS PAGE
+┌─────────────────────────────────────┐
+│            Your Friends             │ ← HIGHLIGHTED
+│  ┌─────┐ ┌─────┐ ┌─────┐            │
+│  │Alex │ │Maria│ │Sam  │            │
+│  │ 🤝  │ │ 🤝  │ │ 🤝  │            │
+│  └─────┘ └─────┘ └─────┘            │
+│  [Find Friends] [Invite Friends]    │
+└─────────────────────────────────────┘
+│ "Mutual friendships have the highest Trust Score impact │
+│  (20% weight). Build genuine connections with people!"   │
+└─────────────────────────────────────┘
+
+STEP 12: ANALYTICS OVERVIEW 
+📍 Location: ANALYTICS PAGE (Header button)
+┌─────────────────────────────────────┐
+│           Your Analytics            │ ← HIGHLIGHTED
+│  Trust Score Trend: 📈 +5 this week│
+│  Posts Created: 12 | Comments: 45   │
+│  Reactions Received: 👍 89          │
+│  Events Attended: 3                 │
+│  Friend Connections: +2 this month  │
+│  Social Accounts: 6/8 connected     │
+└─────────────────────────────────────┘
+│ "Track your progress and see how your activities       │
+│  contribute to your Trust Score growth over time!"     │
+└─────────────────────────────────────┘
+
+STEP 13: DISCOVERY & SEARCH 
+📍 Location: SEARCH PAGE
+┌─────────────────────────────────────┐
+│           🔍 Discover               │ ← HIGHLIGHTED
+│  Search: ________________           │
+│  Filters: [People] [Posts] [Events] │
+│                                     │
+│  Trending Topics:                   │
+│  #coffee #events #music #local      │
+│                                     │
+│  Suggested People:                  │
+│  Based on mutual friends & interests│
+└─────────────────────────────────────┘
+│ "Discover new people, posts, and events! Use hashtags  │
+│  and follow trending topics to grow your network."     │
+└─────────────────────────────────────┘
+
+WALKTHROUGH COMPLETION
+┌─────────────────────────────────────┐
+│        🎉 You're All Set!           │
+│                                    │
+│  You now know how to:              │
+│  ✅ Create authentic posts          │
+│  ✅ Engage responsibly             │
+│  ✅ Build your Trust Score         │
+│  ✅ Connect with community         │
+│  ✅ Organize/join events           │
+│                                    │
+│  [Start Exploring] [Review Again]   │
+└─────────────────────────────────────┘
+
+WALKTHROUGH NAVIGATION:
+┌─────────────────────────────────────┐
+│  [◀ Previous] [Skip Tour] [Next ▶] │
+│     ●●●●○○○○○○○○○ (Step 4 of 13)    │
+│                                    │
+│  Access anytime: Settings > Help > │
+│                   Platform Tour     │
+└─────────────────────────────────────┘ 

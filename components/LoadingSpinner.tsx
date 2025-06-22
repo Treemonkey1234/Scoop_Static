@@ -41,13 +41,12 @@ const LoadingSpinner: React.FC = () => {
             </linearGradient>
           </defs>
           
-          {/* Waffle Cone */}
+          {/* Waffle Cone - Static */}
           <path 
             d="M25 70 L40 130 L55 70 Z" 
             fill="url(#wafflePattern)"
             stroke="#8B4513"
             strokeWidth="1"
-            className="animate-wiggle"
           />
           
           {/* Cone Waffle Lines */}
@@ -66,104 +65,181 @@ const LoadingSpinner: React.FC = () => {
             <line x1="50" y1="72" x2="42" y2="128"/>
           </g>
           
-          {/* Ice Cream Scoops */}
-          {/* Vanilla Scoop (bottom) */}
+          {/* Vanilla Scoop (bottom) - Animated filling */}
           <circle 
             cx="40" 
             cy="65" 
-            r="18" 
             fill="url(#vanillaGrad)"
             stroke="#F0E68C"
             strokeWidth="1"
-            className="animate-scoop-drop"
-            style={{ animationDelay: '0.6s' }}
           >
-            <animate attributeName="cy" values="65;63;65" dur="2s" repeatCount="indefinite"/>
+            <animate 
+              attributeName="r" 
+              values="0;18;18;18;18;0;0;0;0;0" 
+              dur="4s" 
+              repeatCount="indefinite"
+            />
+            <animate 
+              attributeName="opacity" 
+              values="0;1;1;1;1;0;0;0;0;0" 
+              dur="4s" 
+              repeatCount="indefinite"
+            />
           </circle>
           
-          {/* Mint Scoop (middle) */}
+          {/* Mint Scoop (middle) - Animated filling */}
           <circle 
             cx="40" 
             cy="45" 
-            r="17" 
             fill="url(#mintGrad)"
             stroke="#32CD32"
             strokeWidth="1"
-            className="animate-scoop-drop"
-            style={{ animationDelay: '0.3s' }}
           >
-            <animate attributeName="cy" values="45;43;45" dur="2s" repeatCount="indefinite"/>
+            <animate 
+              attributeName="r" 
+              values="0;0;17;17;17;17;0;0;0;0" 
+              dur="4s" 
+              repeatCount="indefinite"
+            />
+            <animate 
+              attributeName="opacity" 
+              values="0;0;1;1;1;1;0;0;0;0" 
+              dur="4s" 
+              repeatCount="indefinite"
+            />
           </circle>
           
-          {/* Strawberry Scoop (top) */}
+          {/* Strawberry Scoop (top) - Animated filling */}
           <circle 
             cx="40" 
             cy="27" 
-            r="16" 
             fill="url(#strawberryGrad)"
             stroke="#FF69B4"
             strokeWidth="1"
-            className="animate-scoop-drop"
-            style={{ animationDelay: '0s' }}
           >
-            <animate attributeName="cy" values="27;25;27" dur="2s" repeatCount="indefinite"/>
+            <animate 
+              attributeName="r" 
+              values="0;0;0;16;16;16;16;0;0;0" 
+              dur="4s" 
+              repeatCount="indefinite"
+            />
+            <animate 
+              attributeName="opacity" 
+              values="0;0;0;1;1;1;1;0;0;0" 
+              dur="4s" 
+              repeatCount="indefinite"
+            />
           </circle>
           
-          {/* Cherry on top */}
+          {/* Cherry on top - Animated */}
           <circle 
             cx="40" 
             cy="15" 
             r="3" 
             fill="#DC143C"
-            className="animate-cherry-bounce"
           >
-            <animate attributeName="cy" values="15;13;15" dur="1.5s" repeatCount="indefinite"/>
+            <animate 
+              attributeName="opacity" 
+              values="0;0;0;0;1;1;1;1;0;0" 
+              dur="4s" 
+              repeatCount="indefinite"
+            />
+            <animateTransform
+              attributeName="transform"
+              type="scale"
+              values="0;0;0;0;1;1;1;1;0;0"
+              dur="4s"
+              repeatCount="indefinite"
+            />
           </circle>
           
-          {/* Cherry stem */}
+          {/* Cherry stem - Animated */}
           <path 
             d="M40 15 Q42 10 45 8" 
             stroke="#228B22" 
             strokeWidth="1.5" 
             fill="none"
-            className="animate-stem-sway"
           >
-            <animateTransform
-              attributeName="transform"
-              attributeType="XML"
-              type="rotate"
-              values="0 40 15;5 40 15;0 40 15;-5 40 15;0 40 15"
-              dur="3s"
+            <animate 
+              attributeName="opacity" 
+              values="0;0;0;0;1;1;1;1;0;0" 
+              dur="4s" 
               repeatCount="indefinite"
             />
           </path>
           
-          {/* Sprinkles */}
-          <g className="sprinkles">
+          {/* Sprinkles - Animated to appear with scoops */}
+          <g>
             <rect x="35" y="30" width="2" height="6" fill="#FF1493" rx="1" transform="rotate(20 36 33)">
-              <animateTransform attributeName="transform" type="rotate" values="20 36 33;25 36 33;20 36 33" dur="4s" repeatCount="indefinite"/>
+              <animate 
+                attributeName="opacity" 
+                values="0;0;0;1;1;1;1;0;0;0" 
+                dur="4s" 
+                repeatCount="indefinite"
+              />
             </rect>
             <rect x="45" y="35" width="2" height="6" fill="#00CED1" rx="1" transform="rotate(-30 46 38)">
-              <animateTransform attributeName="transform" type="rotate" values="-30 46 38;-25 46 38;-30 46 38" dur="3s" repeatCount="indefinite"/>
+              <animate 
+                attributeName="opacity" 
+                values="0;0;1;1;1;1;0;0;0;0" 
+                dur="4s" 
+                repeatCount="indefinite"
+              />
             </rect>
             <rect x="32" y="50" width="2" height="6" fill="#FFD700" rx="1" transform="rotate(45 33 53)">
-              <animateTransform attributeName="transform" type="rotate" values="45 33 53;50 33 53;45 33 53" dur="3.5s" repeatCount="indefinite"/>
+              <animate 
+                attributeName="opacity" 
+                values="0;1;1;1;1;0;0;0;0;0" 
+                dur="4s" 
+                repeatCount="indefinite"
+              />
             </rect>
             <rect x="48" y="55" width="2" height="6" fill="#9370DB" rx="1" transform="rotate(-15 49 58)">
-              <animateTransform attributeName="transform" type="rotate" values="-15 49 58;-10 49 58;-15 49 58" dur="2.5s" repeatCount="indefinite"/>
+              <animate 
+                attributeName="opacity" 
+                values="0;1;1;1;1;0;0;0;0;0" 
+                dur="4s" 
+                repeatCount="indefinite"
+              />
             </rect>
             <rect x="38" y="40" width="2" height="6" fill="#FF4500" rx="1" transform="rotate(60 39 43)">
-              <animateTransform attributeName="transform" type="rotate" values="60 39 43;65 39 43;60 39 43" dur="4.5s" repeatCount="indefinite"/>
+              <animate 
+                attributeName="opacity" 
+                values="0;0;1;1;1;1;0;0;0;0" 
+                dur="4s" 
+                repeatCount="indefinite"
+              />
             </rect>
           </g>
           
-          {/* Shine effects */}
-          <ellipse cx="35" cy="22" rx="3" ry="6" fill="rgba(255,255,255,0.3)" transform="rotate(-20 35 22)"/>
-          <ellipse cx="45" cy="40" rx="2" ry="4" fill="rgba(255,255,255,0.2)" transform="rotate(15 45 40)"/>
-          <ellipse cx="35" cy="60" rx="2" ry="5" fill="rgba(255,255,255,0.25)" transform="rotate(-10 35 60)"/>
+          {/* Shine effects - Animated with scoops */}
+          <ellipse cx="35" cy="22" rx="3" ry="6" fill="rgba(255,255,255,0.3)" transform="rotate(-20 35 22)">
+            <animate 
+              attributeName="opacity" 
+              values="0;0;0;0.3;0.3;0.3;0.3;0;0;0" 
+              dur="4s" 
+              repeatCount="indefinite"
+            />
+          </ellipse>
+          <ellipse cx="45" cy="40" rx="2" ry="4" fill="rgba(255,255,255,0.2)" transform="rotate(15 45 40)">
+            <animate 
+              attributeName="opacity" 
+              values="0;0;0.2;0.2;0.2;0.2;0;0;0;0" 
+              dur="4s" 
+              repeatCount="indefinite"
+            />
+          </ellipse>
+          <ellipse cx="35" cy="60" rx="2" ry="5" fill="rgba(255,255,255,0.25)" transform="rotate(-10 35 60)">
+            <animate 
+              attributeName="opacity" 
+              values="0;0.25;0.25;0.25;0.25;0;0;0;0;0" 
+              dur="4s" 
+              repeatCount="indefinite"
+            />
+          </ellipse>
         </svg>
       </div>
-      <p className="mt-6 text-lg font-medium text-rose-600 animate-pulse">
+      <p className="mt-6 text-lg font-medium text-cyan-600 animate-pulse">
         Scooping up something sweet...
       </p>
     </div>
