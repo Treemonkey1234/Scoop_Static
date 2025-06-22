@@ -23,6 +23,7 @@ import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid'
 export default function EventsPage() {
   const [activeTab, setActiveTab] = useState<'upcoming' | 'past' | 'discover'>('upcoming')
   const [likedEvents, setLikedEvents] = useState<{[key: string]: boolean}>({})
+  const [startX, setStartX] = useState(0)
   const [flagModal, setFlagModal] = useState<{
     isOpen: boolean
     contentType: 'post' | 'event' | 'social'
@@ -77,6 +78,30 @@ export default function EventsPage() {
 
   const upcomingEvents = sampleEvents.filter(event => getEventDate(event.date).isUpcoming)
   const pastEvents = sampleEvents.filter(event => !getEventDate(event.date).isUpcoming)
+
+  // Tab order for swipe navigation
+  const tabOrder: ('upcoming' | 'past' | 'discover')[] = ['upcoming', 'past', 'discover']
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setStartX(e.touches[0].clientX)
+  }
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const endX = e.changedTouches[0].clientX
+    const diff = startX - endX
+
+    if (Math.abs(diff) > 50) { // Minimum swipe distance
+      const currentIndex = tabOrder.indexOf(activeTab)
+      
+      if (diff > 0 && currentIndex < tabOrder.length - 1) {
+        // Swipe left - next tab
+        setActiveTab(tabOrder[currentIndex + 1])
+      } else if (diff < 0 && currentIndex > 0) {
+        // Swipe right - previous tab
+        setActiveTab(tabOrder[currentIndex - 1])
+      }
+    }
+  }
 
   const renderEventCard = (event: any, isPast = false) => {
     const host = sampleUsers.find(u => u.id === event.hostId)
@@ -289,8 +314,17 @@ export default function EventsPage() {
           ))}
         </div>
 
-        {/* Content */}
-        <div className="space-y-4">
+        {/* Content - Swipeable */}
+        <div 
+          className="space-y-4"
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+        >
+          {/* Swipe instruction for mobile */}
+          <div className="text-center text-sm text-slate-500 mb-4 md:hidden">
+            ← Swipe to navigate between tabs →
+          </div>
+
           {activeTab === 'upcoming' && (
             <>
               {upcomingEvents.length > 0 ? (

@@ -7,6 +7,7 @@ import Layout from '@/components/Layout'
 import TrustBadge from '@/components/TrustBadge'
 import FlagModal from '@/components/FlagModal'
 import LoadingSpinner from '@/components/LoadingSpinner'
+import DragVoteSystem from '@/components/DragVoteSystem'
 
 import { getCurrentUser, sampleUsers, sampleReviews, sampleEvents, User } from '@/lib/sampleData'
 import { 
@@ -191,79 +192,15 @@ export default function HomePage() {
             return (
               <div key={review.id} className="card-premium hover:shadow-xl transition-all duration-300 border-cyan-200/50 overflow-hidden">
                 <div className="flex">
-                  {/* Left Voting Section with Dynamic Gradient - Full Height */}
-                  <div className="flex flex-col items-center justify-between mr-4 self-stretch w-12">
-                    {(() => {
-                      const totalVotes = review.upvotes + review.downvotes
-                      const positiveRatio = totalVotes > 0 ? (review.upvotes / totalVotes) * 100 : 50
-                      const currentVoteAdjustment = currentVote === 'up' ? 1 : currentVote === 'down' ? -1 : 0
-                      const adjustedUpvotes = review.upvotes + (currentVote === 'up' ? 1 : 0)
-                      const adjustedDownvotes = review.downvotes + (currentVote === 'down' ? 1 : 0)
-                      const adjustedTotal = adjustedUpvotes + adjustedDownvotes
-                      const adjustedRatio = adjustedTotal > 0 ? (adjustedUpvotes / adjustedTotal) * 100 : 50
-                      
-                      // Create gradient based on vote ratio
-                      let gradientStyle = {}
-                      if (adjustedRatio >= 80) {
-                        // Heavy positive - dark cyan at top
-                        gradientStyle = { background: 'linear-gradient(to bottom, #0891b2 0%, #06b6d4 30%, #67e8f9 70%, #cffafe 100%)' }
-                      } else if (adjustedRatio >= 60) {
-                        // Medium positive - medium cyan at top
-                        gradientStyle = { background: 'linear-gradient(to bottom, #06b6d4 0%, #22d3ee 40%, #a5f3fc 80%, #ecfeff 100%)' }
-                      } else if (adjustedRatio >= 40) {
-                        // Balanced - even gradient
-                        gradientStyle = { background: 'linear-gradient(to bottom, #22d3ee 0%, #67e8f9 25%, #a5f3fc 50%, #cffafe 75%, #ecfeff 100%)' }
-                      } else if (adjustedRatio >= 20) {
-                        // Medium negative - medium red at bottom
-                        gradientStyle = { background: 'linear-gradient(to bottom, #fef2f2 0%, #fecaca 20%, #f87171 60%, #dc2626 100%)' }
-                      } else {
-                        // Heavy negative - dark red at bottom
-                        gradientStyle = { background: 'linear-gradient(to bottom, #fef2f2 0%, #fecaca 30%, #ef4444 70%, #b91c1c 100%)' }
-                      }
-
-                      return (
-                        <div 
-                          className="flex flex-col items-center justify-between h-full w-full rounded-xl border border-slate-200 shadow-sm p-1"
-                          style={gradientStyle}
-                        >
-                          {/* Upvote Button */}
-                          <button
-                            onClick={() => handleVote(review.id, 'up')}
-                            className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 backdrop-blur-sm ${
-                              currentVote === 'up' 
-                                ? 'bg-white/90 shadow-lg ring-2 ring-cyan-500' 
-                                : 'bg-white/70 hover:bg-white/90 hover:shadow-md'
-                            }`}
-                            title="Upvote this scoop"
-                          >
-                            <span className="text-lg">🍦</span>
-                          </button>
-
-                          {/* Vote Score */}
-                          <div className="flex flex-col items-center space-y-1 bg-white/80 backdrop-blur-sm rounded-lg px-2 py-3">
-                            <span className="text-sm font-bold text-slate-800">
-                              {review.upvotes + (currentVote === 'up' ? 1 : currentVote === 'down' ? -1 : 0) - review.downvotes}
-                            </span>
-                            <span className="text-xs font-medium text-slate-600">
-                              {Math.round(adjustedRatio)}%
-                            </span>
-                          </div>
-
-                          {/* Downvote Button */}
-                          <button
-                            onClick={() => handleVote(review.id, 'down')}
-                            className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 backdrop-blur-sm ${
-                              currentVote === 'down' 
-                                ? 'bg-white/90 shadow-lg ring-2 ring-red-500' 
-                                : 'bg-white/70 hover:bg-white/90 hover:shadow-md'
-                            }`}
-                            title="Downvote this scoop"
-                          >
-                            <span className="text-lg rotate-180">🍦</span>
-                          </button>
-                        </div>
-                      )
-                    })()}
+                  {/* Left Drag-and-Drop Voting Section */}
+                  <div className="mr-4 self-stretch w-12">
+                    <DragVoteSystem
+                      postId={review.id}
+                      upvotes={review.upvotes}
+                      downvotes={review.downvotes}
+                      currentVote={currentVote}
+                      onVote={handleVote}
+                    />
                   </div>
 
                   {/* Main Content */}
