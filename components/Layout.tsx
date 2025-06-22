@@ -32,6 +32,19 @@ const GlobalWalkthroughModal = ({ isOpen, onClose }: { isOpen: boolean; onClose:
   const [currentStep, setCurrentStep] = useState(0)
   const router = useRouter()
 
+  // Restore step from localStorage when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      const savedStep = localStorage.getItem('currentWalkthroughStep')
+      if (savedStep) {
+        const stepNumber = parseInt(savedStep, 10)
+        if (!isNaN(stepNumber) && stepNumber >= 0 && stepNumber < steps.length) {
+          setCurrentStep(stepNumber)
+        }
+      }
+    }
+  }, [isOpen])
+
   const steps = [
     {
       title: "Welcome to ScoopSocials! 🍦",
@@ -125,12 +138,16 @@ const GlobalWalkthroughModal = ({ isOpen, onClose }: { isOpen: boolean; onClose:
     if (currentStep < steps.length - 1) {
       const nextStepData = steps[currentStep + 1]
       
+      // Store walkthrough state before navigation
+      localStorage.setItem('walkthroughInProgress', 'true')
+      localStorage.setItem('currentWalkthroughStep', (currentStep + 1).toString())
+      
       // Navigate to the next page if needed
       if (nextStepData.page && nextStepData.page !== window.location.pathname) {
         try {
           await router.push(nextStepData.page)
-          // Wait for navigation to complete
-          await new Promise(resolve => setTimeout(resolve, 1200))
+          // Wait for navigation to complete - increased timeout for reliability
+          await new Promise(resolve => setTimeout(resolve, 1800))
         } catch (error) {
           console.error('Navigation error:', error)
         }
@@ -153,8 +170,11 @@ const GlobalWalkthroughModal = ({ isOpen, onClose }: { isOpen: boolean; onClose:
             accountsBtn.scrollIntoView({ behavior: 'smooth', block: 'center' })
           }
         }
-      }, 1800)
+      }, 2000)
     } else {
+      // Clear walkthrough state when finished
+      localStorage.removeItem('walkthroughInProgress')
+      localStorage.removeItem('currentWalkthroughStep')
       onClose()
     }
   }
@@ -163,11 +183,15 @@ const GlobalWalkthroughModal = ({ isOpen, onClose }: { isOpen: boolean; onClose:
     if (currentStep > 0) {
       const prevStepData = steps[currentStep - 1]
       
+      // Store walkthrough state before navigation
+      localStorage.setItem('walkthroughInProgress', 'true')
+      localStorage.setItem('currentWalkthroughStep', (currentStep - 1).toString())
+      
       // Navigate to the previous page if needed
       if (prevStepData.page && prevStepData.page !== window.location.pathname) {
         try {
           await router.push(prevStepData.page)
-          await new Promise(resolve => setTimeout(resolve, 1200))
+          await new Promise(resolve => setTimeout(resolve, 1800))
         } catch (error) {
           console.error('Navigation error:', error)
         }
@@ -178,6 +202,9 @@ const GlobalWalkthroughModal = ({ isOpen, onClose }: { isOpen: boolean; onClose:
   }
 
   const skipWalkthrough = () => {
+    // Clear walkthrough state when skipped
+    localStorage.removeItem('walkthroughInProgress')
+    localStorage.removeItem('currentWalkthroughStep')
     onClose()
   }
 
@@ -385,13 +412,25 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     const user = getCurrentUser()
     setCurrentUser(user)
     
-    // Check for new user walkthrough
-    const isNewUser = localStorage.getItem('isNewUser')
-    if (isNewUser === 'true') {
-      localStorage.removeItem('isNewUser')
+    // Check for ongoing walkthrough first
+    const walkthroughInProgress = localStorage.getItem('walkthroughInProgress')
+    const savedStep = localStorage.getItem('currentWalkthroughStep')
+    
+    if (walkthroughInProgress === 'true' && savedStep) {
+      // Restore walkthrough state after page navigation
       setTimeout(() => {
         setGlobalWalkthrough(true)
-      }, 1000)
+        // The GlobalWalkthroughModal will handle restoring the correct step
+      }, 500)
+    } else {
+      // Check for new user walkthrough
+      const isNewUser = localStorage.getItem('isNewUser')
+      if (isNewUser === 'true') {
+        localStorage.removeItem('isNewUser')
+        setTimeout(() => {
+          setGlobalWalkthrough(true)
+        }, 1000)
+      }
     }
 
     // Listen for walkthrough triggers from other components

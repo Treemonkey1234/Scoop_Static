@@ -150,7 +150,10 @@ export default function ModeratorPage() {
         <div className="grid grid-cols-4 gap-4 mb-6">
           <div className="card-soft text-center">
             <div className="text-2xl font-bold text-slate-800">{moderationStats.totalFlags}</div>
-            <div className="text-sm text-slate-500">🚩 Total Flags</div>
+            <div className="text-sm text-slate-500 flex items-center justify-center space-x-1">
+              <FlagIcon className="w-4 h-4 text-red-500" />
+              <span>Total Flags</span>
+            </div>
           </div>
           <div className="card-soft text-center">
             <div className="text-2xl font-bold text-yellow-600">{moderationStats.pending}</div>

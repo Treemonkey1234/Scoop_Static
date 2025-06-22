@@ -13,20 +13,18 @@ import {
   ChevronUpIcon, 
   ChevronDownIcon, 
   ChatBubbleLeftIcon,
-  HeartIcon,
   ShareIcon,
   MapPinIcon,
   CalendarIcon,
-  UsersIcon
+  UsersIcon,
+  FlagIcon
 } from '@heroicons/react/24/outline'
-import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid'
 import { useRouter } from 'next/navigation'
 
 
 
 export default function HomePage() {
   const [votedPosts, setVotedPosts] = useState<{[key: string]: 'up' | 'down' | null}>({})
-  const [likedPosts, setLikedPosts] = useState<{[key: string]: boolean}>({})
   const [isLoading, setIsLoading] = useState(true)
   const [currentUser, setCurrentUser] = useState<User | null>(null)
 
@@ -73,18 +71,11 @@ export default function HomePage() {
       ...prev,
       [postId]: newVote
     }))
-
-
   }
 
-  const handleLike = (postId: string) => {
-    const isLiked = likedPosts[postId]
-    setLikedPosts(prev => ({
-      ...prev,
-      [postId]: !isLiked
-    }))
-
-
+  const handleComment = (postId: string) => {
+    // Navigate to comments page for this post
+    window.location.href = `/comments/${postId}`
   }
 
   const handleFlag = (contentType: 'post' | 'event' | 'social', contentId: string, contentTitle?: string) => {
@@ -128,6 +119,12 @@ export default function HomePage() {
     setTimeout(() => {
       setIsLoading(false)
     }, 1500)
+  }
+
+  // Helper function to limit content preview
+  const limitContentPreview = (content: string, maxLength: number = 150) => {
+    if (content.length <= maxLength) return content
+    return content.substring(0, maxLength) + '...'
   }
 
   if (isLoading && !refreshing) {
@@ -192,16 +189,12 @@ export default function HomePage() {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-xl font-bold text-slate-800">Latest Scoops</h3>
-            <Link href="/create-post" className="text-sm text-cyan-600 hover:text-cyan-700 font-medium">
-              Share a scoop →
-            </Link>
           </div>
 
           {sampleReviews.map((review, index) => {
             const reviewer = sampleUsers.find(u => u.id === review.reviewerId)
             const reviewee = sampleUsers.find(u => u.id === review.reviewedId)
             const currentVote = votedPosts[review.id]
-            const isLiked = likedPosts[review.id]
 
             if (!reviewer || !reviewee) return null
 
@@ -295,9 +288,9 @@ export default function HomePage() {
                       />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center space-x-2 mb-1">
-                          <h4 className="font-semibold text-slate-800 truncate">{reviewer.name}</h4>
-                          <span className="text-slate-400">→</span>
-                          <span className="font-medium text-slate-700 truncate">{reviewee.name}</span>
+                          <h4 className="font-semibold text-slate-800 text-base">{reviewer.name}</h4>
+                          <span className="text-slate-400 text-sm">→</span>
+                          <span className="font-medium text-slate-700 text-base">{reviewee.name}</span>
                           <TrustBadge score={reviewer.trustScore} size="sm" />
                         </div>
                         <div className="flex items-center space-x-2 text-sm text-slate-500 mb-3">
@@ -314,39 +307,28 @@ export default function HomePage() {
                         </div>
                       </div>
                       
-                      {/* Flag Button - Top Right */}
+                      {/* Flag Button - Top Right - Standardized */}
                       <button 
                         onClick={() => handleFlag('post', review.id, `Review by ${reviewer.name}`)}
                         className="p-2 rounded-lg hover:bg-red-50 text-red-500 transition-all duration-200 self-start"
+                        title="Flag this content"
                       >
-                        <span className="text-sm">🚩</span>
+                        <FlagIcon className="w-4 h-4" />
                       </button>
                     </div>
 
+                    {/* Limited Content Preview */}
                     <blockquote className="text-slate-700 mb-4 bg-slate-50 p-4 rounded-xl border-l-4 border-cyan-400">
-                      "{review.content}"
+                      "{limitContentPreview(review.content, 120)}"
                     </blockquote>
 
-                    {/* Action Buttons */}
+                    {/* Action Buttons - Removed Like, Fixed Comment */}
                     <div className="flex items-center justify-between pt-4 border-t border-slate-200">
                       <div className="flex items-center space-x-4">
                         <button
-                          onClick={() => handleLike(review.id)}
-                          className={`flex items-center space-x-1 p-2 rounded-lg transition-all duration-200 ${
-                            isLiked 
-                              ? 'bg-pink-100 text-pink-600' 
-                              : 'hover:bg-slate-100 text-slate-600'
-                          }`}
+                          onClick={() => handleComment(review.id)}
+                          className="flex items-center space-x-1 p-2 rounded-lg hover:bg-slate-100 text-slate-600 transition-all duration-200"
                         >
-                          {isLiked ? (
-                            <HeartIconSolid className="w-4 h-4" />
-                          ) : (
-                            <HeartIcon className="w-4 h-4" />
-                          )}
-                          <span className="text-sm font-medium">Like</span>
-                        </button>
-
-                        <button className="flex items-center space-x-1 p-2 rounded-lg hover:bg-slate-100 text-slate-600 transition-all duration-200">
                           <ChatBubbleLeftIcon className="w-4 h-4" />
                           <span className="text-sm font-medium">Comment</span>
                         </button>
@@ -390,7 +372,6 @@ export default function HomePage() {
         contentId={flagModal.contentId}
         contentTitle={flagModal.contentTitle}
       />
-
 
     </Layout>
   )

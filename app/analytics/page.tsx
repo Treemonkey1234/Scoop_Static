@@ -14,7 +14,8 @@ import {
   EyeIcon,
   HeartIcon,
   ShareIcon,
-  TrophyIcon
+  TrophyIcon,
+  FlagIcon
 } from '@heroicons/react/24/outline'
 
 export default function AnalyticsPage() {
@@ -322,7 +323,7 @@ export default function AnalyticsPage() {
 
             <div className="p-4 bg-gradient-to-br from-orange-50 to-orange-100/50 rounded-xl border border-orange-200">
               <div className="flex items-center space-x-2 mb-2">
-                <span className="text-lg">🚩</span>
+                <FlagIcon className="w-5 h-5 text-orange-600" />
                 <span className="text-sm font-medium text-slate-700">Helpful Flags</span>
               </div>
               <div className="text-2xl font-bold text-slate-800 mb-1">{analytics.community.helpfulFlags}</div>
