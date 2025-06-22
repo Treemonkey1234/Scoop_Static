@@ -177,7 +177,7 @@ export default function UserProfilePage() {
           {userReviews.length > 0 ? (
             <div className="space-y-4">
               {userReviews.slice(0, 3).map((review) => {
-                const reviewer = sampleUsers.find(u => u.id === review.authorId)
+                const reviewer = sampleUsers.find(u => u.id === review.reviewerId)
                 return (
                   <div key={review.id} className="p-4 bg-slate-50 rounded-xl">
                     <div className="flex items-start space-x-3">
@@ -209,7 +209,7 @@ export default function UserProfilePage() {
                         <p className="text-sm text-slate-600 mb-2">{review.content}</p>
                         <div className="flex items-center space-x-4 text-xs text-slate-500">
                           <span>{review.category}</span>
-                          <span>{review.date}</span>
+                          <span>{review.timestamp}</span>
                           <span>{review.communityValidation}% community validation</span>
                         </div>
                       </div>
