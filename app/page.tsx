@@ -140,16 +140,6 @@ export default function HomePage() {
   return (
     <Layout>
       <div className="space-y-4 p-4">
-        <div className="text-center mb-12">
-          <h1 className="text-5xl md:text-6xl font-bold mb-6">
-            <span className="bg-gradient-to-r from-cyan-600 via-teal-600 to-blue-600 bg-clip-text text-transparent">
-              Get the Scoop
-            </span>
-          </h1>
-          <p className="text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed">
-            Connect with your community through trust-based reviews and authentic recommendations.
-          </p>
-        </div>
 
         {/* Enhanced Welcome Header */}
         <div className="card-premium relative overflow-hidden bg-gradient-to-r from-cyan-50 to-teal-50 border-cyan-200">

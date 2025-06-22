@@ -326,8 +326,6 @@ export default function EventsPage() {
             <div className="space-y-4">
               <div className="card-soft text-center py-8">
                 <GlobeAltIcon className="w-16 h-16 text-cyan-300 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-slate-700 mb-2">Interactive Map Coming Soon</h3>
-                <p className="text-slate-600 mb-4">Discover events near you with our interactive map</p>
                 <Link href="/discover" className="btn-primary">
                   Open Map View
                 </Link>

@@ -79,6 +79,10 @@ const SocialIcon = ({ platform }: { platform: string }) => {
 
 export default function ConnectedAccountsPage() {
   const [currentUser, setCurrentUser] = useState<User | null>(null)
+  const [currentPage, setCurrentPage] = useState(0)
+  const [selectedPlatform, setSelectedPlatform] = useState<string | null>(null)
+  const [usernameInput, setUsernameInput] = useState('')
+  const [startX, setStartX] = useState(0)
 
   useEffect(() => {
     const user = getCurrentUser()
@@ -88,6 +92,61 @@ export default function ConnectedAccountsPage() {
   const handleFlagAccount = (platform: string, handle: string) => {
     // In a real app, this would open a flag modal
     alert(`Flag ${platform} account (${handle}) functionality would open here`)
+  }
+
+  // All available platforms organized by pages
+  const allPlatforms = [
+    // Page 1
+    ['Instagram', 'Facebook', 'Twitter', 'LinkedIn', 'TikTok', 'Snapchat'],
+    // Page 2  
+    ['YouTube', 'Discord', 'Reddit', 'GitHub', 'WhatsApp', 'Telegram'],
+    // Page 3
+    ['Pinterest', 'Twitch', 'Steam', 'Signal', 'Clubhouse', 'BeReal']
+  ]
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setStartX(e.touches[0].clientX)
+  }
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const endX = e.changedTouches[0].clientX
+    const diff = startX - endX
+
+    if (Math.abs(diff) > 50) { // Minimum swipe distance
+      if (diff > 0 && currentPage < allPlatforms.length - 1) {
+        // Swipe left - next page
+        setCurrentPage(currentPage + 1)
+        setSelectedPlatform(null) // Close any open input
+      } else if (diff < 0 && currentPage > 0) {
+        // Swipe right - previous page
+        setCurrentPage(currentPage - 1)
+        setSelectedPlatform(null) // Close any open input
+      }
+    }
+  }
+
+  const handlePlatformClick = (platform: string) => {
+    if (selectedPlatform === platform) {
+      setSelectedPlatform(null)
+      setUsernameInput('')
+    } else {
+      setSelectedPlatform(platform)
+      setUsernameInput('')
+    }
+  }
+
+  const handleConfirmUsername = () => {
+    if (usernameInput.trim()) {
+      // In a real app, this would save the account connection
+      alert(`Connecting ${selectedPlatform} account: ${usernameInput}`)
+      setSelectedPlatform(null)
+      setUsernameInput('')
+    }
+  }
+
+  const handleCancelUsername = () => {
+    setSelectedPlatform(null)
+    setUsernameInput('')
   }
 
   if (!currentUser) {
@@ -105,9 +164,10 @@ export default function ConnectedAccountsPage() {
     return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
   }
 
-  const availablePlatforms = [
-    'Snapchat', 'Pinterest', 'Reddit', 'GitHub', 'Twitch', 'Medium'
-  ].filter(platform => !currentUser.socialAccounts.some(account => account.platform === platform))
+  // Filter out already connected platforms from current page
+  const currentPagePlatforms = allPlatforms[currentPage]?.filter(
+    platform => !currentUser?.socialAccounts.some(account => account.platform === platform)
+  ) || []
 
   return (
     <Layout>
@@ -166,20 +226,112 @@ export default function ConnectedAccountsPage() {
           )}
         </div>
 
-        {/* Add More Accounts */}
-        {availablePlatforms.length > 0 && (
+        {/* Enhanced Available Platforms with Swipe Navigation */}
+        {currentPagePlatforms.length > 0 && (
           <div className="card-soft">
-            <h3 className="text-lg font-semibold text-slate-800 mb-4">Available Platforms</h3>
-            <div className="grid grid-cols-2 gap-3">
-              {availablePlatforms.map((platform) => (
-                <button
-                  key={platform}
-                  className="flex items-center space-x-3 p-3 rounded-xl border border-slate-200 hover:border-cyan-300 hover:bg-cyan-50 transition-all duration-200"
-                >
-                  <SocialIcon platform={platform} />
-                  <span className="font-medium text-slate-700">{platform}</span>
-                </button>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-slate-800">Available Platforms</h3>
+              <div className="flex space-x-2">
+                {allPlatforms.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => {
+                      setCurrentPage(index)
+                      setSelectedPlatform(null)
+                    }}
+                    className={`w-2 h-2 rounded-full transition-all duration-200 ${
+                      currentPage === index ? 'bg-cyan-500' : 'bg-slate-300'
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+            
+            <div className="text-center text-sm text-slate-500 mb-4">
+              Page {currentPage + 1} of {allPlatforms.length} • Swipe to navigate
+            </div>
+
+            <div 
+              className="grid grid-cols-2 gap-3"
+              onTouchStart={handleTouchStart}
+              onTouchEnd={handleTouchEnd}
+            >
+              {currentPagePlatforms.map((platform) => (
+                <div key={platform} className="space-y-3">
+                  {selectedPlatform === platform ? (
+                    // Username input mode
+                    <div className="p-3 rounded-xl border-2 border-cyan-300 bg-cyan-50">
+                      <div className="flex items-center space-x-2 mb-3">
+                        <SocialIcon platform={platform} />
+                        <span className="font-medium text-slate-700">{platform}</span>
+                      </div>
+                      <input
+                        type="text"
+                        value={usernameInput}
+                        onChange={(e) => setUsernameInput(e.target.value)}
+                        placeholder={`Enter your ${platform} username...`}
+                        className="w-full p-2 text-sm border border-cyan-200 rounded-lg focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 transition-all duration-200"
+                        autoFocus
+                      />
+                      <div className="flex items-center justify-end space-x-2 mt-2">
+                        <button
+                          onClick={handleCancelUsername}
+                          className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-all duration-200"
+                        >
+                          ✗
+                        </button>
+                        <button
+                          onClick={handleConfirmUsername}
+                          disabled={!usernameInput.trim()}
+                          className="p-2 text-green-500 hover:bg-green-50 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          ✓
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    // Regular platform button
+                    <button
+                      onClick={() => handlePlatformClick(platform)}
+                      className="flex items-center space-x-3 p-3 rounded-xl border border-slate-200 hover:border-cyan-300 hover:bg-cyan-50 transition-all duration-200"
+                    >
+                      <SocialIcon platform={platform} />
+                      <span className="font-medium text-slate-700">{platform}</span>
+                    </button>
+                  )}
+                </div>
               ))}
+            </div>
+
+            {/* Navigation buttons for non-touch devices */}
+            <div className="flex items-center justify-between mt-4">
+              <button
+                onClick={() => {
+                  if (currentPage > 0) {
+                    setCurrentPage(currentPage - 1)
+                    setSelectedPlatform(null)
+                  }
+                }}
+                disabled={currentPage === 0}
+                className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-slate-600 hover:text-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <span>←</span>
+                <span>Previous</span>
+              </button>
+              
+              <button
+                onClick={() => {
+                  if (currentPage < allPlatforms.length - 1) {
+                    setCurrentPage(currentPage + 1)
+                    setSelectedPlatform(null)
+                  }
+                }}
+                disabled={currentPage === allPlatforms.length - 1}
+                className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-slate-600 hover:text-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <span>Next</span>
+                <span>→</span>
+              </button>
             </div>
           </div>
         )}

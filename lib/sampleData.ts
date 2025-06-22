@@ -120,7 +120,7 @@ export function createNewUser(userData: {
     username: userData.fullName.toLowerCase().replace(/\s+/g, '_'),
     email: userData.email,
     phone: userData.phone,
-    avatar: `https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400`, // Default avatar
+    avatar: `/scoop-logo.png`, // Default avatar - ScoopSocials logo
     bio: 'New to ScoopSocials! Looking forward to connecting with the community.',
     trustScore: 50, // Starting trust score for new users
     trustLevel: 'new',
@@ -216,7 +216,7 @@ export const sampleUsers: User[] = [
     name: 'Alex Thompson',
     username: 'alex_outdoors',
     email: 'alex@example.com',
-    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400',
+    avatar: '/scoop-logo.png',
     bio: 'Adventure seeker and photographer. Always planning the next hike 🏔️',
     trustScore: 76,
     trustLevel: 'good',

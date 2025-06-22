@@ -70,9 +70,12 @@ export default function SignInPage() {
               <div className="w-12 h-12 bg-gradient-to-r from-cyan-500 to-teal-600 rounded-2xl flex items-center justify-center shadow-lg">
                 <span className="text-white text-xl">🍦</span>
               </div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-cyan-600 to-teal-600 bg-clip-text text-transparent">ScoopSocials</h1>
             </div>
-            <p className="text-slate-600 mb-2">Trust-Based Social</p>
+            <h1 className="text-5xl md:text-6xl font-bold mb-6">
+              <span className="bg-gradient-to-r from-cyan-600 via-teal-600 to-blue-600 bg-clip-text text-transparent">
+                Get the Scoop
+              </span>
+            </h1>
           </div>
 
           {/* Phone Verification Form */}
@@ -141,9 +144,12 @@ export default function SignInPage() {
             <div className="w-12 h-12 bg-gradient-to-r from-cyan-500 to-teal-600 rounded-2xl flex items-center justify-center shadow-lg">
               <span className="text-white text-xl">🍦</span>
             </div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-cyan-600 to-teal-600 bg-clip-text text-transparent">ScoopSocials</h1>
           </div>
-          <p className="text-slate-600 mb-2">Trust-Based Social</p>
+          <h1 className="text-5xl md:text-6xl font-bold mb-6">
+            <span className="bg-gradient-to-r from-cyan-600 via-teal-600 to-blue-600 bg-clip-text text-transparent">
+              Get the Scoop
+            </span>
+          </h1>
           
           <div className="card-soft bg-white/80 backdrop-blur-sm border-cyan-200/50 shadow-xl mt-6">
             <h2 className="text-xl font-semibold text-slate-800 mb-2">Welcome Back</h2>
