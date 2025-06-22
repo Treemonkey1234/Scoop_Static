@@ -466,7 +466,7 @@
 }
 
 .floating-ice-cream-3 {
-  @apply absolute opacity-18;
+  @apply absolute opacity-20;
   left: 45%;
   top: -12%;
   animation: float-ice-cream 28s infinite linear;
@@ -474,7 +474,7 @@
 }
 
 .floating-ice-cream-4 {
-  @apply absolute opacity-16;
+  @apply absolute opacity-15;
   left: 25%;
   top: -9%;
   animation: float-ice-cream 32s infinite linear;
@@ -483,7 +483,7 @@
 
 /* Individual Floating Scoops */
 .floating-scoop-solo-1 {
-  @apply absolute opacity-12;
+  @apply absolute opacity-10;
   left: 15%;
   top: -5%;
   animation: float-scoop-gentle 20s infinite linear;
@@ -491,7 +491,7 @@
 }
 
 .floating-scoop-solo-2 {
-  @apply absolute opacity-14;
+  @apply absolute opacity-15;
   left: 85%;
   top: -6%;
   animation: float-scoop-gentle 22s infinite linear;
@@ -499,7 +499,7 @@
 }
 
 .floating-scoop-solo-3 {
-  @apply absolute opacity-13;
+  @apply absolute opacity-10;
   left: 65%;
   top: -7%;
   animation: float-scoop-gentle 24s infinite linear;
