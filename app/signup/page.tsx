@@ -3,6 +3,7 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline'
+import { createNewUser, saveCurrentUser } from '@/lib/sampleData'
 
 export default function SignUpPage() {
   const [formData, setFormData] = useState({
@@ -108,12 +109,24 @@ export default function SignUpPage() {
     e.preventDefault()
     setIsLoading(true)
     
-    // Simulate verification
-    setTimeout(() => {
-      setIsLoading(false)
-      // Redirect to home page
-      window.location.href = '/'
-    }, 1000)
+          // Simulate verification and create new user account
+      setTimeout(() => {
+        // Create new user with form data
+        const newUser = createNewUser({
+          fullName: formData.fullName,
+          email: formData.email,
+          phone: formData.phone
+        })
+        
+        // Save the new user as current user
+        saveCurrentUser(newUser)
+        
+        setIsLoading(false)
+        // Set flag for new user walkthrough
+        localStorage.setItem('isNewUser', 'true')
+        // Redirect to home page
+        window.location.href = '/'
+      }, 1000)
   }
 
   if (showVerification) {
@@ -124,7 +137,7 @@ export default function SignUpPage() {
           <div className="text-center mb-8">
             <div className="flex items-center justify-center space-x-3 mb-4">
               <div className="w-12 h-12 bg-gradient-to-r from-cyan-500 to-teal-600 rounded-2xl flex items-center justify-center shadow-lg">
-                <span className="text-white font-bold text-xl">S</span>
+                <span className="text-white text-xl">🍦</span>
               </div>
               <h1 className="text-3xl font-bold bg-gradient-to-r from-cyan-600 to-teal-600 bg-clip-text text-transparent">ScoopSocials</h1>
             </div>
@@ -153,7 +166,7 @@ export default function SignUpPage() {
                     maxLength={1}
                     value={digit}
                     onChange={(e) => handleVerificationChange(index, e.target.value)}
-                    className="w-12 h-12 text-center text-xl font-bold border-2 border-cyan-200 rounded-xl focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 transition-all duration-200"
+                    className="w-12 h-12 text-center text-xl font-bold border-2 border-cyan-200 rounded-xl focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 transition-all duration-200 bg-white"
                     required
                   />
                 ))}
@@ -196,21 +209,21 @@ export default function SignUpPage() {
         <div className="text-center mb-8">
           <div className="flex items-center justify-center space-x-3 mb-4">
             <div className="w-12 h-12 bg-gradient-to-r from-cyan-500 to-teal-600 rounded-2xl flex items-center justify-center shadow-lg">
-              <span className="text-white font-bold text-xl">S</span>
+              <span className="text-white text-xl">🍦</span>
             </div>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-cyan-600 to-teal-600 bg-clip-text text-transparent">ScoopSocials</h1>
           </div>
           <p className="text-slate-600 mb-2">Trust-Based Social</p>
           
           <div className="card-soft bg-white/80 backdrop-blur-sm border-cyan-200/50 shadow-xl mt-6">
-            <h2 className="text-xl font-semibold text-slate-800 mb-2">Join the Trust</h2>
-            <p className="text-slate-600">Community</p>
+            <h2 className="text-xl font-semibold text-slate-800 mb-2">Create Your Account</h2>
+            <p className="text-slate-600">Join the trust-based community</p>
           </div>
         </div>
 
         {/* Sign Up Form */}
         <div className="card-soft bg-white/80 backdrop-blur-sm border-cyan-200/50 shadow-xl">
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-4">
             {/* Full Name */}
             <div className="space-y-2">
               <label htmlFor="fullName" className="block text-sm font-medium text-slate-700">
@@ -223,11 +236,13 @@ export default function SignUpPage() {
                 value={formData.fullName}
                 onChange={handleInputChange}
                 placeholder="John Doe"
-                className={`input-field border-cyan-200/50 focus:border-cyan-500 focus:ring-cyan-200 ${errors.fullName ? 'border-red-500' : ''}`}
+                className={`w-full p-3 rounded-xl border bg-white focus:ring-2 focus:ring-cyan-200 transition-all duration-200 ${
+                  errors.fullName ? 'border-red-500 focus:border-red-500' : 'border-cyan-200 focus:border-cyan-500'
+                }`}
                 required
               />
               {errors.fullName && (
-                <p className="text-xs text-red-600">{errors.fullName}</p>
+                <p className="text-sm text-red-600">{errors.fullName}</p>
               )}
             </div>
 
@@ -242,12 +257,14 @@ export default function SignUpPage() {
                 name="email"
                 value={formData.email}
                 onChange={handleInputChange}
-                placeholder="john.doe@email.com"
-                className={`input-field border-cyan-200/50 focus:border-cyan-500 focus:ring-cyan-200 ${errors.email ? 'border-red-500' : ''}`}
+                placeholder="john@example.com"
+                className={`w-full p-3 rounded-xl border bg-white focus:ring-2 focus:ring-cyan-200 transition-all duration-200 ${
+                  errors.email ? 'border-red-500 focus:border-red-500' : 'border-cyan-200 focus:border-cyan-500'
+                }`}
                 required
               />
               {errors.email && (
-                <p className="text-xs text-red-600">{errors.email}</p>
+                <p className="text-sm text-red-600">{errors.email}</p>
               )}
             </div>
 
@@ -263,18 +280,20 @@ export default function SignUpPage() {
                 value={formData.phone}
                 onChange={handleInputChange}
                 placeholder="+1 (555) 123-4567"
-                className={`input-field border-cyan-200/50 focus:border-cyan-500 focus:ring-cyan-200 ${errors.phone ? 'border-red-500' : ''}`}
+                className={`w-full p-3 rounded-xl border bg-white focus:ring-2 focus:ring-cyan-200 transition-all duration-200 ${
+                  errors.phone ? 'border-red-500 focus:border-red-500' : 'border-cyan-200 focus:border-cyan-500'
+                }`}
                 required
               />
               {errors.phone && (
-                <p className="text-xs text-red-600">{errors.phone}</p>
+                <p className="text-sm text-red-600">{errors.phone}</p>
               )}
             </div>
 
             {/* Password */}
             <div className="space-y-2">
               <label htmlFor="password" className="block text-sm font-medium text-slate-700">
-                🔒 Create Password
+                🔒 Password
               </label>
               <div className="relative">
                 <input
@@ -284,7 +303,9 @@ export default function SignUpPage() {
                   value={formData.password}
                   onChange={handleInputChange}
                   placeholder="••••••••••••••"
-                  className={`input-field pr-12 border-cyan-200/50 focus:border-cyan-500 focus:ring-cyan-200 ${errors.password ? 'border-red-500' : ''}`}
+                  className={`w-full p-3 pr-12 rounded-xl border bg-white focus:ring-2 focus:ring-cyan-200 transition-all duration-200 ${
+                    errors.password ? 'border-red-500 focus:border-red-500' : 'border-cyan-200 focus:border-cyan-500'
+                  }`}
                   required
                 />
                 <button
@@ -300,8 +321,9 @@ export default function SignUpPage() {
                 </button>
               </div>
               {errors.password && (
-                <p className="text-xs text-red-600">{errors.password}</p>
+                <p className="text-sm text-red-600">{errors.password}</p>
               )}
+              <p className="text-xs text-slate-500">Password must be at least 8 characters</p>
             </div>
 
             {/* Confirm Password */}
@@ -317,7 +339,9 @@ export default function SignUpPage() {
                   value={formData.confirmPassword}
                   onChange={handleInputChange}
                   placeholder="••••••••••••••"
-                  className={`input-field pr-12 border-cyan-200/50 focus:border-cyan-500 focus:ring-cyan-200 ${errors.confirmPassword ? 'border-red-500' : ''}`}
+                  className={`w-full p-3 pr-12 rounded-xl border bg-white focus:ring-2 focus:ring-cyan-200 transition-all duration-200 ${
+                    errors.confirmPassword ? 'border-red-500 focus:border-red-500' : 'border-cyan-200 focus:border-cyan-500'
+                  }`}
                   required
                 />
                 <button
@@ -333,48 +357,61 @@ export default function SignUpPage() {
                 </button>
               </div>
               {errors.confirmPassword && (
-                <p className="text-xs text-red-600">{errors.confirmPassword}</p>
+                <p className="text-sm text-red-600">{errors.confirmPassword}</p>
               )}
             </div>
 
-            {/* Checkboxes */}
+            {/* Age Verification */}
             <div className="space-y-3">
-              <label className="flex items-start space-x-3">
+              <div className="flex items-start space-x-3">
                 <input
                   type="checkbox"
-                  name="agreeToTerms"
-                  checked={formData.agreeToTerms}
-                  onChange={handleInputChange}
-                  className="rounded border-slate-300 text-cyan-600 focus:ring-cyan-500 mt-0.5"
-                />
-                <div className="flex-1">
-                  <span className="text-sm text-slate-700">
-                    I agree to <Link href="/terms" className="text-cyan-600 hover:text-cyan-700 font-medium">Terms of Service</Link> & <Link href="/privacy" className="text-cyan-600 hover:text-cyan-700 font-medium">Privacy Policy</Link>
-                  </span>
-                  {errors.agreeToTerms && (
-                    <p className="text-xs text-red-600 mt-1">{errors.agreeToTerms}</p>
-                  )}
-                </div>
-              </label>
-              
-              <label className="flex items-start space-x-3">
-                <input
-                  type="checkbox"
+                  id="over18"
                   name="over18"
                   checked={formData.over18}
                   onChange={handleInputChange}
-                  className="rounded border-slate-300 text-cyan-600 focus:ring-cyan-500 mt-0.5"
+                  className="mt-1 rounded border-cyan-300 text-cyan-600 focus:ring-cyan-500"
+                  required
                 />
                 <div className="flex-1">
-                  <span className="text-sm text-slate-700">I'm 18+ years old</span>
+                  <label htmlFor="over18" className="text-sm text-slate-700">
+                    I am 18 years or older
+                  </label>
                   {errors.over18 && (
-                    <p className="text-xs text-red-600 mt-1">{errors.over18}</p>
+                    <p className="text-sm text-red-600 mt-1">{errors.over18}</p>
                   )}
                 </div>
-              </label>
+              </div>
+
+              <div className="flex items-start space-x-3">
+                <input
+                  type="checkbox"
+                  id="agreeToTerms"
+                  name="agreeToTerms"
+                  checked={formData.agreeToTerms}
+                  onChange={handleInputChange}
+                  className="mt-1 rounded border-cyan-300 text-cyan-600 focus:ring-cyan-500"
+                  required
+                />
+                <div className="flex-1">
+                  <label htmlFor="agreeToTerms" className="text-sm text-slate-700">
+                    I agree to the{' '}
+                    <Link href="/terms" className="text-cyan-600 hover:text-cyan-700 underline">
+                      Terms of Service
+                    </Link>{' '}
+                    and{' '}
+                    <Link href="/privacy" className="text-cyan-600 hover:text-cyan-700 underline">
+                      Privacy Policy
+                    </Link>
+                  </label>
+                  {errors.agreeToTerms && (
+                    <p className="text-sm text-red-600 mt-1">{errors.agreeToTerms}</p>
+                  )}
+                </div>
+              </div>
             </div>
 
-            {/* Create Account Button */}
+            {/* Submit Button */}
             <button
               type="submit"
               disabled={isLoading}
@@ -386,54 +423,20 @@ export default function SignUpPage() {
                   <span>Creating Account...</span>
                 </div>
               ) : (
-                'CREATE ACCOUNT'
+                'Create Account'
               )}
             </button>
 
-            {/* Divider */}
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-slate-200"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white text-slate-500">or</span>
-              </div>
-            </div>
-
             {/* Sign In Link */}
             <div className="text-center">
-              <p className="text-sm text-slate-600 mb-4">Already have an account?</p>
-              <Link
-                href="/signin"
-                className="w-full btn-secondary block text-center border-cyan-200 text-cyan-700 hover:bg-cyan-50"
-              >
-                Sign In
-              </Link>
+              <p className="text-sm text-slate-600">
+                Already have an account?{' '}
+                <Link href="/signin" className="text-cyan-600 hover:text-cyan-700 font-medium">
+                  Sign In
+                </Link>
+              </p>
             </div>
           </form>
-        </div>
-
-        {/* Features */}
-        <div className="card-soft bg-white/80 backdrop-blur-sm border-cyan-200/50 shadow-xl mt-6">
-          <div className="grid grid-cols-3 gap-4 text-center">
-            <div>
-              <span className="text-2xl block mb-2">🎯</span>
-              <p className="text-xs text-slate-600">Quality Over Quantity</p>
-            </div>
-            <div>
-              <span className="text-2xl block mb-2">🤝</span>
-              <p className="text-xs text-slate-600">Community Trust</p>
-            </div>
-            <div>
-              <span className="text-2xl block mb-2">🏆</span>
-              <p className="text-xs text-slate-600">Verified Members</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="text-center mt-8 text-xs text-slate-500">
-          © 2024 ScoopSocials • <Link href="/terms" className="hover:text-cyan-600">Terms</Link> • <Link href="/privacy" className="hover:text-cyan-600">Privacy</Link>
         </div>
       </div>
     </div>

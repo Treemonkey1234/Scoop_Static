@@ -18,6 +18,7 @@ export interface User {
   eventsAttended: number
   isVerified: boolean
   mutualFriends?: number
+  phone?: string
 }
 
 export interface SocialAccount {
@@ -76,6 +77,71 @@ export interface Comment {
   downvotes: number
   replies: Comment[]
   parentId?: string
+}
+
+// User Management Functions
+export function getCurrentUser(): User {
+  if (typeof window === 'undefined') {
+    // Server-side rendering fallback
+    return sampleUsers[0]
+  }
+
+  try {
+    const storedUser = localStorage.getItem('currentUser')
+    if (storedUser) {
+      return JSON.parse(storedUser)
+    }
+  } catch (error) {
+    console.error('Error parsing stored user data:', error)
+  }
+  
+  // Fallback to first sample user
+  return sampleUsers[0]
+}
+
+export function saveCurrentUser(user: User): void {
+  if (typeof window === 'undefined') return
+  
+  try {
+    localStorage.setItem('currentUser', JSON.stringify(user))
+  } catch (error) {
+    console.error('Error saving user data:', error)
+  }
+}
+
+export function createNewUser(userData: {
+  fullName: string
+  email: string
+  phone: string
+}): User {
+  const newUser: User = {
+    id: Date.now().toString(),
+    name: userData.fullName,
+    username: userData.fullName.toLowerCase().replace(/\s+/g, '_'),
+    email: userData.email,
+    phone: userData.phone,
+    avatar: `https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400`, // Default avatar
+    bio: 'New to ScoopSocials! Looking forward to connecting with the community.',
+    trustScore: 50, // Starting trust score for new users
+    trustLevel: 'new',
+    joinDate: new Date().toISOString().split('T')[0],
+    location: 'Location not set',
+    accountType: 'free',
+    socialAccounts: [],
+    friendsCount: 0,
+    reviewsCount: 0,
+    eventsAttended: 0,
+    isVerified: false
+  }
+  
+  return newUser
+}
+
+export function updateUserProfile(updates: Partial<User>): User {
+  const currentUser = getCurrentUser()
+  const updatedUser = { ...currentUser, ...updates }
+  saveCurrentUser(updatedUser)
+  return updatedUser
 }
 
 // Sample Users
@@ -196,7 +262,7 @@ export const sampleReviews: Review[] = [
     id: '1',
     reviewerId: '2',
     reviewedId: '1',
-    category: 'Professional Flavor',
+    category: 'Professional',
     rating: 5,
     content: "Sarah's design work is absolutely sweet! 🍦 She delivered a premium vanilla experience with strawberry-level attention to detail. Her creative process is smooth as gelato and the final product was a triple-scoop delight. Highly recommend this flavor artist!",
     timestamp: '2025-06-14T10:30:00Z',
@@ -527,7 +593,7 @@ export const sampleComments: Comment[] = [
 
 // Review Categories
 export const reviewCategories = [
-  'Professional Flavor',
+      'Professional',
   'Social Scoop',
   'Roommate Ripple',
   'Service Sundae',

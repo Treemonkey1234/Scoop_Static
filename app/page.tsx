@@ -8,7 +8,7 @@ import TrustBadge from '@/components/TrustBadge'
 import FlagModal from '@/components/FlagModal'
 import LoadingSpinner from '@/components/LoadingSpinner'
 import { useToast } from '@/components/Toast'
-import { sampleUsers, sampleReviews, sampleEvents } from '@/lib/sampleData'
+import { getCurrentUser, sampleUsers, sampleReviews, sampleEvents, User } from '@/lib/sampleData'
 import { 
   ChevronUpIcon, 
   ChevronDownIcon, 
@@ -21,10 +21,173 @@ import {
 } from '@heroicons/react/24/outline'
 import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid'
 
+// Walkthrough Modal Component
+const WalkthroughModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
+  const [currentStep, setCurrentStep] = useState(0)
+
+  const steps = [
+    {
+      title: "Welcome to ScoopSocials! 🍦",
+      content: "Let's take a quick tour of your new trust-based social platform. This walkthrough will help you get the most out of every feature.",
+      highlight: "header"
+    },
+    {
+      title: "Header Navigation 📊",
+      content: "Your header contains the Analytics button (left) and Create button (right). Analytics shows your trust score trends and community impact.",
+      highlight: "header"
+    },
+    {
+      title: "Understanding Posts 📝",
+      content: "Posts on ScoopSocials are trust-based reviews. Each post shows the reviewer, reviewee, category, and community validation percentage.",
+      highlight: "posts"
+    },
+    {
+      title: "Community Validation ✅",
+      content: "The green progress bar shows community agreement. Users can upvote/downvote posts, helping maintain quality and accuracy.",
+      highlight: "validation"
+    },
+    {
+      title: "Creating Content ✏️",
+      content: "Use the Create button to share reviews or host events. Quality content boosts your trust score and helps the community.",
+      highlight: "create"
+    },
+    {
+      title: "Community Safety 🚩",
+      content: "Flag inappropriate content using the flag button. Accurate flagging contributes to your trust score and keeps the community safe.",
+      highlight: "safety"
+    },
+    {
+      title: "Events & Networking 📅",
+      content: "Browse and join events in your community. Attending events and leaving reviews builds your network and trust score.",
+      highlight: "events"
+    },
+    {
+      title: "Your Profile Hub 👤",
+      content: "Your profile shows your trust score, connected accounts, and recent reviews. This is your digital reputation center.",
+      highlight: "profile"
+    },
+    {
+      title: "Trust Score Breakdown 📊",
+      content: "Your trust score is calculated from 11 factors including social media verification, community engagement, and content quality.",
+      highlight: "trust"
+    },
+    {
+      title: "Connected Accounts 🌐",
+      content: "Link your social media accounts to boost your trust score. More verified accounts = higher community trust.",
+      highlight: "accounts"
+    },
+    {
+      title: "Professional Features 💼",
+      content: "Pro accounts get dual-layer visibility, advanced analytics, and professional reputation management tools.",
+      highlight: "pro"
+    },
+    {
+      title: "Building Friendships 👥",
+      content: "Connect with trusted community members. Friend connections help you discover events and build your local network.",
+      highlight: "friends"
+    },
+    {
+      title: "Analytics Dashboard 📈",
+      content: "Track your trust score trends, engagement metrics, and community impact. Use insights to improve your reputation.",
+      highlight: "analytics"
+    },
+    {
+      title: "Discovery Features 🔍",
+      content: "Use search and discovery to find events, people, and content that match your interests and trust preferences.",
+      highlight: "discovery"
+    }
+  ]
+
+  const nextStep = () => {
+    if (currentStep < steps.length - 1) {
+      setCurrentStep(currentStep + 1)
+    } else {
+      onClose()
+    }
+  }
+
+  const prevStep = () => {
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1)
+    }
+  }
+
+  const skipWalkthrough = () => {
+    onClose()
+  }
+
+  if (!isOpen) return null
+
+  const currentStepData = steps[currentStep]
+
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-hidden">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-cyan-500 to-teal-600 p-6 text-white">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-xl font-bold">{currentStepData.title}</h2>
+            <button
+              onClick={skipWalkthrough}
+              className="text-cyan-100 hover:text-white transition-colors duration-200"
+            >
+              ✕
+            </button>
+          </div>
+          <div className="flex items-center space-x-2">
+            <div className="flex-1 bg-cyan-600 rounded-full h-2">
+              <div 
+                className="bg-white h-2 rounded-full transition-all duration-300"
+                style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
+              />
+            </div>
+            <span className="text-sm font-medium">{currentStep + 1}/{steps.length}</span>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="p-6">
+          <p className="text-slate-700 leading-relaxed mb-6">
+            {currentStepData.content}
+          </p>
+
+          {/* Navigation */}
+          <div className="flex items-center justify-between">
+            <button
+              onClick={prevStep}
+              disabled={currentStep === 0}
+              className="px-4 py-2 text-slate-600 hover:text-slate-800 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              ← Previous
+            </button>
+
+            <div className="flex space-x-2">
+              <button
+                onClick={skipWalkthrough}
+                className="px-4 py-2 text-slate-600 hover:text-slate-800 transition-colors duration-200"
+              >
+                Skip
+              </button>
+              <button
+                onClick={nextStep}
+                className="px-6 py-2 bg-gradient-to-r from-cyan-500 to-teal-600 text-white rounded-xl hover:from-cyan-600 hover:to-teal-700 transition-all duration-200"
+              >
+                {currentStep === steps.length - 1 ? 'Finish' : 'Next →'}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function HomePage() {
   const [votedPosts, setVotedPosts] = useState<{[key: string]: 'up' | 'down' | null}>({})
   const [likedPosts, setLikedPosts] = useState<{[key: string]: boolean}>({})
   const [isLoading, setIsLoading] = useState(true)
+  const [showWalkthrough, setShowWalkthrough] = useState(false)
+  const [currentUser, setCurrentUser] = useState<User | null>(null)
 
   const [refreshing, setRefreshing] = useState(false)
   const { showSuccess, showError, showInfo, ToastContainer } = useToast()
@@ -40,11 +203,29 @@ export default function HomePage() {
     contentTitle: ''
   })
 
+  // Load current user on component mount
+  React.useEffect(() => {
+    const user = getCurrentUser()
+    setCurrentUser(user)
+  }, [])
+
+  // Check for new user and show walkthrough
+  React.useEffect(() => {
+    const isNewUser = localStorage.getItem('isNewUser')
+    if (isNewUser === 'true') {
+      // Clear the flag
+      localStorage.removeItem('isNewUser')
+      // Show walkthrough after a brief delay
+      setTimeout(() => {
+        setShowWalkthrough(true)
+      }, 1000)
+    }
+  }, [])
+
   // Simulate loading
   React.useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false)
-      showInfo('Welcome back!', 'Your feed has been updated with the latest activity.')
     }, 1500)
 
     return () => clearTimeout(timer)
@@ -159,15 +340,15 @@ export default function HomePage() {
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h2 className="text-2xl font-bold bg-gradient-to-r from-cyan-700 to-teal-700 bg-clip-text text-transparent mb-2">
-                  Welcome back, {sampleUsers[0].name}! 
+                  Welcome back, {currentUser?.name}! 
                 </h2>
-                <div className="flex items-center space-x-4">
-                  <TrustBadge score={sampleUsers[0].trustScore} size="lg" />
-                  <div className="text-sm text-slate-600">
-                    <span className="font-medium">{sampleUsers[0].friendsCount}</span> friends • 
-                    <span className="font-medium ml-1">{sampleUsers[0].reviewsCount}</span> reviews
+                                  <div className="flex items-center space-x-4">
+                    <TrustBadge score={currentUser?.trustScore || 50} size="lg" />
+                    <div className="text-sm text-slate-600">
+                      <span className="font-medium">{currentUser?.friendsCount || 0}</span> friends • 
+                      <span className="font-medium ml-1">{currentUser?.reviewsCount || 0}</span> reviews
+                    </div>
                   </div>
-                </div>
               </div>
               <button
                 onClick={handleRefresh}
@@ -336,7 +517,7 @@ export default function HomePage() {
         {/* Load More */}
         {isLoading ? (
           <div className="flex justify-center py-8">
-            <LoadingSpinner />
+            <LoadingSpinner type="pull-refresh" />
           </div>
         ) : (
           <button 
@@ -360,6 +541,12 @@ export default function HomePage() {
 
       {/* Toast Notifications */}
       <ToastContainer />
+
+      {/* Walkthrough Modal */}
+      <WalkthroughModal 
+        isOpen={showWalkthrough} 
+        onClose={() => setShowWalkthrough(false)} 
+      />
     </Layout>
   )
 } 

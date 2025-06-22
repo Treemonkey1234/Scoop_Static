@@ -1,60 +1,63 @@
 'use client'
 
 import React from 'react'
-import { getTrustLevel } from '@/lib/sampleData'
 
 interface TrustBadgeProps {
   score: number
   size?: 'sm' | 'md' | 'lg'
-  showScore?: boolean
-  className?: string
+  showLabel?: boolean
 }
 
-const TrustBadge: React.FC<TrustBadgeProps> = ({ 
-  score, 
-  size = 'md', 
-  showScore = true,
-  className = '' 
-}) => {
-  const trustLevel = getTrustLevel(score)
-  
-  const sizeClasses = {
-    sm: 'px-2 py-1 text-xs',
-    md: 'px-3 py-1 text-sm',
-    lg: 'px-4 py-2 text-base'
+const TrustBadge: React.FC<TrustBadgeProps> = ({ score, size = 'md', showLabel = false }) => {
+  const getTrustLevel = (score: number) => {
+    if (score >= 90) return 'excellent'
+    if (score >= 80) return 'verygood'
+    if (score >= 70) return 'good'
+    if (score >= 60) return 'fair'
+    return 'poor'
   }
 
-  const getIcon = () => {
-    switch (trustLevel) {
-      case 'excellent': return '🍦'
-      case 'good': return '🍨'
-      case 'fair': return '🧁'
-      case 'poor': return '🍧'
-      case 'new': return '🥛'
-      default: return '🤔'
+  const getTrustColor = (level: string) => {
+    switch (level) {
+      case 'excellent': return 'bg-trust-excellent text-white'
+      case 'verygood': return 'bg-trust-verygood text-white'
+      case 'good': return 'bg-trust-good text-white'
+      case 'fair': return 'bg-trust-fair text-slate-800'
+      case 'poor': return 'bg-trust-poor text-slate-800'
+      default: return 'bg-slate-400 text-white'
     }
   }
 
-  const getLabel = () => {
-    switch (trustLevel) {
-      case 'excellent': return 'Legendary Lavender'
-      case 'good': return 'Premium Pistachio'
-      case 'fair': return 'Rocky Road Regular'
-      case 'poor': return 'Melting Mint'
-      case 'new': return 'Vanilla Newbie'
-      default: return 'Unknown Flavor'
+  const getTrustLabel = (level: string) => {
+    switch (level) {
+      case 'excellent': return 'Excellent'
+      case 'verygood': return 'Very Good'
+      case 'good': return 'Good'
+      case 'fair': return 'Fair'
+      case 'poor': return 'Poor'
+      default: return 'Unknown'
     }
   }
+
+  const getSizeClasses = (size: string) => {
+    switch (size) {
+      case 'sm': return 'text-xs px-2 py-1'
+      case 'lg': return 'text-lg px-4 py-2'
+      default: return 'text-sm px-3 py-1'
+    }
+  }
+
+  const level = getTrustLevel(score)
+  const colorClass = getTrustColor(level)
+  const sizeClass = getSizeClasses(size)
 
   return (
-    <div className={`
-      trust-badge trust-${trustLevel} ${sizeClasses[size]} ${className}
-      animate-fade-in hover:scale-105 transition-all duration-200
-    `}>
-      <span className="mr-1">{getIcon()}</span>
-      <span className="font-semibold">{getLabel()}</span>
-      {showScore && (
-        <span className="ml-1 opacity-75">({score})</span>
+    <div className={`${colorClass} ${sizeClass} rounded-full font-bold inline-flex items-center justify-center min-w-0 whitespace-nowrap shadow-sm`}>
+      {score}
+      {showLabel && size !== 'sm' && (
+        <span className="ml-1 font-medium text-xs">
+          {getTrustLabel(level)}
+        </span>
       )}
     </div>
   )

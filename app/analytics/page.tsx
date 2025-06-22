@@ -123,6 +123,13 @@ export default function AnalyticsPage() {
     }
   ]
 
+  const achievements = [
+    { title: 'Verified Professional', icon: '💼', description: 'LinkedIn verified' },
+    { title: 'Community Leader', icon: '🏆', description: '10+ events hosted' },
+    { title: 'Trusted Reviewer', icon: '⭐', description: '50+ helpful reviews' },
+    { title: 'Early Adopter', icon: '🚀', description: 'Joined in 2023' }
+  ]
+
   return (
     <Layout>
       <div className="p-4 space-y-6">
@@ -172,11 +179,11 @@ export default function AnalyticsPage() {
               <div className={`text-2xl font-bold flex items-center justify-center ${
                 analytics.trustScoreTrend.trend === 'up' ? 'text-green-600' : 'text-red-500'
               }`}>
-                                 {analytics.trustScoreTrend.trend === 'up' ? (
-                   <ArrowTrendingUpIcon className="w-5 h-5 mr-1" />
-                 ) : (
-                   <ArrowTrendingDownIcon className="w-5 h-5 mr-1" />
-                 )}
+                {analytics.trustScoreTrend.trend === 'up' ? (
+                  <ArrowTrendingUpIcon className="w-5 h-5 mr-1" />
+                ) : (
+                  <ArrowTrendingDownIcon className="w-5 h-5 mr-1" />
+                )}
                 {analytics.trustScoreTrend.change > 0 ? '+' : ''}{analytics.trustScoreTrend.change}
               </div>
               <div className="text-sm text-slate-500">This Week</div>
@@ -207,6 +214,28 @@ export default function AnalyticsPage() {
           </div>
         </div>
 
+        {/* Achievements */}
+        <div className="card-premium">
+          <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center">
+            <TrophyIcon className="w-5 h-5 mr-2 text-amber-500" />
+            Achievements
+          </h3>
+          <div className="grid grid-cols-2 gap-3">
+            {achievements.map((achievement, index) => (
+              <div 
+                key={index} 
+                className="p-3 bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl border border-amber-200"
+              >
+                <div className="flex items-center space-x-2 mb-1">
+                  <span className="text-lg">{achievement.icon}</span>
+                  <span className="text-sm font-semibold text-slate-800">{achievement.title}</span>
+                </div>
+                <p className="text-xs text-slate-600">{achievement.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* Engagement Metrics */}
         <div className="card-premium">
           <div className="flex items-center space-x-3 mb-6">
@@ -222,11 +251,11 @@ export default function AnalyticsPage() {
                   <div className={`flex items-center space-x-1 text-sm font-medium ${
                     metric.trend === 'up' ? 'text-green-600' : 'text-red-500'
                   }`}>
-                                         {metric.trend === 'up' ? (
-                       <ArrowTrendingUpIcon className="w-3 h-3" />
-                     ) : (
-                       <ArrowTrendingDownIcon className="w-3 h-3" />
-                     )}
+                    {metric.trend === 'up' ? (
+                      <ArrowTrendingUpIcon className="w-3 h-3" />
+                    ) : (
+                      <ArrowTrendingDownIcon className="w-3 h-3" />
+                    )}
                     <span>{metric.change}</span>
                   </div>
                 </div>

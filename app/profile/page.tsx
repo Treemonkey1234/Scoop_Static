@@ -1,12 +1,12 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import Layout from '@/components/Layout'
 import TrustBadge from '@/components/TrustBadge'
 import FlagModal from '@/components/FlagModal'
-import { sampleUsers, sampleReviews } from '@/lib/sampleData'
+import { getCurrentUser, sampleReviews, sampleUsers, User } from '@/lib/sampleData'
 import { 
   Cog6ToothIcon,
   BellIcon,
@@ -24,10 +24,7 @@ import {
 import { CheckBadgeIcon as CheckBadgeIconSolid } from '@heroicons/react/24/solid'
 
 export default function ProfilePage() {
-  // Using the first user as the current user
-  const currentUser = sampleUsers[0]
-  const userReviews = sampleReviews.filter(r => r.reviewedId === currentUser.id)
-  
+  const [currentUser, setCurrentUser] = useState<User | null>(null)
   const [showAllSocials, setShowAllSocials] = useState(false)
   const [showTrustBreakdown, setShowTrustBreakdown] = useState(false)
   const [flagModal, setFlagModal] = useState<{
@@ -42,6 +39,24 @@ export default function ProfilePage() {
     contentTitle: ''
   })
 
+  // Load current user on component mount
+  useEffect(() => {
+    const user = getCurrentUser()
+    setCurrentUser(user)
+  }, [])
+
+  if (!currentUser) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="w-8 h-8 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      </Layout>
+    )
+  }
+
+  const userReviews = sampleReviews.filter(r => r.reviewedId === currentUser.id)
+  
   const handleFlag = (contentType: 'post' | 'event' | 'social', contentId: string, contentTitle?: string) => {
     console.log('Profile flag clicked:', { contentType, contentId, contentTitle })
     setFlagModal({
@@ -61,27 +76,34 @@ export default function ProfilePage() {
     })
   }
 
-  // Updated Trust Score Breakdown with 11 components and proper weightings
+  // Updated Trust Score Breakdown with 11 components (removed weight display)
   const trustBreakdown = [
-    { category: 'Time Spent on App', score: 94, weight: 10, count: '120+ hours' },
-    { category: 'Recent Activity', score: 89, weight: 10, count: 'Active daily' },
-    { category: 'Postings Quality', score: 96, weight: 15, count: '42 posts' },
-    { category: 'Comments Engagement', score: 88, weight: 10, count: '156 comments' },
-    { category: 'Community Engagement', score: 92, weight: 15, count: '234 interactions' },
-    { category: 'Friends Network', score: 95, weight: 10, count: '89 connections' },
-    { category: 'Events Attended', score: 87, weight: 5, count: '12 events' },
-    { category: 'Social Media Connected', score: 98, weight: 20, count: '8/8 accounts' },
-    { category: 'Flagging Accuracy', score: 91, weight: 5, count: '23/25 accurate' },
-    { category: 'Positive Reactions', score: 93, weight: 15, count: '89% positive' },
-    { category: 'Profile Completeness', score: 100, weight: 5, count: '100% complete' }
+    { category: 'Time Spent on App', score: currentUser.trustScore > 80 ? 94 : 65, count: currentUser.trustScore > 80 ? '120+ hours' : '20+ hours' },
+    { category: 'Recent Activity', score: currentUser.trustScore > 80 ? 89 : 70, count: currentUser.trustScore > 80 ? 'Active daily' : 'Active weekly' },
+    { category: 'Postings Quality', score: currentUser.trustScore > 80 ? 96 : 45, count: `${currentUser.reviewsCount} posts` },
+    { category: 'Comments Engagement', score: currentUser.trustScore > 80 ? 88 : 50, count: currentUser.trustScore > 80 ? '156 comments' : '12 comments' },
+    { category: 'Community Engagement', score: currentUser.trustScore > 80 ? 92 : 40, count: currentUser.trustScore > 80 ? '234 interactions' : '15 interactions' },
+    { category: 'Friends Network', score: Math.min(95, 40 + (currentUser.friendsCount * 2)), count: `${currentUser.friendsCount} connections` },
+    { category: 'Events Attended', score: Math.min(95, 40 + (currentUser.eventsAttended * 3)), count: `${currentUser.eventsAttended} events` },
+    { category: 'Social Media Connected', score: Math.min(98, 30 + (currentUser.socialAccounts.length * 10)), count: `${currentUser.socialAccounts.length} accounts` },
+    { category: 'Flagging Accuracy', score: currentUser.trustScore > 80 ? 91 : 60, count: currentUser.trustScore > 80 ? '23/25 accurate' : 'No flags yet' },
+    { category: 'Positive Reactions', score: currentUser.trustScore > 80 ? 93 : 55, count: currentUser.trustScore > 80 ? '89% positive' : '65% positive' },
+    { category: 'Profile Completeness', score: calculateProfileCompleteness(currentUser), count: `${calculateProfileCompleteness(currentUser)}% complete` }
   ]
 
-  const achievements = [
-    { title: 'Verified Professional', icon: '💼', description: 'LinkedIn verified' },
-    { title: 'Community Leader', icon: '🏆', description: '10+ events hosted' },
-    { title: 'Trusted Reviewer', icon: '⭐', description: '50+ helpful reviews' },
-    { title: 'Early Adopter', icon: '🚀', description: 'Joined in 2023' }
-  ]
+  function calculateProfileCompleteness(user: User): number {
+    let completeness = 0
+    if (user.name) completeness += 15
+    if (user.bio && user.bio !== 'New to ScoopSocials! Looking forward to connecting with the community.') completeness += 15
+    if (user.location && user.location !== 'Location not set') completeness += 10
+    if (user.avatar) completeness += 10
+    if (user.email) completeness += 10
+    if (user.phone) completeness += 10
+    if (user.socialAccounts.length > 0) completeness += 15
+    if (user.socialAccounts.length >= 3) completeness += 10
+    if (user.isVerified) completeness += 5
+    return completeness
+  }
 
   // Social media icons mapping
   const socialIcons = {
@@ -200,12 +222,7 @@ export default function ProfilePage() {
                   <div key={index} className="flex items-center justify-between">
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-1">
-                        <div className="flex items-center space-x-2">
-                          <span className="text-sm font-medium text-slate-700">{item.category}</span>
-                          <span className="text-xs text-cyan-600 bg-cyan-100 px-2 py-1 rounded-full">
-                            {item.weight}%
-                          </span>
-                        </div>
+                        <span className="text-sm font-medium text-slate-700">{item.category}</span>
                         <div className="flex items-center space-x-2">
                           <span className="text-sm font-semibold text-slate-800">{item.score}</span>
                           <span className="text-xs text-slate-500">({item.count})</span>
@@ -226,8 +243,7 @@ export default function ProfilePage() {
                 <h5 className="text-sm font-semibold text-slate-800 mb-2">Trust Score Calculation</h5>
                 <p className="text-xs text-slate-600">
                   Your trust score is calculated using a weighted average of 11 key factors. 
-                  Social media verification and community engagement carry the highest weights 
-                  at 20% and 15% respectively.
+                  Social media verification and community engagement carry the highest weights.
                 </p>
               </div>
             </div>
@@ -242,7 +258,7 @@ export default function ProfilePage() {
               Connected Accounts
             </h3>
             <span className="text-sm text-cyan-600 bg-cyan-100 px-2 py-1 rounded-full">
-              {currentUser.socialAccounts.length}/8
+              {currentUser.socialAccounts.length} connected
             </span>
           </div>
           
@@ -252,7 +268,7 @@ export default function ProfilePage() {
               <div 
                 key={index}
                 className="w-12 h-12 bg-gradient-to-br from-cyan-100 to-teal-100 rounded-xl flex items-center justify-center text-2xl hover:scale-110 transition-transform duration-200 cursor-pointer border border-cyan-200"
-                                 title={`${account.platform}: ${account.handle}`}
+                title={`${account.platform}: ${account.handle}`}
               >
                 {socialIcons[account.platform as keyof typeof socialIcons] || '🔗'}
               </div>
@@ -277,33 +293,11 @@ export default function ProfilePage() {
           {/* Link to Detailed View */}
           <div className="mt-4 pt-4 border-t border-slate-200">
             <Link 
-              href="/profile/connected-accounts"
+              href="/profile/accounts"
               className="text-sm text-cyan-600 hover:text-cyan-700 font-medium"
             >
-              Manage connected accounts →
+              View all accounts →
             </Link>
-          </div>
-        </div>
-
-        {/* Achievements */}
-        <div className="card-soft">
-          <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center">
-            <TrophyIcon className="w-5 h-5 mr-2 text-amber-500" />
-            Achievements
-          </h3>
-          <div className="grid grid-cols-2 gap-3">
-            {achievements.map((achievement, index) => (
-              <div 
-                key={index} 
-                className="p-3 bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl border border-amber-200"
-              >
-                <div className="flex items-center space-x-2 mb-1">
-                  <span className="text-lg">{achievement.icon}</span>
-                  <span className="text-sm font-semibold text-slate-800">{achievement.title}</span>
-                </div>
-                <p className="text-xs text-slate-600">{achievement.description}</p>
-              </div>
-            ))}
           </div>
         </div>
 

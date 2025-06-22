@@ -68,7 +68,7 @@ export default function SignInPage() {
           <div className="text-center mb-8">
             <div className="flex items-center justify-center space-x-3 mb-4">
               <div className="w-12 h-12 bg-gradient-to-r from-cyan-500 to-teal-600 rounded-2xl flex items-center justify-center shadow-lg">
-                <span className="text-white font-bold text-xl">S</span>
+                <span className="text-white text-xl">🍦</span>
               </div>
               <h1 className="text-3xl font-bold bg-gradient-to-r from-cyan-600 to-teal-600 bg-clip-text text-transparent">ScoopSocials</h1>
             </div>
@@ -139,7 +139,7 @@ export default function SignInPage() {
         <div className="text-center mb-8">
           <div className="flex items-center justify-center space-x-3 mb-4">
             <div className="w-12 h-12 bg-gradient-to-r from-cyan-500 to-teal-600 rounded-2xl flex items-center justify-center shadow-lg">
-              <span className="text-white font-bold text-xl">S</span>
+              <span className="text-white text-xl">🍦</span>
             </div>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-cyan-600 to-teal-600 bg-clip-text text-transparent">ScoopSocials</h1>
           </div>
@@ -166,7 +166,7 @@ export default function SignInPage() {
                 value={formData.phoneOrUsername}
                 onChange={handleInputChange}
                 placeholder="+1 (555) 123-4567 or @username"
-                className="input-field border-cyan-200/50 focus:border-cyan-500 focus:ring-cyan-200"
+                className="w-full p-3 rounded-xl border border-cyan-200 bg-white focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 transition-all duration-200"
                 required
               />
             </div>
@@ -184,7 +184,7 @@ export default function SignInPage() {
                   value={formData.password}
                   onChange={handleInputChange}
                   placeholder="••••••••••••••"
-                  className="input-field pr-12 border-cyan-200/50 focus:border-cyan-500 focus:ring-cyan-200"
+                  className="w-full p-3 pr-12 rounded-xl border border-cyan-200 bg-white focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 transition-all duration-200"
                   required
                 />
                 <button

@@ -1,9 +1,9 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Layout from '@/components/Layout'
-import { sampleUsers } from '@/lib/sampleData'
+import { getCurrentUser, User } from '@/lib/sampleData'
 import { 
   Cog6ToothIcon,
   BellIcon,
@@ -16,15 +16,190 @@ import {
   ArrowRightOnRectangleIcon,
   TrashIcon,
   ChevronRightIcon,
-  ChartBarIcon
+  ChartBarIcon,
+  AcademicCapIcon
 } from '@heroicons/react/24/outline'
 
+// Walkthrough Modal Component
+const WalkthroughModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
+  const [currentStep, setCurrentStep] = useState(0)
+
+  const steps = [
+    {
+      title: "Welcome to ScoopSocials! 🍦",
+      content: "Let's take a quick tour of your new trust-based social platform. This walkthrough will help you get the most out of every feature.",
+      highlight: "header"
+    },
+    {
+      title: "Header Navigation 📊",
+      content: "Your header contains the Analytics button (left) and Create button (right). Analytics shows your trust score trends and community impact.",
+      highlight: "header"
+    },
+    {
+      title: "Understanding Posts 📝",
+      content: "Posts on ScoopSocials are trust-based reviews. Each post shows the reviewer, reviewee, category, and community validation percentage.",
+      highlight: "posts"
+    },
+    {
+      title: "Community Validation ✅",
+      content: "The green progress bar shows community agreement. Users can upvote/downvote posts, helping maintain quality and accuracy.",
+      highlight: "validation"
+    },
+    {
+      title: "Creating Content ✏️",
+      content: "Use the Create button to share reviews or host events. Quality content boosts your trust score and helps the community.",
+      highlight: "create"
+    },
+    {
+      title: "Community Safety 🚩",
+      content: "Flag inappropriate content using the flag button. Accurate flagging contributes to your trust score and keeps the community safe.",
+      highlight: "safety"
+    },
+    {
+      title: "Events & Networking 📅",
+      content: "Browse and join events in your community. Attending events and leaving reviews builds your network and trust score.",
+      highlight: "events"
+    },
+    {
+      title: "Your Profile Hub 👤",
+      content: "Your profile shows your trust score, connected accounts, and recent reviews. This is your digital reputation center.",
+      highlight: "profile"
+    },
+    {
+      title: "Trust Score Breakdown 📊",
+      content: "Your trust score is calculated from 11 factors including social media verification, community engagement, and content quality.",
+      highlight: "trust"
+    },
+    {
+      title: "Connected Accounts 🌐",
+      content: "Link your social media accounts to boost your trust score. More verified accounts = higher community trust.",
+      highlight: "accounts"
+    },
+    {
+      title: "Professional Features 💼",
+      content: "Pro accounts get dual-layer visibility, advanced analytics, and professional reputation management tools.",
+      highlight: "pro"
+    },
+    {
+      title: "Building Friendships 👥",
+      content: "Connect with trusted community members. Friend connections help you discover events and build your local network.",
+      highlight: "friends"
+    },
+    {
+      title: "Analytics Dashboard 📈",
+      content: "Track your trust score trends, engagement metrics, and community impact. Use insights to improve your reputation.",
+      highlight: "analytics"
+    },
+    {
+      title: "Discovery Features 🔍",
+      content: "Use search and discovery to find events, people, and content that match your interests and trust preferences.",
+      highlight: "discovery"
+    }
+  ]
+
+  const nextStep = () => {
+    if (currentStep < steps.length - 1) {
+      setCurrentStep(currentStep + 1)
+    } else {
+      onClose()
+    }
+  }
+
+  const prevStep = () => {
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1)
+    }
+  }
+
+  const skipWalkthrough = () => {
+    onClose()
+  }
+
+  if (!isOpen) return null
+
+  const currentStepData = steps[currentStep]
+
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-hidden">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-cyan-500 to-teal-600 p-6 text-white">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-xl font-bold">{currentStepData.title}</h2>
+            <button
+              onClick={skipWalkthrough}
+              className="text-cyan-100 hover:text-white transition-colors duration-200"
+            >
+              ✕
+            </button>
+          </div>
+          <div className="flex items-center space-x-2">
+            <div className="flex-1 bg-cyan-600 rounded-full h-2">
+              <div 
+                className="bg-white h-2 rounded-full transition-all duration-300"
+                style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
+              />
+            </div>
+            <span className="text-sm font-medium">{currentStep + 1}/{steps.length}</span>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="p-6">
+          <p className="text-slate-700 leading-relaxed mb-6">
+            {currentStepData.content}
+          </p>
+
+          {/* Navigation */}
+          <div className="flex items-center justify-between">
+            <button
+              onClick={prevStep}
+              disabled={currentStep === 0}
+              className="px-4 py-2 text-slate-600 hover:text-slate-800 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              ← Previous
+            </button>
+
+            <div className="flex space-x-2">
+              <button
+                onClick={skipWalkthrough}
+                className="px-4 py-2 text-slate-600 hover:text-slate-800 transition-colors duration-200"
+              >
+                Skip
+              </button>
+              <button
+                onClick={nextStep}
+                className="px-6 py-2 bg-gradient-to-r from-cyan-500 to-teal-600 text-white rounded-xl hover:from-cyan-600 hover:to-teal-700 transition-all duration-200"
+              >
+                {currentStep === steps.length - 1 ? 'Finish' : 'Next →'}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function SettingsPage() {
-  const currentUser = sampleUsers[0] // Using Sarah as current user
+  const [currentUser, setCurrentUser] = useState<User | null>(null)
+  const [showWalkthrough, setShowWalkthrough] = useState(false)
+
+  // Load current user on component mount
+  useEffect(() => {
+    const user = getCurrentUser()
+    setCurrentUser(user)
+    if (user) {
+      setSettings(prev => ({
+        ...prev,
+        accountType: user.accountType
+      }))
+    }
+  }, [])
   
   const [settings, setSettings] = useState({
     // Account settings
-    accountType: currentUser.accountType,
+    accountType: 'free' as 'free' | 'pro' | 'venue',
     
     // Notification settings
     pushNotifications: true,
@@ -62,11 +237,21 @@ export default function SettingsPage() {
     }))
   }
 
+  if (!currentUser) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="w-8 h-8 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      </Layout>
+    )
+  }
+
   const ToggleSwitch = ({ enabled, onToggle }: { enabled: boolean; onToggle: () => void }) => (
     <button
       onClick={onToggle}
       className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ${
-        enabled ? 'bg-primary-500' : 'bg-slate-300'
+        enabled ? 'bg-cyan-500' : 'bg-slate-300'
       }`}
     >
       <span
@@ -114,7 +299,7 @@ export default function SettingsPage() {
         {/* Account Type */}
         <div className="card-soft">
           <h2 className="text-lg font-semibold text-slate-800 mb-4 flex items-center">
-            <UserIcon className="w-5 h-5 mr-2 text-primary-500" />
+            <UserIcon className="w-5 h-5 mr-2 text-cyan-500" />
             Account Type
           </h2>
           
@@ -123,7 +308,7 @@ export default function SettingsPage() {
             <div 
               className={`p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${
                 settings.accountType === 'free' 
-                  ? 'border-primary-500 bg-primary-50' 
+                  ? 'border-cyan-500 bg-cyan-50' 
                   : 'border-slate-200 hover:border-slate-300'
               }`}
               onClick={() => handleAccountTypeChange('free')}
@@ -133,7 +318,7 @@ export default function SettingsPage() {
                   <h3 className="font-semibold text-slate-800 flex items-center">
                     🆓 Free Account
                     {settings.accountType === 'free' && (
-                      <span className="ml-2 text-xs bg-primary-500 text-white px-2 py-1 rounded-full">Current</span>
+                      <span className="ml-2 text-xs bg-cyan-500 text-white px-2 py-1 rounded-full">Current</span>
                     )}
                   </h3>
                   <p className="text-sm text-slate-600">Basic access, 20 invitations per event</p>
@@ -201,15 +386,15 @@ export default function SettingsPage() {
         {/* Notifications */}
         <div className="card-soft">
           <h2 className="text-lg font-semibold text-slate-800 mb-4 flex items-center">
-            <BellIcon className="w-5 h-5 mr-2 text-primary-500" />
+            <BellIcon className="w-5 h-5 mr-2 text-cyan-500" />
             Notifications
           </h2>
           
           <div className="space-y-1">
             <SettingItem
-              icon={<BellIcon className="w-5 h-5" />}
+              icon={<span className="text-lg">📱</span>}
               title="Push Notifications"
-              description="Get notified about important updates"
+              description="Get notified about important activity"
             >
               <ToggleSwitch 
                 enabled={settings.pushNotifications} 
@@ -220,7 +405,7 @@ export default function SettingsPage() {
             <SettingItem
               icon={<span className="text-lg">📧</span>}
               title="Email Notifications"
-              description="Receive email updates"
+              description="Receive updates via email"
             >
               <ToggleSwitch 
                 enabled={settings.emailNotifications} 
@@ -240,9 +425,9 @@ export default function SettingsPage() {
             </SettingItem>
 
             <SettingItem
-              icon={<span className="text-lg">🎉</span>}
+              icon={<span className="text-lg">📅</span>}
               title="Event Notifications"
-              description="Event invites and updates"
+              description="Event updates and reminders"
             >
               <ToggleSwitch 
                 enabled={settings.eventNotifications} 
@@ -264,7 +449,7 @@ export default function SettingsPage() {
             <SettingItem
               icon={<span className="text-lg">📈</span>}
               title="Marketing Emails"
-              description="News and product updates"
+              description="Tips and feature updates"
             >
               <ToggleSwitch 
                 enabled={settings.marketingEmails} 
@@ -274,10 +459,10 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* Privacy */}
+        {/* Privacy & Security */}
         <div className="card-soft">
           <h2 className="text-lg font-semibold text-slate-800 mb-4 flex items-center">
-            <ShieldCheckIcon className="w-5 h-5 mr-2 text-primary-500" />
+            <ShieldCheckIcon className="w-5 h-5 mr-2 text-cyan-500" />
             Privacy & Security
           </h2>
           
@@ -328,7 +513,7 @@ export default function SettingsPage() {
         {/* App Settings */}
         <div className="card-soft">
           <h2 className="text-lg font-semibold text-slate-800 mb-4 flex items-center">
-            <Cog6ToothIcon className="w-5 h-5 mr-2 text-primary-500" />
+            <Cog6ToothIcon className="w-5 h-5 mr-2 text-cyan-500" />
             App Settings
           </h2>
           
@@ -356,6 +541,21 @@ export default function SettingsPage() {
           <h2 className="text-lg font-semibold text-slate-800 mb-4">Account Actions</h2>
           
           <div className="space-y-3">
+            {/* Platform Walkthrough Button */}
+            <button
+              onClick={() => setShowWalkthrough(true)}
+              className="flex items-center justify-between w-full p-4 hover:bg-cyan-50 rounded-xl transition-colors duration-200 border-l-4 border-cyan-500"
+            >
+              <div className="flex items-center space-x-3">
+                <AcademicCapIcon className="w-5 h-5 text-cyan-600" />
+                <div className="text-left">
+                  <span className="font-medium text-cyan-700">🎓 Platform Walkthrough</span>
+                  <p className="text-xs text-cyan-600">Learn how to use ScoopSocials effectively</p>
+                </div>
+              </div>
+              <ChevronRightIcon className="w-5 h-5 text-cyan-400" />
+            </button>
+
             <Link
               href="/moderator"
               className="flex items-center justify-between p-4 hover:bg-orange-50 rounded-xl transition-colors duration-200 border-l-4 border-orange-500"
@@ -460,19 +660,25 @@ export default function SettingsPage() {
         {/* App Info */}
         <div className="card-soft text-center">
           <div className="flex items-center justify-center space-x-3 mb-2">
-            <div className="w-8 h-8 bg-gradient-to-r from-primary-500 to-primary-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">S</span>
+            <div className="w-8 h-8 bg-gradient-to-r from-cyan-500 to-teal-600 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-sm">🍦</span>
             </div>
             <h3 className="text-lg font-semibold text-slate-800">ScoopSocials</h3>
           </div>
           <p className="text-sm text-slate-500 mb-4">Version 1.0.0</p>
           <div className="flex justify-center space-x-6 text-xs text-slate-500">
-            <Link href="/terms" className="hover:text-primary-600">Terms of Service</Link>
-            <Link href="/privacy" className="hover:text-primary-600">Privacy Policy</Link>
-            <Link href="/about" className="hover:text-primary-600">About</Link>
+            <Link href="/terms" className="hover:text-cyan-600">Terms of Service</Link>
+            <Link href="/privacy" className="hover:text-cyan-600">Privacy Policy</Link>
+            <Link href="/about" className="hover:text-cyan-600">About</Link>
           </div>
         </div>
       </div>
+
+      {/* Walkthrough Modal */}
+      <WalkthroughModal 
+        isOpen={showWalkthrough} 
+        onClose={() => setShowWalkthrough(false)} 
+      />
     </Layout>
   )
 } 

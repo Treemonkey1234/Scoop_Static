@@ -1,6 +1,27 @@
 import React from 'react'
 
-const LoadingSpinner: React.FC = () => {
+interface LoadingSpinnerProps {
+  type?: 'default' | 'pull-refresh'
+}
+
+const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ type = 'default' }) => {
+  
+  // Simple ice cream cone animation for pull-to-refresh
+  if (type === 'pull-refresh') {
+    return (
+      <div className="flex items-center justify-center space-x-3 py-6">
+        <div className="animate-bounce" style={{ animationDelay: '0ms' }}>
+          <div className="text-3xl">🍦</div>
+        </div>
+        <div className="animate-bounce" style={{ animationDelay: '200ms' }}>
+          <div className="text-3xl">🍨</div>
+        </div>
+        <div className="animate-bounce" style={{ animationDelay: '400ms' }}>
+          <div className="text-3xl">🍧</div>
+        </div>
+      </div>
+    )
+  }
   return (
     <div className="flex flex-col items-center justify-center p-8">
       <div className="ice-cream-svg-loader">
