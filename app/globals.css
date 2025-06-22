@@ -632,10 +632,7 @@
   @apply shadow-lg border-2 border-pink-300/50;
 }
 
-.nav-item.active::after {
-  content: '🍦';
-  @apply absolute bottom-1 left-1/2 transform -translate-x-1/2 text-lg;
-}
+
 
 /* Ice Cream SVG Loader Animations */
 .ice-cream-svg-loader {
