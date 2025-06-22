@@ -739,6 +739,13 @@
 .trust-poor { color: #dc2626; }
 .trust-new { color: #6b7280; }
 
+/* Trust Badge Background Colors */
+.bg-trust-excellent { background-color: #059669; }
+.bg-trust-verygood { background-color: #10b981; }
+.bg-trust-good { background-color: #0891b2; }
+.bg-trust-fair { background-color: #d97706; }
+.bg-trust-poor { background-color: #dc2626; }
+
 /* Enhanced Modal Styles */
 .modal-backdrop {
   @apply fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4;

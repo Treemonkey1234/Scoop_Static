@@ -7,7 +7,8 @@ import { getCurrentUser, User } from '@/lib/sampleData'
 import { 
   ArrowLeftIcon,
   PlusIcon,
-  CheckBadgeIcon
+  CheckBadgeIcon,
+  FlagIcon
 } from '@heroicons/react/24/outline'
 
 // Social media platform SVG components
@@ -84,6 +85,11 @@ export default function ConnectedAccountsPage() {
     setCurrentUser(user)
   }, [])
 
+  const handleFlagAccount = (platform: string, handle: string) => {
+    // In a real app, this would open a flag modal
+    alert(`Flag ${platform} account (${handle}) functionality would open here`)
+  }
+
   if (!currentUser) {
     return (
       <Layout>
@@ -135,9 +141,18 @@ export default function ConnectedAccountsPage() {
                   <p className="text-slate-600">{account.handle}</p>
                   <p className="text-sm text-slate-500">Connected since: {formatDate(currentUser.joinDate)}</p>
                 </div>
-                <button className="text-sm text-red-600 hover:text-red-700 font-medium">
-                  Disconnect
-                </button>
+                <div className="flex items-center space-x-2">
+                  <button 
+                    onClick={() => handleFlagAccount(account.platform, account.handle)}
+                    className="p-2 rounded-lg hover:bg-red-50 text-red-500 transition-all duration-200"
+                    title="Flag this account"
+                  >
+                    <FlagIcon className="w-4 h-4" />
+                  </button>
+                  <button className="text-sm text-red-600 hover:text-red-700 font-medium">
+                    Disconnect
+                  </button>
+                </div>
               </div>
             </div>
           ))}

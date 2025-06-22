@@ -4,7 +4,7 @@ import { XMarkIcon } from '@heroicons/react/24/outline'
 interface FlagModalProps {
   isOpen: boolean
   onClose: () => void
-  contentType: 'post' | 'event' | 'social'
+  contentType: 'post' | 'event' | 'social' | 'comment'
   contentId: string
   contentTitle?: string
 }
@@ -50,6 +50,16 @@ const FlagModal: React.FC<FlagModalProps> = ({
       'Inappropriate Content',
       'Spam Account',
       'Other'
+    ],
+    comment: [
+      'Harassment/Bullying',
+      'Hate Speech/Discrimination',
+      'Spam/Promotional Content',
+      'Inappropriate Content',
+      'Off-Topic Comment',
+      'Misinformation/False Claims',
+      'Personal Attack',
+      'Other'
     ]
   }
 
@@ -80,7 +90,7 @@ const FlagModal: React.FC<FlagModalProps> = ({
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-slate-200">
           <h3 className="text-lg font-semibold text-slate-800">
-            Flag {contentType === 'post' ? 'Post' : contentType === 'event' ? 'Event' : 'Social Account'}
+            Flag {contentType === 'post' ? 'Post' : contentType === 'event' ? 'Event' : contentType === 'comment' ? 'Comment' : 'Social Account'}
           </h3>
           <button
             onClick={onClose}

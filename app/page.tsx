@@ -32,7 +32,7 @@ export default function HomePage() {
 
   const [flagModal, setFlagModal] = useState<{
     isOpen: boolean
-    contentType: 'post' | 'event' | 'social'
+    contentType: 'post' | 'event' | 'social' | 'comment'
     contentId: string
     contentTitle?: string
   }>({
@@ -78,7 +78,7 @@ export default function HomePage() {
     window.location.href = `/comments/${postId}`
   }
 
-  const handleFlag = (contentType: 'post' | 'event' | 'social', contentId: string, contentTitle?: string) => {
+  const handleFlag = (contentType: 'post' | 'event' | 'social' | 'comment', contentId: string, contentTitle?: string) => {
     setFlagModal({
       isOpen: true,
       contentType,
@@ -126,6 +126,12 @@ export default function HomePage() {
     if (content.length <= maxLength) return content
     return content.substring(0, maxLength) + '...'
   }
+
+  // Mock comments for demonstration
+  const getMockComments = (postId: string) => [
+    { id: '1', author: 'Jane Smith', content: 'Great review! I had a similar experience.', timestamp: '2 hours ago' },
+    { id: '2', author: 'Mike Johnson', content: 'Thanks for sharing this insight.', timestamp: '1 hour ago' }
+  ]
 
   if (isLoading && !refreshing) {
     return (
@@ -195,14 +201,15 @@ export default function HomePage() {
             const reviewer = sampleUsers.find(u => u.id === review.reviewerId)
             const reviewee = sampleUsers.find(u => u.id === review.reviewedId)
             const currentVote = votedPosts[review.id]
+            const mockComments = getMockComments(review.id)
 
             if (!reviewer || !reviewee) return null
 
             return (
               <div key={review.id} className="card-premium hover:shadow-xl transition-all duration-300 border-cyan-200/50 overflow-hidden">
                 <div className="flex">
-                  {/* Left Voting Section with Dynamic Gradient */}
-                  <div className="flex flex-col items-center justify-between mr-4 self-stretch min-h-[400px] w-12">
+                  {/* Left Voting Section with Dynamic Gradient - Reduced Height */}
+                  <div className="flex flex-col items-center justify-between mr-4 self-start min-h-[280px] w-12 mt-2">
                     {(() => {
                       const totalVotes = review.upvotes + review.downvotes
                       const positiveRatio = totalVotes > 0 ? (review.upvotes / totalVotes) * 100 : 50
@@ -291,19 +298,21 @@ export default function HomePage() {
                           <h4 className="font-semibold text-slate-800 text-base">{reviewer.name}</h4>
                           <span className="text-slate-400 text-sm">→</span>
                           <span className="font-medium text-slate-700 text-base">{reviewee.name}</span>
-                          <TrustBadge score={reviewer.trustScore} size="sm" />
+                          <div className="bg-white/80 rounded-full">
+                            <TrustBadge score={reviewer.trustScore} size="sm" />
+                          </div>
                         </div>
-                        <div className="flex items-center space-x-2 text-sm text-slate-500 mb-3">
+                        <div className="flex items-center space-x-2 text-sm text-slate-500 mb-2">
                           <span className="px-2 py-1 bg-cyan-100 text-cyan-700 rounded-lg font-medium">
                             {review.category}
                           </span>
                           <span>•</span>
                           <span>{getPostDate(review.timestamp)}</span>
-                          <span>•</span>
-                          <div className="flex items-center space-x-1">
-                            <MapPinIcon className="w-3 h-3" />
-                            <span>{reviewer.location}</span>
-                          </div>
+                        </div>
+                        {/* Location moved under category and date */}
+                        <div className="flex items-center space-x-1 text-xs text-slate-500 mb-3">
+                          <MapPinIcon className="w-3 h-3" />
+                          <span>{reviewer.location}</span>
                         </div>
                       </div>
                       
@@ -321,6 +330,33 @@ export default function HomePage() {
                     <blockquote className="text-slate-700 mb-4 bg-slate-50 p-4 rounded-xl border-l-4 border-cyan-400">
                       "{limitContentPreview(review.content, 120)}"
                     </blockquote>
+
+                    {/* Mock Comments Section */}
+                    <div className="bg-slate-50 rounded-xl p-3 mb-4">
+                      <h5 className="text-sm font-medium text-slate-700 mb-2">Comments ({mockComments.length})</h5>
+                      <div className="space-y-2">
+                        {mockComments.map((comment) => (
+                          <div key={comment.id} className="bg-white p-2 rounded-lg border border-slate-200">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <div className="flex items-center space-x-2 mb-1">
+                                  <span className="text-sm font-medium text-slate-800">{comment.author}</span>
+                                  <span className="text-xs text-slate-500">{comment.timestamp}</span>
+                                </div>
+                                <p className="text-sm text-slate-700">{comment.content}</p>
+                              </div>
+                              <button 
+                                onClick={() => handleFlag('comment', comment.id, `Comment by ${comment.author}`)}
+                                className="p-1 rounded hover:bg-red-50 text-red-500 transition-all duration-200"
+                                title="Flag this comment"
+                              >
+                                <FlagIcon className="w-3 h-3" />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
 
                     {/* Action Buttons - Removed Like, Fixed Comment */}
                     <div className="flex items-center justify-between pt-4 border-t border-slate-200">
