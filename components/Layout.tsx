@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { 
   HomeIcon, 
   CalendarIcon, 
@@ -11,7 +12,10 @@ import {
   UserIcon,
   PlusIcon,
   ChartBarIcon,
-  SparklesIcon
+  SparklesIcon,
+  Cog6ToothIcon,
+  UsersIcon,
+  BellIcon
 } from '@heroicons/react/24/outline'
 import {
   HomeIcon as HomeIconSolid,
@@ -21,7 +25,234 @@ import {
   UserIcon as UserIconSolid,
   ChartBarIcon as ChartBarIconSolid
 } from '@heroicons/react/24/solid'
-import { sampleUsers } from '@/lib/sampleData'
+import { sampleUsers, getCurrentUser, User } from '@/lib/sampleData'
+
+// Global Walkthrough Modal Component
+const GlobalWalkthroughModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
+  const [currentStep, setCurrentStep] = useState(0)
+  const router = useRouter()
+
+  const steps = [
+    {
+      title: "Welcome to ScoopSocials! 🍦",
+      content: "Let's take a quick tour of your new trust-based social platform. This walkthrough will guide you through each section.",
+      highlight: "header",
+      page: "/"
+    },
+    {
+      title: "Header Navigation 📊",
+      content: "Your header contains the Analytics button (left) and Create button (right). Let's check out Analytics first!",
+      highlight: "header",
+      page: "/",
+      action: "analytics"
+    },
+    {
+      title: "Analytics Dashboard 📈",
+      content: "Here you can track your trust score trends, engagement metrics, and community impact. This helps you understand your reputation growth.",
+      highlight: "analytics",
+      page: "/analytics"
+    },
+    {
+      title: "Your Profile Hub 👤",
+      content: "Your profile shows your trust score, connected accounts, and recent reviews. This is your digital reputation center.",
+      highlight: "profile",
+      page: "/profile"
+    },
+    {
+      title: "Trust Score Breakdown 📊",
+      content: "Click on your trust score to see the detailed breakdown. It's calculated from 11 factors including social verification and community engagement.",
+      highlight: "trust",
+      page: "/profile"
+    },
+    {
+      title: "Connected Accounts 🌐",
+      content: "Link your social media accounts to boost your trust score. More verified accounts = higher community trust. Let's see all your accounts!",
+      highlight: "accounts",
+      page: "/profile",
+      action: "connected-accounts"
+    },
+    {
+      title: "Account Management 🔗",
+      content: "Here you can manage all your connected social media accounts. Each verified account adds to your trust score!",
+      highlight: "accounts",
+      page: "/connected-accounts"
+    },
+    {
+      title: "Events & Networking 📅",
+      content: "Browse and join events in your community. Attending events and leaving reviews builds your network and trust score.",
+      highlight: "events",
+      page: "/events"
+    },
+    {
+      title: "Building Friendships 👥",
+      content: "Connect with trusted community members. Friend connections help you discover events and build your local network.",
+      highlight: "friends",
+      page: "/friends"
+    },
+    {
+      title: "Discovery Features 🔍",
+      content: "Use search to find events, people, and content that match your interests and trust preferences.",
+      highlight: "discovery",
+      page: "/search"
+    },
+    {
+      title: "Platform Settings ⚙️",
+      content: "Manage your account settings, privacy preferences, and platform configurations here.",
+      highlight: "settings",
+      page: "/settings"
+    },
+    {
+      title: "Understanding Posts 📝",
+      content: "Back to the home feed! Posts are trust-based reviews with voting arrows on the left. Community validation shows agreement levels.",
+      highlight: "posts",
+      page: "/"
+    },
+    {
+      title: "Creating Content ✏️",
+      content: "Use the Create button to share reviews or host events. Quality content boosts your trust score and helps the community.",
+      highlight: "create",
+      page: "/"
+    },
+    {
+      title: "You're All Set! 🎉",
+      content: "You've completed the tour! Start building trust by creating content, attending events, and engaging with your community.",
+      highlight: "complete",
+      page: "/"
+    }
+  ]
+
+  const nextStep = async () => {
+    if (currentStep < steps.length - 1) {
+      const nextStepData = steps[currentStep + 1]
+      
+      // Navigate to the next page if needed
+      if (nextStepData.page && nextStepData.page !== window.location.pathname) {
+        try {
+          await router.push(nextStepData.page)
+          // Wait for navigation to complete
+          await new Promise(resolve => setTimeout(resolve, 1200))
+        } catch (error) {
+          console.error('Navigation error:', error)
+        }
+      }
+      
+      setCurrentStep(currentStep + 1)
+      
+      // Perform specific actions after navigation and step update
+      setTimeout(() => {
+        if (nextStepData.action === "analytics") {
+          // Highlight analytics button
+          const analyticsBtn = document.querySelector('[href="/analytics"]')
+          if (analyticsBtn) {
+            analyticsBtn.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          }
+        } else if (nextStepData.action === "connected-accounts") {
+          // Highlight connected accounts button
+          const accountsBtn = document.querySelector('[href="/connected-accounts"]')
+          if (accountsBtn) {
+            accountsBtn.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          }
+        }
+      }, 1800)
+    } else {
+      onClose()
+    }
+  }
+
+  const prevStep = async () => {
+    if (currentStep > 0) {
+      const prevStepData = steps[currentStep - 1]
+      
+      // Navigate to the previous page if needed
+      if (prevStepData.page && prevStepData.page !== window.location.pathname) {
+        try {
+          await router.push(prevStepData.page)
+          await new Promise(resolve => setTimeout(resolve, 1200))
+        } catch (error) {
+          console.error('Navigation error:', error)
+        }
+      }
+      
+      setCurrentStep(currentStep - 1)
+    }
+  }
+
+  const skipWalkthrough = () => {
+    onClose()
+  }
+
+  if (!isOpen) return null
+
+  const currentStepData = steps[currentStep]
+
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-hidden">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-cyan-500 to-teal-600 p-6 text-white">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-xl font-bold">{currentStepData.title}</h2>
+            <button
+              onClick={skipWalkthrough}
+              className="text-cyan-100 hover:text-white transition-colors duration-200"
+            >
+              ✕
+            </button>
+          </div>
+          <div className="flex items-center space-x-2">
+            <div className="flex-1 bg-cyan-600 rounded-full h-2">
+              <div 
+                className="bg-white h-2 rounded-full transition-all duration-300"
+                style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
+              />
+            </div>
+            <span className="text-sm font-medium">{currentStep + 1}/{steps.length}</span>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="p-6">
+          <p className="text-slate-700 leading-relaxed mb-6">
+            {currentStepData.content}
+          </p>
+
+          {/* Current Page Indicator */}
+          <div className="mb-4 p-3 bg-cyan-50 rounded-lg border border-cyan-200">
+            <div className="text-sm text-cyan-700">
+              📍 <strong>Current Page:</strong> {currentStepData.page === '/' ? 'Home Feed' : currentStepData.page.slice(1).charAt(0).toUpperCase() + currentStepData.page.slice(2)}
+            </div>
+          </div>
+
+          {/* Navigation */}
+          <div className="flex items-center justify-between">
+            <button
+              onClick={prevStep}
+              disabled={currentStep === 0}
+              className="px-4 py-2 text-slate-600 hover:text-slate-800 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              ← Previous
+            </button>
+
+            <div className="flex space-x-2">
+              <button
+                onClick={skipWalkthrough}
+                className="px-4 py-2 text-slate-600 hover:text-slate-800 transition-colors duration-200"
+              >
+                Skip Tour
+              </button>
+              <button
+                onClick={nextStep}
+                className="px-6 py-2 bg-gradient-to-r from-cyan-500 to-teal-600 text-white rounded-xl hover:from-cyan-600 hover:to-teal-700 transition-all duration-200"
+              >
+                {currentStep === steps.length - 1 ? 'Finish Tour' : 'Next →'}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 interface LayoutProps {
   children: React.ReactNode
@@ -90,6 +321,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [isOnline, setIsOnline] = useState(true)
   const [showToast, setShowToast] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [currentUser, setCurrentUser] = useState<User | null>(null)
+  const [globalWalkthrough, setGlobalWalkthrough] = useState(false)
 
   // Simulate loading for navigation
   const handleNavigation = () => {
@@ -147,6 +380,28 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     }
     return pathname.startsWith(href)
   }
+
+  useEffect(() => {
+    const user = getCurrentUser()
+    setCurrentUser(user)
+    
+    // Check for new user walkthrough
+    const isNewUser = localStorage.getItem('isNewUser')
+    if (isNewUser === 'true') {
+      localStorage.removeItem('isNewUser')
+      setTimeout(() => {
+        setGlobalWalkthrough(true)
+      }, 1000)
+    }
+
+    // Listen for walkthrough triggers from other components
+    const handleWalkthroughTrigger = () => {
+      setGlobalWalkthrough(true)
+    }
+
+    window.addEventListener('triggerWalkthrough', handleWalkthroughTrigger)
+    return () => window.removeEventListener('triggerWalkthrough', handleWalkthroughTrigger)
+  }, [])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-blue-50 to-teal-50 relative">
@@ -284,6 +539,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
       {/* Sprinkle Celebration */}
       <SprinkleCelebration show={showToast} />
+
+      {/* Global Walkthrough Modal */}
+      <GlobalWalkthroughModal isOpen={globalWalkthrough} onClose={() => setGlobalWalkthrough(false)} />
     </div>
   )
 }
