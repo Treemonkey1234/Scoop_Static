@@ -127,12 +127,6 @@ export default function HomePage() {
     return content.substring(0, maxLength) + '...'
   }
 
-  // Mock comments for demonstration
-  const getMockComments = (postId: string) => [
-    { id: '1', author: 'Jane Smith', content: 'Great review! I had a similar experience.', timestamp: '2 hours ago' },
-    { id: '2', author: 'Mike Johnson', content: 'Thanks for sharing this insight.', timestamp: '1 hour ago' }
-  ]
-
   if (isLoading && !refreshing) {
     return (
       <Layout>
@@ -201,15 +195,14 @@ export default function HomePage() {
             const reviewer = sampleUsers.find(u => u.id === review.reviewerId)
             const reviewee = sampleUsers.find(u => u.id === review.reviewedId)
             const currentVote = votedPosts[review.id]
-            const mockComments = getMockComments(review.id)
 
             if (!reviewer || !reviewee) return null
 
             return (
               <div key={review.id} className="card-premium hover:shadow-xl transition-all duration-300 border-cyan-200/50 overflow-hidden">
                 <div className="flex">
-                  {/* Left Voting Section with Dynamic Gradient - Reduced Height */}
-                  <div className="flex flex-col items-center justify-between mr-4 self-start min-h-[280px] w-12 mt-2">
+                  {/* Left Voting Section with Dynamic Gradient - Full Height */}
+                  <div className="flex flex-col items-center justify-between mr-4 self-stretch w-12">
                     {(() => {
                       const totalVotes = review.upvotes + review.downvotes
                       const positiveRatio = totalVotes > 0 ? (review.upvotes / totalVotes) * 100 : 50
@@ -330,33 +323,6 @@ export default function HomePage() {
                     <blockquote className="text-slate-700 mb-4 bg-slate-50 p-4 rounded-xl border-l-4 border-cyan-400">
                       "{limitContentPreview(review.content, 120)}"
                     </blockquote>
-
-                    {/* Mock Comments Section */}
-                    <div className="bg-slate-50 rounded-xl p-3 mb-4">
-                      <h5 className="text-sm font-medium text-slate-700 mb-2">Comments ({mockComments.length})</h5>
-                      <div className="space-y-2">
-                        {mockComments.map((comment) => (
-                          <div key={comment.id} className="bg-white p-2 rounded-lg border border-slate-200">
-                            <div className="flex items-start justify-between">
-                              <div className="flex-1">
-                                <div className="flex items-center space-x-2 mb-1">
-                                  <span className="text-sm font-medium text-slate-800">{comment.author}</span>
-                                  <span className="text-xs text-slate-500">{comment.timestamp}</span>
-                                </div>
-                                <p className="text-sm text-slate-700">{comment.content}</p>
-                              </div>
-                              <button 
-                                onClick={() => handleFlag('comment', comment.id, `Comment by ${comment.author}`)}
-                                className="p-1 rounded hover:bg-red-50 text-red-500 transition-all duration-200"
-                                title="Flag this comment"
-                              >
-                                <FlagIcon className="w-3 h-3" />
-                              </button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
 
                     {/* Action Buttons - Removed Like, Fixed Comment */}
                     <div className="flex items-center justify-between pt-4 border-t border-slate-200">
