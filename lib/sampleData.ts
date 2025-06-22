@@ -151,7 +151,7 @@ export const sampleUsers: User[] = [
     name: 'Sarah Chen',
     username: 'sarahc_designs',
     email: 'sarah@example.com',
-    avatar: 'https://images.unsplash.com/photo-1494790108755-2616b6c0ca5e?w=400',
+    avatar: '/scoop-logo.png',
     bio: 'UX Designer passionate about creating meaningful experiences. Coffee enthusiast ☕',
     trustScore: 92,
     trustLevel: 'excellent',

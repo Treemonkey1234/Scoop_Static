@@ -620,6 +620,20 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               >
                 <PlusIcon className="w-5 h-5" />
               </button>
+
+              {/* User Profile Picture */}
+              <Link
+                href="/profile"
+                onClick={handleNavigation}
+                className="relative"
+              >
+                <img
+                  src={currentUser?.avatar || '/scoop-logo.png'}
+                  alt="Profile"
+                  className="w-9 h-9 rounded-xl shadow-lg object-cover border-2 border-cyan-200 hover:border-cyan-400 transition-all duration-200"
+                />
+                <div className={`status-${isOnline ? 'online' : 'offline'} absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5`}></div>
+              </Link>
             </div>
           </div>
         </div>
