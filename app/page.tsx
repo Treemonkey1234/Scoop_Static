@@ -26,7 +26,7 @@ export default function HomePage() {
   const [votedPosts, setVotedPosts] = useState<{[key: string]: 'up' | 'down' | null}>({})
   const [likedPosts, setLikedPosts] = useState<{[key: string]: boolean}>({})
   const [isLoading, setIsLoading] = useState(true)
-  const [isLoadingEvents, setIsLoadingEvents] = useState(false)
+
   const [refreshing, setRefreshing] = useState(false)
   const { showSuccess, showError, showInfo, ToastContainer } = useToast()
   const [flagModal, setFlagModal] = useState<{
@@ -589,97 +589,6 @@ export default function HomePage() {
                       <span className="text-sm">Flag</span>
                     </button>
                   </div>
-                </div>
-              </div>
-            )
-          })}
-
-          <div className="text-center">
-            <h2 className="text-3xl font-bold text-slate-800 mb-4">Sweet Social Events</h2>
-            <p className="text-slate-600 mb-8">Ice cream socials and flavor meetups</p>
-          </div>
-
-          {/* Sample Events */}
-          {sampleEvents.slice(0, 2).map((event, index) => {
-            const host = sampleUsers.find(u => u.id === event.hostId)
-            if (!host) return null
-
-            return (
-              <div key={`event-${event.id}`} className="card-premium group transition-all duration-300">
-                {/* Event Image */}
-                <div className="relative mb-4 -mx-6 -mt-6">
-                  <Image
-                    src={event.imageUrl}
-                    alt={event.title}
-                    width={400}
-                    height={200}
-                    className="w-full h-48 object-cover rounded-t-2xl"
-                  />
-                  <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full">
-                    <span className="text-sm font-semibold text-slate-800">
-                      {event.price === 0 ? 'Free' : `$${event.price}`}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Event Header */}
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center space-x-3">
-                    <Image
-                      src={host.avatar}
-                      alt={host.name}
-                      width={40}
-                      height={40}
-                      className="rounded-full"
-                    />
-                    <div>
-                      <h3 className="font-semibold text-slate-800">{host.name}</h3>
-                      <p className="text-sm text-slate-500">hosting an event</p>
-                    </div>
-                  </div>
-                  <TrustBadge score={host.trustScore} size="sm" />
-                </div>
-
-                {/* Event Details */}
-                <div className="mb-4">
-                  <h4 className="text-lg font-semibold text-slate-800 mb-2">{event.title}</h4>
-                  <p className="text-slate-600 mb-3">{event.description}</p>
-                  
-                  <div className="space-y-2 text-sm text-slate-600">
-                    <div className="flex items-center space-x-2">
-                      <CalendarIcon className="w-4 h-4 text-primary-500" />
-                      <span>{event.date} at {event.time}</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <MapPinIcon className="w-4 h-4 text-primary-500" />
-                      <span>{event.location}</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <UsersIcon className="w-4 h-4 text-primary-500" />
-                      <span>{event.attendeeCount} attending • {event.maxAttendees - event.attendeeCount} spots left</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Event Actions */}
-                <div className="flex items-center space-x-3">
-                  <Link
-                    href={`/events/${event.id}`}
-                    className="flex-1 btn-primary text-center py-2"
-                  >
-                    View Event
-                  </Link>
-                  <button className="flex items-center space-x-1 text-slate-500 hover:text-primary-500 transition-colors duration-200">
-                    <ShareIcon className="w-5 h-5" />
-                  </button>
-                  <button 
-                    onClick={() => handleFlag('event', event.id, event.title)}
-                    className="flex items-center space-x-1 text-slate-500 hover:text-orange-500 transition-colors duration-200"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6v1a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
-                    </svg>
-                  </button>
                 </div>
               </div>
             )
