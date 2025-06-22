@@ -56,33 +56,40 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
     const rect = containerRef.current.getBoundingClientRect()
     const newY = e.clientY - rect.top - startPosition.y
     
-    // Constrain drag to container bounds
-    const maxY = rect.height - 60 // cone height
-    const constrainedY = Math.max(-10, Math.min(maxY, newY))
+    // Allow full range of movement - both up and down
+    const maxUpward = -rect.height * 0.4 // Allow dragging up 40% of container height
+    const maxDownward = rect.height * 0.4 // Allow dragging down 40% of container height
+    const constrainedY = Math.max(maxUpward, Math.min(maxDownward, newY))
     
     setDragPosition({ x: 0, y: constrainedY })
   }
 
-  const handleMouseUp = () => {
+    const handleMouseUp = () => {
     if (!isDragging || !containerRef.current) return
     
     const containerHeight = containerRef.current.getBoundingClientRect().height
-    const threshold = containerHeight * 0.3 // 30% threshold
+    const threshold = containerHeight * 0.2 // 20% threshold - more sensitive
     
     if (dragPosition.y < -threshold) {
       // Dragged up - upvote
       onVote(postId, 'up')
     } else if (dragPosition.y > threshold) {
-      // Dragged down - downvote  
+      // Dragged down - downvote
       onVote(postId, 'down')
     }
     
     setIsDragging(false)
     setDragPosition({ x: 0, y: 0 })
+    
+    // Unlock page scroll after drag (for consistency)
+    document.body.style.overflow = ''
+    document.body.style.position = ''
+    document.body.style.width = ''
   }
 
   // Touch events for mobile
   const handleTouchStart = (e: React.TouchEvent) => {
+    e.preventDefault() // Prevent page scroll
     const touch = e.touches[0]
     setIsDragging(true)
     const rect = containerRef.current?.getBoundingClientRect()
@@ -90,18 +97,25 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
       setStartPosition({ x: touch.clientX - rect.left, y: touch.clientY - rect.top })
       setDragPosition({ x: 0, y: 0 })
     }
+    
+    // Lock page scroll during drag
+    document.body.style.overflow = 'hidden'
+    document.body.style.position = 'fixed'
+    document.body.style.width = '100%'
   }
 
   const handleTouchMove = (e: React.TouchEvent) => {
     if (!isDragging || !containerRef.current) return
     
+    e.preventDefault() // Prevent page scroll/bounce
     const touch = e.touches[0]
     const rect = containerRef.current.getBoundingClientRect()
     const newY = touch.clientY - rect.top - startPosition.y
     
-    // Constrain drag to container bounds
-    const maxY = rect.height - 60 // cone height
-    const constrainedY = Math.max(-10, Math.min(maxY, newY))
+    // Allow full range of movement - both up and down
+    const maxUpward = -rect.height * 0.4 // Allow dragging up 40% of container height
+    const maxDownward = rect.height * 0.4 // Allow dragging down 40% of container height
+    const constrainedY = Math.max(maxUpward, Math.min(maxDownward, newY))
     
     setDragPosition({ x: 0, y: constrainedY })
   }
@@ -110,7 +124,7 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
     if (!isDragging || !containerRef.current) return
     
     const containerHeight = containerRef.current.getBoundingClientRect().height
-    const threshold = containerHeight * 0.3 // 30% threshold
+    const threshold = containerHeight * 0.2 // 20% threshold - more sensitive
     
     if (dragPosition.y < -threshold) {
       // Dragged up - upvote
@@ -122,6 +136,11 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
     
     setIsDragging(false)
     setDragPosition({ x: 0, y: 0 })
+    
+    // Unlock page scroll after drag
+    document.body.style.overflow = ''
+    document.body.style.position = ''
+    document.body.style.width = ''
   }
 
   return (
@@ -224,15 +243,17 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
         </svg>
       </div>
 
-      {/* Vote Score Display - positioned behind the ice cream */}
-      <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 bg-white/90 backdrop-blur-sm rounded-lg px-2 py-1 z-10 shadow-sm">
-        <div className="text-xs font-bold text-slate-800 text-center">
-          {adjustedUpvotes - adjustedDownvotes}
+      {/* Vote Score Display - only visible when ice cream is dragged away */}
+      {(isDragging && Math.abs(dragPosition.y) > 20) && (
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white/95 backdrop-blur-sm rounded-lg px-3 py-2 z-5 shadow-lg border border-slate-200">
+          <div className="text-sm font-bold text-slate-800 text-center">
+            {adjustedUpvotes - adjustedDownvotes}
+          </div>
+          <div className="text-xs text-slate-600 text-center">
+            {Math.round(positiveRatio)}%
+          </div>
         </div>
-        <div className="text-xs text-slate-600 text-center">
-          {Math.round(positiveRatio)}%
-        </div>
-      </div>
+      )}
 
       {/* Downvote Zone Indicator */}
       <div className={`w-full h-6 rounded-b-lg flex items-center justify-center transition-all duration-200 ${
