@@ -470,9 +470,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             {/* Logo Section */}
             <div className="flex items-center space-x-3">
               <div className="relative">
-                <img 
+                <Image 
                   src="/scoop-logo.png" 
                   alt="ScoopSocials Logo" 
+                  width={40}
+                  height={40}
                   className="w-10 h-10 rounded-2xl shadow-lg"
                 />
                 <div className={`status-${isOnline ? 'online' : 'offline'} absolute -bottom-1 -right-1`}></div>

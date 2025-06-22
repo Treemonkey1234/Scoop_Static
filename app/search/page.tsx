@@ -148,6 +148,12 @@ export default function SearchPage() {
     liveChat: false,
     walkingDirections: false
   })
+  const [isClient, setIsClient] = useState(false)
+
+  // Ensure we're on the client side
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
 
   const filteredUsers = sampleUsers.filter(user => {
     const matchesQuery = searchQuery === '' || 
@@ -161,26 +167,31 @@ export default function SearchPage() {
   })
 
   // Handle address input change
-  const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAddressChange = React.useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
+    console.log('Address input changed:', value) // Debug log
     setUserAddress(value)
     
     if (value.length > 2) {
       const suggestions = mockAddressSuggestions.filter(addr => 
         addr.toLowerCase().includes(value.toLowerCase())
       )
+      console.log('Found suggestions:', suggestions) // Debug log
       setAddressSuggestions(suggestions)
-      setShowAddressSuggestions(true)
+      setShowAddressSuggestions(suggestions.length > 0)
     } else {
       setShowAddressSuggestions(false)
+      setAddressSuggestions([])
     }
-  }
+  }, [])
 
   // Select address suggestion
-  const selectAddress = (address: string) => {
+  const selectAddress = React.useCallback((address: string) => {
+    console.log('Address selected:', address) // Debug log
     setUserAddress(address)
     setShowAddressSuggestions(false)
-  }
+    setAddressSuggestions([])
+  }, [])
 
   // Toggle AR layer
   const toggleArLayer = (layer: string) => {
@@ -204,10 +215,22 @@ export default function SearchPage() {
     { name: 'Venues', icon: '🏢', count: 67 }
   ]
 
+  if (!isClient) {
+    return (
+      <Layout>
+        <div className="p-4 space-y-6">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-slate-800 mb-2">Loading...</h1>
+          </div>
+        </div>
+      </Layout>
+    )
+  }
+
   return (
     <Layout>
       <div className="p-4 space-y-6">
-        {searchType === 'map' ? (
+        {(searchType as SearchType) === 'map' ? (
           <>
             {/* Interactive Map Header */}
             <div className="flex items-center space-x-4 mb-6">
