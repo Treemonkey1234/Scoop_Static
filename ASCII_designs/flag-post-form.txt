@@ -1,0 +1,87 @@
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                            🚩 FLAG POST FOR REVIEW                         │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ⚠️  FLAGGING RESPONSIBILITY                                                │
+│  By flagging this content, you're helping maintain community standards.    │
+│  Please provide accurate information to help moderators make informed      │
+│  decisions. False flags may impact your trust score.                       │
+│                                                                             │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  📝 POST INFORMATION                                                        │
+│  • Post ID: #4421                                                          │
+│  • Author: @maya_dev (Trust Score: 85)                                     │
+│  • Posted: 2 hours ago                                                     │
+│  • Engagement: 47 upvotes, 12 shares, 23 comments                          │
+│                                                                             │
+│  📄 CONTENT PREVIEW                                                         │
+│  ┌───────────────────────────────────────────────────────────────────────┐ │
+│  │ "This new supplement completely cures depression in just 3 days!      │ │
+│  │ My friend tried it and now she's completely better. No need for       │ │
+│  │ therapy or medication anymore. DM me for the secret formula! 💊✨"     │ │
+│  └───────────────────────────────────────────────────────────────────────┘ │
+│                                                                             │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  🏷️  FLAG REASON (Required)                                                │
+│  ○ Misinformation/False Claims                                             │
+│  ○ Doxxing/Personal Information                                            │
+│  ○ Spam/Self-Promotion                                                     │
+│  ○ Harassment/Bullying                                                     │
+│  ○ Hate Speech                                                             │
+│  ○ Unconstructive Content                                                  │
+│  ○ Copyright Violation                                                     │
+│  ○ Inappropriate Content                                                   │
+│  ○ Scam/Fraud Attempt                                                      │
+│  ○ Other (specify below)                                                   │
+│                                                                             │
+│  📝 DETAILED EXPLANATION (Required - Min 50 characters)                    │
+│  ┌───────────────────────────────────────────────────────────────────────┐ │
+│  │ This post makes dangerous medical claims without any scientific        │ │
+│  │ evidence. Claiming supplements can "cure depression" and advising      │ │
+│  │ people to stop therapy/medication is harmful misinformation that       │ │
+│  │ could endanger mental health. The post also appears to be promoting    │ │
+│  │ an unverified product through DMs.                                     │ │
+│  │                                                                       │ │
+│  │ [Character count: 287/500]                                            │ │
+│  └───────────────────────────────────────────────────────────────────────┘ │
+│                                                                             │
+
+│  🎯 URGENCY LEVEL                                                           │
+│  ○ Low - Can wait for regular review                                       │
+│  ● Medium - Should be reviewed within 24 hours                            │
+│  ○ High - Requires immediate attention (safety risk)                      │
+│                                                                             │
+
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ⚠️  IMPACT WARNING                                                         │
+│  This post has high engagement (47 upvotes, 12 shares). Flagging content  │
+│  with significant community interaction requires stronger evidence.         │
+│                                                                             │
+│  📊 YOUR FLAGGING HISTORY                                                   │
+│  • Total flags submitted: 12                                               │
+│  • Accuracy rate: 91.7% (11/12 upheld)                                     │
+│  • Trust impact: +3 points for helpful flagging                            │
+│                                                                             │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  🔒 PRIVACY & ANONYMITY                                                     │
+│  ☑️ Keep my identity anonymous to the post author                          │
+│  ☑️ Allow moderators to contact me for clarification                       │
+│  ☐ Share my flag reason with the community (after resolution)              │
+│                                                                             │
+│  📧 NOTIFICATION PREFERENCES                                                │
+│  ☑️ Notify me when this flag is reviewed                                   │
+│  ☑️ Send updates on moderator decision                                      │
+│  ☐ Include me in community safety updates                                  │
+│                                                                             │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│                    [ Cancel ]  [ Submit Flag Report ]                      │
+│                                                                             │
+│  💡 Tip: Quality flags with clear evidence help moderators make faster     │
+│      decisions and improve community safety for everyone.                  │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘ 

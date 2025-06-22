@@ -1,0 +1,97 @@
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                      🚩 FLAG SOCIAL ACCOUNT FOR REVIEW                     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ⚠️  SOCIAL VERIFICATION FLAGGING                                           │
+│  Social account verification is crucial for trust scores. False flags      │
+│  can harm someone's reputation, so please provide solid evidence of         │
+│  suspicious or fraudulent social media links.                              │
+│                                                                             │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  👤 PROFILE INFORMATION                                                     │
+│  • User: @sarah_designer (Trust Score: 92)                                 │
+│  • Profile created: March 2023                                             │
+│  • Total social accounts: 6 connected                                      │
+│  • Verification status: 4/6 verified                                       │
+│                                                                             │
+│  📱 FLAGGED SOCIAL ACCOUNT                                                  │
+│  • Platform: Instagram                                                     │
+│  • Handle: @sarahcreates_design                                            │
+│  • Followers: 15.2K                                                        │
+│  • Verification: ✅ Platform verified                                      │
+│  • Linked: 2 months ago                                                    │
+│  • Trust contribution: +8 points                                           │
+│                                                                             │
+│  🔗 ACCOUNT PREVIEW                                                         │
+│  ┌───────────────────────────────────────────────────────────────────────┐ │
+│  │ Bio: "UI/UX Designer • San Francisco • Creating beautiful digital     │ │
+│  │ experiences ✨ DM for collaborations"                                  │ │
+│  │                                                                       │ │
+│  │ Recent posts: Design portfolios, client work, behind-the-scenes      │ │
+│  │ Stories: Daily design tips, workspace photos                          │ │
+│  └───────────────────────────────────────────────────────────────────────┘ │
+│                                                                             │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  🏷️  FLAG REASON (Required)                                                │
+│  ○ Stolen/Impersonated Account                                             │
+│  ○ Fake/Bot Account                                                        │
+│  ○ Purchased Followers/Engagement                                          │
+│  ○ Account Doesn't Match Profile                                           │
+│  ○ Inappropriate Content                                                   │
+│  ○ Inactive/Abandoned Account                                              │
+│  ○ Copyright/Trademark Violation                                           │
+│  ○ Multiple People Using Same Account                                      │
+│  ○ Age/Date Inconsistencies                                                │
+│  ○ Other (specify below)                                                   │
+│                                                                             │
+│  📝 DETAILED EXPLANATION (Required - Min 60 characters)                    │
+│  ┌───────────────────────────────────────────────────────────────────────┐ │
+│  │ This account appears to be impersonating the real designer. The        │ │
+│  │ actual account belongs to @realdesigner_sarah (Instagram) which has    │ │
+│  │ 50K+ followers and shows the same portfolio pieces with original       │ │
+│  │ timestamps. Please verify against the real account:                    │ │
+│  │ @realdesigner_sarah - this is the legitimate account that should be    │ │
+│  │ linked instead. The current linked account shows copied content.       │ │
+│  │                                                                       │ │
+│  │ [Character count: 412/600]                                            │ │
+│  └───────────────────────────────────────────────────────────────────────┘ │
+│                                                                             │
+
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  📊 TRUST SCORE IMPACT                                                      │
+│  Current contribution: +8 points                                           │
+│  If removed: User's trust score would drop to 84 (Good → Good)             │
+│  Risk level: Medium impact on user's platform access                       │
+│                                                                             │
+│  🔄 ALTERNATIVE VERIFICATION                                                │
+│  ☐ Suggest user provide different social proof                            │
+│  ☐ Recommend video verification call                                       │
+│  ☑️ Request additional portfolio verification                              │
+│                                                                             │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  📊 YOUR SOCIAL FLAGGING HISTORY                                            │
+│  • Social account flags: 8                                                 │
+│  • Accuracy rate: 87.5% (7/8 upheld)                                       │
+│  • False accounts detected: 6                                              │
+│  • Trust score corrections: 43 points total                                │
+│                                                                             │
+│  🔒 PRIVACY & COMMUNICATION                                                 │
+│  ☑️ Allow moderators to contact me for verification                        │
+│                                                                             │
+│  📧 FOLLOW-UP PREFERENCES                                                   │
+│  ☑️ Notify me when this flag is reviewed                                   │
+│  ☑️ Send updates on verification outcome                                    │
+│  ☑️ Alert me to similar suspicious accounts                                │
+│                                                                             │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│                   [ Cancel ]  [ Submit Social Flag ]                       │
+│                                                                             │
+│  💡 Remember: Social verification affects trust scores significantly.      │
+│      Strong evidence protects the community and maintains fairness.        │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘ 
