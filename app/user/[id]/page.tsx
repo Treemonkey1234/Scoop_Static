@@ -251,24 +251,14 @@ export default function UserProfilePage() {
                       <div className="flex-1">
                         <div className="flex items-center space-x-2 mb-1">
                           <h4 className="font-semibold text-slate-800">{reviewer?.name || 'Anonymous'}</h4>
-                          <div className="flex items-center">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                              <StarIcon
-                                key={star}
-                                className={`w-4 h-4 ${
-                                  star <= review.rating
-                                    ? 'text-amber-400 fill-current'
-                                    : 'text-slate-300'
-                                }`}
-                              />
-                            ))}
-                          </div>
+                          <span className={`text-sm ${review.votes > 0 ? 'text-trust-excellent' : review.votes < 0 ? 'text-orange-500' : 'text-slate-500'}`}>
+                            ({review.votes > 0 ? `+${review.votes}` : review.votes} votes)
+                          </span>
                         </div>
                         <p className="text-sm text-slate-600 mb-2">{review.content}</p>
                         <div className="flex items-center space-x-4 text-xs text-slate-500">
                           <span>{review.category}</span>
-                          <span>{review.timestamp}</span>
-                          <span>{review.communityValidation}% community validation</span>
+                          <span>{new Date(review.timestamp).toLocaleDateString()}</span>
                         </div>
                       </div>
                     </div>
@@ -301,11 +291,11 @@ export default function UserProfilePage() {
             <div className="text-center p-4 bg-slate-50 rounded-xl">
               <div className="text-2xl font-bold text-slate-800">
                 {userReviews.length > 0 
-                  ? Math.round(userReviews.reduce((acc, r) => acc + r.rating, 0) / userReviews.length * 10) / 10
+                  ? Math.round(userReviews.reduce((acc, r) => acc + (r.votes > 0 ? r.votes : 0), 0) / userReviews.length)
                   : 0
                 }
               </div>
-              <div className="text-sm text-slate-500">Average Rating</div>
+              <div className="text-sm text-slate-500">Average Positive Votes</div>
             </div>
           </div>
         </div>
