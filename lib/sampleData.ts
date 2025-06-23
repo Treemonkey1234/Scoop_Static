@@ -822,6 +822,62 @@ export const sampleReviews: Review[] = [
     votes: 47,
     isEventReview: true,
     eventId: 'event4'
+  },
+  // New Use Case Event Reviews
+  {
+    id: '9',
+    reviewerId: '2', // Sarah Chen
+    reviewedId: '1', // Jake Martinez
+    content: 'Jake\'s Loft is the perfect blend of professional and casual. The venue\'s real-time capacity tracking helped us find the perfect time to arrive. The trust-verified entry system made everyone feel secure. Great spot for after-work networking!',
+    category: 'Venue Events',
+    timestamp: '2024-03-16T22:30:00Z',
+    votes: 38,
+    isEventReview: true,
+    eventId: 'event5'
+  },
+  {
+    id: '10',
+    reviewerId: '4', // David Kim
+    reviewedId: '1', // Jake Martinez
+    content: 'As a freelance developer, this event was invaluable. The trust verification system helped me connect with genuine clients - I\'ve already secured two contracts! The event organizers used Scoop\'s professional profile integration perfectly, allowing us to showcase our work history and client reviews right on our badges. This is exactly how professional networking should work.',
+    category: 'Professional Networking',
+    timestamp: '2024-03-11T19:45:00Z',
+    votes: 42,
+    isEventReview: true,
+    eventId: 'event6'
+  },
+  {
+    id: '11',
+    reviewerId: '3', // Emily Rodriguez
+    reviewedId: '1', // Jake Martinez
+    content: 'ASU\'s integration with Scoop made this the most secure and efficient career fair I\'ve attended. Student verification was seamless through our university profiles, and the trust scores helped employers quickly identify reliable candidates. The real-time event updates about which companies were actively hiring was incredibly helpful. This is the future of campus recruiting!',
+    category: 'Education & Career',
+    timestamp: '2024-03-09T16:20:00Z',
+    votes: 51,
+    isEventReview: true,
+    eventId: 'event7'
+  },
+  {
+    id: '12',
+    reviewerId: '5', // Lisa Thompson (as an insurance professional for this review)
+    reviewedId: '4', // David Kim
+    content: 'Fantastic to see how Scoop\'s trust scores are being integrated into insurance risk assessment. The event demonstrated how high-trust users can receive better insurance rates. The verification process for attendees ensured meaningful connections with other insurance professionals. The platform\'s ability to track professional history while maintaining privacy is impressive.',
+    category: 'Insurance & Technology',
+    timestamp: '2024-03-06T18:15:00Z',
+    votes: 35,
+    isEventReview: true,
+    eventId: 'event8'
+  },
+  {
+    id: '13',
+    reviewerId: '2', // Sarah Chen (as an e-commerce seller for this review)
+    reviewedId: '1', // Jake Martinez
+    content: 'This event showcased how Scoop\'s trust verification is transforming online marketplaces. The live demonstrations of fraud prevention through trust scores were eye-opening. As an online seller, I appreciate how the platform helps verify both buyer and seller identities while protecting privacy. The networking opportunities with other verified sellers were invaluable.',
+    category: 'E-commerce & Trust',
+    timestamp: '2024-03-02T20:00:00Z',
+    votes: 44,
+    isEventReview: true,
+    eventId: 'event9'
   }
 ]
 
@@ -906,6 +962,107 @@ export const sampleEvents: Event[] = [
     trustRequirement: 65,
     tags: ['startup', 'business', 'networking', 'entrepreneurship'],
     attendees: ['1', '2', '4', '5'] // Jake, Sarah, David, Lisa (reviewed)
+  },
+  // New Use Case Events
+  {
+    id: 'event5',
+    title: 'Friday Night Live @ Jake\'s Loft',
+    description: 'Join us for our weekly Friday night networking event! Experience our new real-time capacity tracking and trust-verified entry system. Perfect blend of professional networking and casual socializing with live music and craft cocktails.',
+    hostId: '1', // Jake Martinez
+    date: '2024-03-15', // Day before review
+    time: '7:00 PM',
+    location: 'Jake\'s Loft - Main Floor',
+    address: '123 Downtown Ave, Phoenix, AZ 85004',
+    category: 'Networking',
+    imageUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600',
+    maxAttendees: 100,
+    attendeeCount: 85,
+    price: 15,
+    isPrivate: false,
+    isPast: true,
+    trustRequirement: 65,
+    tags: ['venue', 'networking', 'live-music', 'professional'],
+    attendees: ['1', '2', '4'] // Jake, Sarah (reviewed), David
+  },
+  {
+    id: 'event6',
+    title: 'Phoenix Tech Contractors Summit',
+    description: 'The premier networking event for freelance developers, designers, and tech contractors. Features professional profile integration, client showcase opportunities, and direct connections with hiring managers. Showcase your portfolio and connect with genuine clients.',
+    hostId: '1', // Jake Martinez
+    date: '2024-03-10', // Day before review
+    time: '10:00 AM',
+    location: 'Phoenix Convention Center',
+    address: '100 N 3rd St, Phoenix, AZ 85004',
+    category: 'Professional',
+    imageUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600',
+    maxAttendees: 200,
+    attendeeCount: 150,
+    price: 25,
+    isPrivate: false,
+    isPast: true,
+    trustRequirement: 70,
+    tags: ['freelance', 'contractors', 'professional', 'portfolio'],
+    attendees: ['1', '4', '5'] // Jake, David (reviewed), Lisa
+  },
+  {
+    id: 'event7',
+    title: 'ASU Spring Career Fair',
+    description: 'Arizona State University\'s premier career fair featuring trust verification for students and employers. Real-time updates on company hiring status, verified student profiles, and secure networking environment. The future of campus recruiting starts here.',
+    hostId: '1', // Jake Martinez (as event coordinator)
+    date: '2024-03-08', // Day before review
+    time: '9:00 AM',
+    location: 'ASU Main Campus - Memorial Union',
+    address: '1200 S Forest Ave, Tempe, AZ 85281',
+    category: 'Education',
+    imageUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600',
+    maxAttendees: 350,
+    attendeeCount: 300,
+    price: 0,
+    isPrivate: false,
+    isPast: true,
+    trustRequirement: 60,
+    tags: ['career-fair', 'education', 'students', 'employment'],
+    attendees: ['1', '3', '4'] // Jake, Emily (reviewed), David
+  },
+  {
+    id: 'event8',
+    title: 'InsurTech Innovation Meetup',
+    description: 'Explore how trust scores and verification systems are revolutionizing insurance risk assessment. Learn how high-trust users can access better insurance rates and how the industry is evolving with technology. Network with insurance professionals and tech innovators.',
+    hostId: '4', // David Kim (insurance professional)
+    date: '2024-03-05', // Day before review
+    time: '6:30 PM',
+    location: 'State Farm Stadium - Conference Center',
+    address: '1 Cardinals Dr, Glendale, AZ 85305',
+    category: 'Technology',
+    imageUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600',
+    maxAttendees: 100,
+    attendeeCount: 75,
+    price: 20,
+    isPrivate: false,
+    isPast: true,
+    trustRequirement: 75,
+    tags: ['insurance', 'technology', 'innovation', 'trust-scores'],
+    attendees: ['1', '4', '5'] // Jake, David, Lisa (reviewed)
+  },
+  {
+    id: 'event9',
+    title: 'Arizona E-commerce Trust Summit',
+    description: 'The premier event showcasing how trust verification is transforming online marketplaces. Features live fraud prevention demonstrations, seller verification processes, and networking opportunities for verified e-commerce professionals. Learn to build trust in digital transactions.',
+    hostId: '1', // Jake Martinez
+    date: '2024-03-01', // Day before review
+    time: '1:00 PM',
+    location: 'Phoenix Marketplace - Event Center',
+    address: '9617 N Metro Pkwy W, Phoenix, AZ 85051',
+    category: 'Business',
+    imageUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600',
+    maxAttendees: 150,
+    attendeeCount: 120,
+    price: 30,
+    isPrivate: false,
+    isPast: true,
+    trustRequirement: 70,
+    tags: ['e-commerce', 'trust', 'fraud-prevention', 'online-selling'],
+    attendees: ['1', '2', '5'] // Jake, Sarah (reviewed), Lisa
   }
 ]
 
