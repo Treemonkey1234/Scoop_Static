@@ -111,14 +111,8 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
     document.removeEventListener('mouseup', handleGlobalMouseUp)
   }, [])
 
-  // Touch events - only handle on ice cream cone specifically
+  // Touch events - handle on ice cream cone area
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    // Only handle if touching the ice cream cone directly
-    const target = e.target as HTMLElement
-    if (!target.closest('svg') && !target.closest('[data-ice-cream]')) {
-      return // Let normal touch behavior happen
-    }
-    
     e.preventDefault()
     e.stopPropagation()
     
@@ -130,25 +124,40 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
     setDragPosition({ x: 0, y: 0 })
     setHasMoved(false)
     setIsDragging(true)
+    
+    // Add global touch events for smooth dragging
+    document.addEventListener('touchmove', handleGlobalTouchMove, { passive: false })
+    document.addEventListener('touchend', handleGlobalTouchEnd)
   }, [])
 
-  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+  const handleGlobalTouchMove = useCallback((e: TouchEvent) => {
     if (!isDragging || e.touches.length !== 1) return
     
     e.preventDefault()
-    e.stopPropagation()
     
     const touch = e.touches[0]
     updatePosition(touch.clientY)
   }, [isDragging, updatePosition])
 
-  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+  const handleGlobalTouchEnd = useCallback(() => {
     if (!isDragging) return
     
+    finishDrag()
+    document.removeEventListener('touchmove', handleGlobalTouchMove)
+    document.removeEventListener('touchend', handleGlobalTouchEnd)
+  }, [isDragging])
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    // This is now handled by global events, but keep for compatibility
     e.preventDefault()
     e.stopPropagation()
-    finishDrag()
-  }, [isDragging])
+  }, [])
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    // This is now handled by global events, but keep for compatibility
+    e.preventDefault()
+    e.stopPropagation()
+  }, [])
 
   const finishDrag = useCallback(() => {
     if (!isDragging || !containerRef.current) return
@@ -194,12 +203,14 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
         data-ice-cream="true"
         className={`absolute cursor-grab active:cursor-grabbing transition-all ${
           isDragging ? 'scale-110 z-50' : 'z-20 duration-300'
-        } hover:scale-105`}
+        } hover:scale-105 touch-none`}
         style={{
           top: '50%',
           left: '50%',
           transform: `translate(-50%, -50%) translateY(${dragPosition.y}px)`,
           transition: isDragging ? 'none' : 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          padding: '10px', // Add padding to make touch area larger
+          margin: '-10px', // Negative margin to offset padding
         }}
         onMouseDown={handleMouseDown}
         onTouchStart={handleTouchStart}
