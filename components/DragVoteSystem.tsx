@@ -77,17 +77,7 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
     })
   }, [startY])
 
-  // Clean up animation frame and timeouts on unmount
-  useEffect(() => {
-    return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current)
-      }
-      if (resetTimeoutRef.current) {
-        clearTimeout(resetTimeoutRef.current)
-      }
-    }
-  }, [])
+
 
   // Mouse events
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
@@ -123,7 +113,7 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
     document.removeEventListener('mouseup', handleGlobalMouseUp)
   }, [])
 
-  // Touch events - back to simpler approach
+  // Touch events - using global event listeners like mouse events for better mobile support
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     e.preventDefault()
     e.stopPropagation()
@@ -143,25 +133,47 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
       clearTimeout(resetTimeoutRef.current)
       resetTimeoutRef.current = null
     }
+    
+    // Add global touch events for better mobile support
+    document.addEventListener('touchmove', handleGlobalTouchMove, { passive: false })
+    document.addEventListener('touchend', handleGlobalTouchEnd, { passive: false })
   }, [])
 
-  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+  const handleGlobalTouchMove = useCallback((e: TouchEvent) => {
     if (!isDragging || e.touches.length !== 1) return
     
     e.preventDefault()
-    e.stopPropagation()
-    
     const touch = e.touches[0]
     updatePosition(touch.clientY)
   }, [isDragging, updatePosition])
 
-  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+  const handleGlobalTouchEnd = useCallback((e: TouchEvent) => {
     if (!isDragging) return
     
     e.preventDefault()
-    e.stopPropagation()
     finishDrag()
+    
+    // Clean up global touch events
+    document.removeEventListener('touchmove', handleGlobalTouchMove)
+    document.removeEventListener('touchend', handleGlobalTouchEnd)
   }, [isDragging])
+
+  // Clean up animation frame, timeouts, and event listeners on unmount
+  useEffect(() => {
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current)
+      }
+      if (resetTimeoutRef.current) {
+        clearTimeout(resetTimeoutRef.current)
+      }
+      // Clean up any remaining global event listeners
+      document.removeEventListener('mousemove', handleGlobalMouseMove)
+      document.removeEventListener('mouseup', handleGlobalMouseUp)
+      document.removeEventListener('touchmove', handleGlobalTouchMove)
+      document.removeEventListener('touchend', handleGlobalTouchEnd)
+    }
+  }, [handleGlobalMouseMove, handleGlobalMouseUp, handleGlobalTouchMove, handleGlobalTouchEnd])
 
   const finishDrag = useCallback(() => {
     if (!isDragging || !containerRef.current) return
@@ -268,7 +280,7 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
         data-ice-cream="true"
         className={`absolute cursor-grab active:cursor-grabbing transition-all ${
           isDragging ? 'scale-110 z-50' : 'z-20 duration-300'
-        } hover:scale-105 touch-none flex items-center justify-center`}
+        } hover:scale-105 touch-none flex items-center justify-center select-none`}
         style={{
           top: '50%',
           left: '50%',
@@ -276,11 +288,12 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
           height: '72px', // Larger touch area (52px + 20px padding)
           transform: `translate(-50%, -50%) translateY(${dragPosition.y}px)`,
           transition: isDragging ? 'none' : 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          WebkitTouchCallout: 'none', // Prevent iOS context menu
+          WebkitUserSelect: 'none', // Prevent text selection on iOS
+          touchAction: 'none', // Prevent default touch behaviors
         }}
         onMouseDown={handleMouseDown}
         onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
       >
         <svg 
           width="36" 
