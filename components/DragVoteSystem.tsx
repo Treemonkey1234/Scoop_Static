@@ -111,7 +111,7 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
     document.removeEventListener('mouseup', handleGlobalMouseUp)
   }, [])
 
-  // Touch events - handle on ice cream cone area
+  // Touch events - back to simpler approach
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     e.preventDefault()
     e.stopPropagation()
@@ -124,40 +124,25 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
     setDragPosition({ x: 0, y: 0 })
     setHasMoved(false)
     setIsDragging(true)
-    
-    // Add global touch events for smooth dragging
-    document.addEventListener('touchmove', handleGlobalTouchMove, { passive: false })
-    document.addEventListener('touchend', handleGlobalTouchEnd)
   }, [])
 
-  const handleGlobalTouchMove = useCallback((e: TouchEvent) => {
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
     if (!isDragging || e.touches.length !== 1) return
     
     e.preventDefault()
+    e.stopPropagation()
     
     const touch = e.touches[0]
     updatePosition(touch.clientY)
   }, [isDragging, updatePosition])
 
-  const handleGlobalTouchEnd = useCallback(() => {
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
     if (!isDragging) return
     
+    e.preventDefault()
+    e.stopPropagation()
     finishDrag()
-    document.removeEventListener('touchmove', handleGlobalTouchMove)
-    document.removeEventListener('touchend', handleGlobalTouchEnd)
   }, [isDragging])
-
-  const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    // This is now handled by global events, but keep for compatibility
-    e.preventDefault()
-    e.stopPropagation()
-  }, [])
-
-  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
-    // This is now handled by global events, but keep for compatibility
-    e.preventDefault()
-    e.stopPropagation()
-  }, [])
 
   const finishDrag = useCallback(() => {
     if (!isDragging || !containerRef.current) return
