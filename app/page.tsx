@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import Layout from '@/components/Layout'
@@ -19,7 +19,9 @@ import {
   MapPinIcon,
   CalendarIcon,
   UsersIcon,
-  FlagIcon
+  FlagIcon,
+  TagIcon,
+  UserIcon
 } from '@heroicons/react/24/outline'
 import { useRouter } from 'next/navigation'
 
@@ -47,7 +49,7 @@ export default function HomePage() {
   })
 
   // Load current user, reviews, and events on component mount
-  React.useEffect(() => {
+  useEffect(() => {
     const user = getCurrentUser()
     setCurrentUser(user)
     
@@ -62,7 +64,7 @@ export default function HomePage() {
   }, [])
 
   // Refresh reviews when page becomes visible (returning from create post)
-  React.useEffect(() => {
+  useEffect(() => {
     const handleVisibilityChange = () => {
       if (!document.hidden) {
         const allReviews = getAllReviews()
@@ -79,7 +81,7 @@ export default function HomePage() {
 
 
   // Simulate loading
-  React.useEffect(() => {
+  useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false)
     }, 1500)
@@ -87,26 +89,20 @@ export default function HomePage() {
     return () => clearTimeout(timer)
   }, [])
 
-  const handleVote = (postId: string, voteType: 'up' | 'down') => {
-    const currentVote = votedPosts[postId]
-    let newVote: 'up' | 'down' | null = voteType
-    
-    if (currentVote === voteType) {
-      newVote = null
-    } else {
-      // Actually vote on the review and update metrics
-      const success = voteOnReview(postId, voteType)
-      if (success) {
-        // Refresh reviews to show updated vote counts
-        const updatedReviews = getAllReviews()
-        setReviews(updatedReviews)
-      }
-    }
-    
+  const handleVote = (reviewId: string) => (direction: 'up' | 'down') => {
+    // Update the vote in state
     setVotedPosts(prev => ({
       ...prev,
-      [postId]: newVote
+      [reviewId]: direction
     }))
+
+    // Update the review votes
+    const success = voteOnReview(reviewId, direction)
+    if (success) {
+      // Refresh reviews to show updated vote counts
+      const updatedReviews = getAllReviews()
+      setReviews(updatedReviews)
+    }
   }
 
   const handleComment = (postId: string) => {
@@ -236,11 +232,9 @@ export default function HomePage() {
                   {/* Left Voting Section */}
                   <div className="mr-4 self-stretch w-12">
                     <ClassicVoteSystem
-                      postId={review.id}
-                      upvotes={review.upvotes}
-                      downvotes={review.downvotes}
-                      currentVote={currentVote}
-                      onVote={handleVote}
+                      initialVotes={review.upvotes - review.downvotes}
+                      userVote={currentVote}
+                      onVote={handleVote(review.id)}
                     />
                   </div>
 
