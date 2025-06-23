@@ -188,14 +188,14 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
         data-ice-cream="true"
         className={`absolute cursor-grab active:cursor-grabbing transition-all ${
           isDragging ? 'scale-110 z-50' : 'z-20 duration-300'
-        } hover:scale-105 touch-none`}
+        } hover:scale-105 touch-none flex items-center justify-center`}
         style={{
           top: '50%',
           left: '50%',
+          width: '56px', // Larger touch area (36px + 20px padding)
+          height: '72px', // Larger touch area (52px + 20px padding)
           transform: `translate(-50%, -50%) translateY(${dragPosition.y}px)`,
           transition: isDragging ? 'none' : 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-          padding: '10px', // Add padding to make touch area larger
-          margin: '-10px', // Negative margin to offset padding
         }}
         onMouseDown={handleMouseDown}
         onTouchStart={handleTouchStart}
