@@ -122,9 +122,9 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
     if (voteType && hasDraggedRef.current) {
       onVote(postId, voteType)
       
-      // Stick to voted position
+      // Stick to voted position immediately
       setIsSticking(true)
-      const stickPosition = voteType === 'up' ? -rect.height * 0.25 : rect.height * 0.25
+      const stickPosition = voteType === 'up' ? -rect.height * 0.3 : rect.height * 0.3
       setDragY(stickPosition)
       
       // Show feedback
@@ -134,11 +134,11 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
       // After sticking, return to center
       clearFeedbackTimeout()
       feedbackTimeoutRef.current = setTimeout(() => {
-        setDragY(0)
-        setIsSticking(false)
+        setIsSticking(false) // Stop sticking first
+        setDragY(0) // Then return to center
         setShowFeedback(false)
         setFeedbackType(null)
-      }, 1000) // Stick for 1 second
+      }, 1200) // Stick for 1.2 seconds
     } else {
       // No vote - return to center immediately
       setDragY(0)
@@ -195,17 +195,17 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
       
       // Show quick sticking animation
       setIsSticking(true)
-      setDragY(-containerRef.current!.getBoundingClientRect().height * 0.25)
+      setDragY(-containerRef.current!.getBoundingClientRect().height * 0.3)
       setFeedbackType('up')
       setShowFeedback(true)
       
       clearFeedbackTimeout()
       feedbackTimeoutRef.current = setTimeout(() => {
-        setDragY(0)
         setIsSticking(false)
+        setDragY(0)
         setShowFeedback(false)
         setFeedbackType(null)
-      }, 800)
+      }, 1000)
     }
   }, [isDragging, isSticking, postId, onVote])
 
@@ -238,7 +238,7 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
 
       {/* Ice cream cone */}
       <div
-        className={`absolute cursor-grab active:cursor-grabbing transition-transform duration-200 ease-out hover:scale-105 ${
+        className={`absolute cursor-grab active:cursor-grabbing hover:scale-105 ${
           isDragging || isSticking ? 'scale-110 z-50' : 'z-20'
         } flex items-center justify-center select-none touch-none`}
         style={{
@@ -247,7 +247,8 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
           width: '48px',
           height: '64px',
           transform: `translate(-50%, -50%) translateY(${dragY}px)`,
-          transition: isDragging ? 'none' : 'transform 0.3s ease-out',
+          // Only apply transition when not dragging AND not sticking
+          transition: (!isDragging && !isSticking) ? 'transform 0.4s ease-out' : 'none',
         }}
         onMouseDown={handleMouseDown}
         onTouchStart={handleTouchStart}
@@ -309,16 +310,16 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
       </div>
 
       {/* Live Vote Counter - shows during drag */}
-      {isDragging && (
-        <div className="absolute top-1/2 left-16 transform -translate-y-1/2 z-40 bg-white/95 backdrop-blur-sm border border-slate-200 rounded-lg px-3 py-2 shadow-lg">
-          <div className="text-xs font-semibold text-slate-700 space-y-1">
+      {isDragging && hasDraggedRef.current && (
+        <div className="absolute top-1/2 left-16 transform -translate-y-1/2 z-40 bg-white/95 backdrop-blur-sm border border-slate-200 rounded-lg px-3 py-2 shadow-lg animate-in slide-in-from-left duration-200">
+          <div className="text-xs font-semibold text-slate-700 space-y-1 min-w-[40px]">
             <div className="flex items-center gap-1">
               <span className="text-green-600">👍</span>
-              <span>{previewCounts.upvotes}</span>
+              <span className="font-mono">{previewCounts.upvotes}</span>
             </div>
             <div className="flex items-center gap-1">
               <span className="text-red-600">👎</span>
-              <span>{previewCounts.downvotes}</span>
+              <span className="font-mono">{previewCounts.downvotes}</span>
             </div>
           </div>
         </div>
