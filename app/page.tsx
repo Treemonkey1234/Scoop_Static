@@ -12,8 +12,6 @@ import ClassicVoteSystem from '@/components/ClassicVoteSystem'
 
 import { getCurrentUser, sampleUsers, getAllReviews, getAllEvents, User, voteOnReview } from '@/lib/sampleData'
 import { 
-  ChevronUpIcon, 
-  ChevronDownIcon, 
   ChatBubbleLeftIcon,
   ShareIcon,
   MapPinIcon,
@@ -28,7 +26,6 @@ import { useRouter } from 'next/navigation'
 
 
 export default function HomePage() {
-  const [votedPosts, setVotedPosts] = useState<{[key: string]: 'up' | 'down' | null}>({})
   const [isLoading, setIsLoading] = useState(true)
   const [currentUser, setCurrentUser] = useState<User | null>(null)
   const [reviews, setReviews] = useState<any[]>([])
@@ -90,13 +87,7 @@ export default function HomePage() {
   }, [])
 
   const handleVote = (reviewId: string) => (direction: 'up' | 'down') => {
-    // Update the vote in state
-    setVotedPosts(prev => ({
-      ...prev,
-      [reviewId]: direction
-    }))
-
-    // Update the review votes
+    // Update the vote in the backend
     const success = voteOnReview(reviewId, direction)
     if (success) {
       // Refresh reviews to show updated vote counts
@@ -221,7 +212,6 @@ export default function HomePage() {
           {reviews.map((review, index) => {
             const reviewer = sampleUsers.find(u => u.id === review.reviewerId)
             const reviewee = sampleUsers.find(u => u.id === review.reviewedId)
-            const currentVote = votedPosts[review.id]
             const relatedEvent = review.isEventReview ? events.find(e => e.id === review.eventId) : null
 
             if (!reviewer || !reviewee) return null
@@ -230,36 +220,13 @@ export default function HomePage() {
               <div key={review.id} className="card-premium hover:shadow-xl transition-all duration-300 border-cyan-200/50 overflow-hidden">
                 {/* Vote System */}
                 <div className="flex">
-                  <div className="flex flex-col items-center justify-between py-4 px-3 bg-gradient-to-b from-slate-50 to-white border-r border-slate-100">
-                    <button
-                      onClick={() => handleVote(review.id)('up')}
-                      className={`p-1 rounded-lg transition-all duration-200 ${
-                        currentVote === 'up'
-                          ? 'text-cyan-600 bg-cyan-50'
-                          : 'text-slate-400 hover:text-cyan-600 hover:bg-slate-100'
-                      }`}
-                    >
-                      <ChevronUpIcon className="w-6 h-6" />
-                    </button>
-                    <span className={`font-medium ${
-                      currentVote === 'up'
-                        ? 'text-cyan-600'
-                        : currentVote === 'down'
-                        ? 'text-orange-600'
-                        : 'text-slate-600'
-                    }`}>
-                      {review.votes}
-                    </span>
-                    <button
-                      onClick={() => handleVote(review.id)('down')}
-                      className={`p-1 rounded-lg transition-all duration-200 ${
-                        currentVote === 'down'
-                          ? 'text-orange-600 bg-orange-50'
-                          : 'text-slate-400 hover:text-orange-600 hover:bg-slate-100'
-                      }`}
-                    >
-                      <ChevronDownIcon className="w-6 h-6" />
-                    </button>
+                  <div className="w-20 bg-gradient-to-b from-slate-50 to-white border-r border-slate-100">
+                    <ClassicVoteSystem
+                      reviewId={review.id}
+                      initialVotes={review.votes}
+                      onVote={handleVote(review.id)}
+                      className="h-full"
+                    />
                   </div>
 
                   {/* Content */}

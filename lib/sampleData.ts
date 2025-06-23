@@ -281,6 +281,8 @@ export function calculateNewTrustScore(currentScore: number, activity: string): 
     'social_connected': 3,      // +3 for connecting social account
     'upvote_received': 0.5,     // +0.5 for getting upvoted
     'downvote_received': -1,    // -1 for getting downvoted
+    'upvote_removed': -0.5,     // -0.5 for having upvote removed
+    'downvote_removed': 1,      // +1 for having downvote removed
     'reported': -5,             // -5 for being reported
     'content_removed': -10      // -10 for content removal
   }
@@ -551,38 +553,50 @@ export function voteOnReview(reviewId: string, voteType: 'up' | 'down'): boolean
     
     if (reviewIndex !== -1) {
       const review = allReviews[reviewIndex]
+      const currentUser = getCurrentUser()
       
-      // Check if user has already voted
-      if (review.votes > 0) {
-        // If trying to vote the same way again, remove the vote
-        if (review.votes === 1 && voteType === 'up') {
+      // Get current user's vote history for this review
+      const userVoteKey = `vote_${currentUser.id}_${reviewId}`
+      const currentUserVote = localStorage.getItem(userVoteKey)
+      
+      // Handle vote logic
+      if (currentUserVote === voteType) {
+        // User is clicking the same vote - remove it
+        if (voteType === 'up') {
           allReviews[reviewIndex].votes -= 1
-          // Remove trust score boost from review author
           updateTrustScore(review.reviewerId, 'upvote_removed')
-        } else if (review.votes === -1 && voteType === 'down') {
+        } else {
           allReviews[reviewIndex].votes += 1
-          // Remove trust score penalty from review author
           updateTrustScore(review.reviewerId, 'downvote_removed')
         }
-        allReviews[reviewIndex].votes = 0
-      }
-      
-      // Update vote counts for new vote
-      if (voteType === 'up') {
-        allReviews[reviewIndex].votes += 1
-        // Give trust score boost to review author
-        updateTrustScore(review.reviewerId, 'upvote_received')
+        localStorage.removeItem(userVoteKey)
+      } else if (currentUserVote) {
+        // User is switching vote direction
+        if (voteType === 'up') {
+          allReviews[reviewIndex].votes += 2 // Remove downvote (-1) and add upvote (+1)
+          updateTrustScore(review.reviewerId, 'upvote_received')
+          updateTrustScore(review.reviewerId, 'downvote_removed')
+        } else {
+          allReviews[reviewIndex].votes -= 2 // Remove upvote (-1) and add downvote (-1)
+          updateTrustScore(review.reviewerId, 'downvote_received')
+          updateTrustScore(review.reviewerId, 'upvote_removed')
+        }
+        localStorage.setItem(userVoteKey, voteType)
       } else {
-        allReviews[reviewIndex].votes -= 1
-        // Slight trust score penalty to review author
-        updateTrustScore(review.reviewerId, 'downvote_received')
+        // User is voting for the first time
+        if (voteType === 'up') {
+          allReviews[reviewIndex].votes += 1
+          updateTrustScore(review.reviewerId, 'upvote_received')
+        } else {
+          allReviews[reviewIndex].votes -= 1
+          updateTrustScore(review.reviewerId, 'downvote_received')
+        }
+        localStorage.setItem(userVoteKey, voteType)
       }
       
-      allReviews[reviewIndex].votes = Math.max(-1, Math.min(1, allReviews[reviewIndex].votes))
       saveAllReviews(allReviews)
       
       // Record activity
-      const currentUser = getCurrentUser()
       recordUserActivity(currentUser.id, `vote_${voteType}`, {
         reviewId,
         reviewAuthor: review.reviewerId
@@ -595,6 +609,21 @@ export function voteOnReview(reviewId: string, voteType: 'up' | 'down'): boolean
   } catch (error) {
     console.error('Error voting on review:', error)
     return false
+  }
+}
+
+// Helper function to get user's current vote on a review
+export function getUserVoteOnReview(reviewId: string): 'up' | 'down' | null {
+  if (typeof window === 'undefined') return null
+  
+  try {
+    const currentUser = getCurrentUser()
+    const userVoteKey = `vote_${currentUser.id}_${reviewId}`
+    const vote = localStorage.getItem(userVoteKey)
+    return vote as 'up' | 'down' | null
+  } catch (error) {
+    console.error('Error getting user vote:', error)
+    return null
   }
 }
 
@@ -1063,6 +1092,107 @@ export const sampleEvents: Event[] = [
     trustRequirement: 70,
     tags: ['e-commerce', 'trust', 'fraud-prevention', 'online-selling'],
     attendees: ['1', '2', '5'] // Jake, Sarah (reviewed), Lisa
+  },
+  // Upcoming Events
+  {
+    id: 'upcoming1',
+    title: 'Weekly Tech Meetup Phoenix',
+    description: 'Join us for our weekly tech discussion! This week we\'re covering React 18 features, Next.js updates, and the latest in web development. Great for networking and learning from fellow developers.',
+    hostId: '2', // Sarah Chen
+    date: '2024-12-28', // Future date
+    time: '7:00 PM',
+    location: 'WeWork Central Phoenix',
+    address: '1 E Washington St, Phoenix, AZ 85004',
+    category: 'Technology',
+    imageUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600',
+    maxAttendees: 60,
+    attendeeCount: 23,
+    price: 0,
+    isPrivate: false,
+    isPast: false,
+    trustRequirement: 65,
+    tags: ['tech', 'react', 'nextjs', 'networking'],
+    attendees: ['1', '2', '3', '4'] // Jake, Sarah (host), Emily, David
+  },
+  {
+    id: 'upcoming2',
+    title: 'Phoenix Coffee & Code',
+    description: 'Casual coding session over coffee! Bring your laptop and work on personal projects while connecting with other developers. Perfect for freelancers and anyone looking to code in a social environment.',
+    hostId: '4', // David Kim
+    date: '2024-12-30', // Future date
+    time: '10:00 AM',
+    location: 'Starbucks Reserve - Downtown',
+    address: '300 W Washington St, Phoenix, AZ 85003',
+    category: 'Social',
+    imageUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600',
+    maxAttendees: 15,
+    attendeeCount: 8,
+    price: 0,
+    isPrivate: false,
+    isPast: false,
+    trustRequirement: 50,
+    tags: ['coding', 'coffee', 'casual', 'freelancing'],
+    attendees: ['2', '4', '5'] // Sarah, David (host), Lisa
+  },
+  {
+    id: 'upcoming3',
+    title: 'New Year\'s Networking Mixer',
+    description: 'Ring in the new year with Phoenix\'s professional community! Join us for networking, appetizers, and a toast to new opportunities. Great for meeting potential collaborators and clients.',
+    hostId: '1', // Jake Martinez
+    date: '2024-12-31', // New Year's Eve
+    time: '6:00 PM',
+    location: 'Jake\'s Loft - Rooftop',
+    address: '123 Downtown Ave, Phoenix, AZ 85004',
+    category: 'Networking',
+    imageUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600',
+    maxAttendees: 100,
+    attendeeCount: 45,
+    price: 25,
+    isPrivate: false,
+    isPast: false,
+    trustRequirement: 70,
+    tags: ['networking', 'new-years', 'professional', 'celebration'],
+    attendees: ['1', '2', '3', '4', '5'] // All users attending
+  },
+  {
+    id: 'upcoming4',
+    title: 'Weekend Hiking Adventure',
+    description: 'Explore Phoenix\'s beautiful desert trails! We\'ll hike Camelback Mountain at sunrise for stunning city views. All fitness levels welcome - we\'ll have multiple pace groups.',
+    hostId: '3', // Emily Rodriguez
+    date: '2025-01-04', // Future weekend
+    time: '6:00 AM',
+    location: 'Camelback Mountain Trailhead',
+    address: '5700 N Echo Canyon Pkwy, Phoenix, AZ 85018',
+    category: 'Outdoors',
+    imageUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600',
+    maxAttendees: 25,
+    attendeeCount: 12,
+    price: 0,
+    isPrivate: false,
+    isPast: false,
+    trustRequirement: 60,
+    tags: ['hiking', 'outdoors', 'fitness', 'sunrise'],
+    attendees: ['1', '3', '4'] // Jake, Emily (host), David
+  },
+  {
+    id: 'upcoming5',
+    title: 'Startup Pitch Night',
+    description: 'Local entrepreneurs present their startup ideas to the community! Whether you\'re looking to pitch, invest, or just learn about innovation in Phoenix, this event is perfect for you.',
+    hostId: '5', // Lisa Thompson
+    date: '2025-01-07', // Future date
+    time: '7:30 PM',
+    location: 'Phoenix Innovation District',
+    address: '515 E Grant St, Phoenix, AZ 85004',
+    category: 'Business',
+    imageUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600',
+    maxAttendees: 80,
+    attendeeCount: 34,
+    price: 15,
+    isPrivate: false,
+    isPast: false,
+    trustRequirement: 75,
+    tags: ['startup', 'entrepreneurship', 'pitch', 'innovation'],
+    attendees: ['1', '2', '4', '5'] // Jake, Sarah, David, Lisa (host)
   }
 ]
 

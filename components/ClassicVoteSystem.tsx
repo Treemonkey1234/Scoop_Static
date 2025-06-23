@@ -1,8 +1,10 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/24/outline'
 import { ChevronUpIcon as ChevronUpSolid, ChevronDownIcon as ChevronDownSolid } from '@heroicons/react/24/solid'
+import { getUserVoteOnReview } from '@/lib/sampleData'
 
 interface VoteSystemProps {
+  reviewId: string
   initialVotes?: number
   userVote?: 'up' | 'down' | null
   onVote?: (direction: 'up' | 'down') => void
@@ -10,6 +12,7 @@ interface VoteSystemProps {
 }
 
 export default function ClassicVoteSystem({ 
+  reviewId,
   initialVotes = 0,
   userVote = null,
   onVote,
@@ -18,23 +21,31 @@ export default function ClassicVoteSystem({
   const [votes, setVotes] = useState(initialVotes)
   const [currentVote, setCurrentVote] = useState<'up' | 'down' | null>(userVote)
 
+  // Load user's current vote state on mount
+  useEffect(() => {
+    const userCurrentVote = getUserVoteOnReview(reviewId)
+    setCurrentVote(userCurrentVote)
+  }, [reviewId])
+
   const handleVote = (direction: 'up' | 'down') => {
-    // If clicking the same direction, remove the vote
+    // Update the vote visually first for immediate feedback
+    const previousVote = currentVote
+    
     if (direction === currentVote) {
-      setVotes(votes - (direction === 'up' ? 1 : -1))
+      // Removing vote
       setCurrentVote(null)
-    } 
-    // If changing vote direction
-    else if (currentVote) {
+      setVotes(votes - (direction === 'up' ? 1 : -1))
+    } else if (previousVote) {
+      // Switching vote direction
+      setCurrentVote(direction)
       setVotes(votes + (direction === 'up' ? 2 : -2))
+    } else {
+      // First time voting
       setCurrentVote(direction)
-    }
-    // If voting for the first time
-    else {
       setVotes(votes + (direction === 'up' ? 1 : -1))
-      setCurrentVote(direction)
     }
 
+    // Call the parent's onVote handler
     onVote?.(direction)
   }
 

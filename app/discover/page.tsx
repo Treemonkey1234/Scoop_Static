@@ -143,10 +143,10 @@ const usAddressSuggestions = [
   "987 Providence Road, Charlotte, NC 28211"
 ]
 
-// Demo events within 5 miles
+// Live discovery events within 5 miles - unique from past events
 const demoEvents = [
   {
-    id: 'event1',
+    id: 'discover1',
     title: 'JavaScript Workshop',
     category: 'Tech',
     emoji: '💻',
@@ -164,7 +164,7 @@ const demoEvents = [
     lng: -112.0740
   },
   {
-    id: 'event2', 
+    id: 'discover2', 
     title: 'Art Gallery Opening',
     category: 'Art',
     emoji: '🎨',
@@ -182,7 +182,7 @@ const demoEvents = [
     lng: -112.0635
   },
   {
-    id: 'event3',
+    id: 'discover3',
     title: 'Coffee & Code',
     category: 'Social',
     emoji: '☕',
@@ -200,7 +200,7 @@ const demoEvents = [
     lng: -112.0667
   },
   {
-    id: 'event4',
+    id: 'discover4',
     title: 'Hiking Group',
     category: 'Outdoor',
     emoji: '🥾',
@@ -218,7 +218,7 @@ const demoEvents = [
     lng: -111.9714
   },
   {
-    id: 'event5',
+    id: 'discover5',
     title: 'Rooftop Social',
     category: 'Social', 
     emoji: '🎉',
@@ -236,22 +236,58 @@ const demoEvents = [
     lng: -112.0700
   },
   {
-    id: 'event6',
-    title: 'Business Meetup',
+    id: 'discover6',
+    title: 'Startup Pitch Night',
     category: 'Business',
     emoji: '💼',
-    time: 'In progress',
-    distance: '4.8mi',
-    attendees: 18,
-    status: 'active',
+    time: 'Tomorrow 6PM',
+    distance: '2.8mi',
+    attendees: 35,
+    status: 'upcoming',
     statusColor: '🟡',
-    trustScore: 76,
+    trustScore: 89,
     organizer: 'David Kim',
-    location: 'Business Center',
-    description: 'Startup networking event',
-    liveCount: 18,
+    location: 'Innovation District',
+    description: 'Local entrepreneurs present ideas',
+    liveCount: 0,
     lat: 33.4400,
     lng: -112.0800
+  },
+  {
+    id: 'discover7',
+    title: 'Food Truck Festival',
+    category: 'Food',
+    emoji: '🌮',
+    time: 'This Weekend',
+    distance: '5.0mi',
+    attendees: 200,
+    status: 'upcoming',
+    statusColor: '🌟',
+    trustScore: 85,
+    organizer: 'Phoenix Food Collective',
+    location: 'Steele Indian School Park',
+    description: 'Best food trucks in Phoenix',
+    liveCount: 0,
+    lat: 33.4942,
+    lng: -112.0479
+  },
+  {
+    id: 'discover8',
+    title: 'Live Music Night',
+    category: 'Entertainment',
+    emoji: '🎵',
+    time: 'Friday 8PM',
+    distance: '1.9mi',
+    attendees: 75,
+    status: 'upcoming',
+    statusColor: '🎶',
+    trustScore: 90,
+    organizer: 'The Van Buren',
+    location: 'Downtown Phoenix',
+    description: 'Local bands and indie artists',
+    liveCount: 0,
+    lat: 33.4530,
+    lng: -112.0685
   }
 ]
 

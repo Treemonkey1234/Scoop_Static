@@ -133,9 +133,12 @@ export default function FriendsPage() {
               >
                 Review
               </Link>
-              <button className="p-2 rounded-xl hover:bg-slate-100 transition-colors duration-200">
-                <ChatBubbleLeftIcon className="w-4 h-4 text-slate-500" />
-              </button>
+              <Link
+                href={`/user/${user.id}`}
+                className="btn-secondary text-xs px-3 py-2 text-center"
+              >
+                View Profile
+              </Link>
             </>
           )}
           

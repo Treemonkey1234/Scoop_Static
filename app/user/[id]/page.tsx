@@ -12,9 +12,10 @@ import {
   UserGroupIcon,
   StarIcon,
   ChevronLeftIcon,
-  ChatBubbleLeftIcon,
-  UserPlusIcon
+  UserPlusIcon,
+  PencilIcon
 } from '@heroicons/react/24/outline'
+import Link from 'next/link'
 
 export default function UserProfilePage() {
   const params = useParams()
@@ -170,10 +171,13 @@ export default function UserProfilePage() {
                 <UserPlusIcon className="w-4 h-4 mr-2" />
                 Add Friend
               </button>
-              <button className="flex-1 btn-secondary">
-                <ChatBubbleLeftIcon className="w-4 h-4 mr-2" />
-                Message
-              </button>
+              <Link
+                href={`/create-post?reviewFor=${user.id}`}
+                className="flex-1 btn-secondary flex items-center justify-center"
+              >
+                <PencilIcon className="w-4 h-4 mr-2" />
+                Write Review
+              </Link>
             </div>
           </div>
         </div>
