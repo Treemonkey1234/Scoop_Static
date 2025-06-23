@@ -28,8 +28,9 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
   const hasMovedRef = useRef(false)
   const stickyTimeoutRef = useRef<NodeJS.Timeout>()
 
-  const THRESHOLD = 25  // Pixels to trigger vote
+  const THRESHOLD = 15  // Pixels to trigger vote (reduced from 25)
   const STICKY_DURATION = 1500  // How long cone sticks in position
+  const MAX_DRAG_RANGE = 80  // Maximum drag distance (increased from 60)
 
   // Calculate live vote preview
   const getVotePreview = () => {
@@ -83,11 +84,11 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
     if (!isDragging || isSticking) return
     
     const deltaY = clientY - startPosRef.current.y
-    const maxRange = 60 // Maximum drag distance
-    const constrainedY = Math.max(-maxRange, Math.min(maxRange, deltaY))
+    // Use the new MAX_DRAG_RANGE constant
+    const constrainedY = Math.max(-MAX_DRAG_RANGE, Math.min(MAX_DRAG_RANGE, deltaY))
     
-    // Track if user has moved enough to count as intentional drag
-    if (Math.abs(deltaY) > 5) {
+    // Track if user has moved enough to count as intentional drag (reduced threshold)
+    if (Math.abs(deltaY) > 3) {
       hasMovedRef.current = true
     }
     
@@ -107,9 +108,9 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
     if (preview.willVote && hasMovedRef.current && preview.voteType) {
       onVote(postId, preview.voteType)
       
-      // Show sticky behavior
+      // Show sticky behavior with better positioning
       setIsSticking(true)
-      const stickyPosition = preview.voteType === 'up' ? -40 : 40
+      const stickyPosition = preview.voteType === 'up' ? -50 : 50  // Increased from 40
       setDragY(stickyPosition)
       setFeedbackMessage(preview.voteType === 'up' ? 'Upvoted! 👍' : 'Downvoted! 👎')
       
@@ -185,8 +186,8 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
   }, [])
 
   const preview = getVotePreview()
-  const isUpZone = dragY < -10
-  const isDownZone = dragY > 10
+  const isUpZone = dragY < -THRESHOLD  // Use actual threshold instead of -10
+  const isDownZone = dragY > THRESHOLD  // Use actual threshold instead of 10
 
   return (
     <div 
@@ -194,16 +195,19 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
       className="flex flex-col items-center justify-between h-full w-14 rounded-xl border border-slate-200 shadow-sm p-2 relative overflow-hidden select-none bg-slate-50"
       style={{
         background: isDragging && preview.willVote ? 
-          (isUpZone ? 'linear-gradient(to bottom, rgba(34, 197, 94, 0.15), rgba(248, 250, 252, 1))' :
-           'linear-gradient(to top, rgba(239, 68, 68, 0.15), rgba(248, 250, 252, 1))') : 
+          (preview.voteType === 'up' ? 'linear-gradient(to bottom, rgba(34, 197, 94, 0.2), rgba(248, 250, 252, 1))' :
+           'linear-gradient(to top, rgba(239, 68, 68, 0.2), rgba(248, 250, 252, 1))') : 
           undefined
       }}
     >
       {/* Upvote Zone Indicator */}
       <div className={`w-full h-8 rounded-t-lg flex items-center justify-center transition-all duration-200 ${
+        isDragging && preview.willVote && preview.voteType === 'up' ? 'bg-green-500/40 scale-110' : 
         isDragging && isUpZone ? 'bg-green-400/30' : 'opacity-40'
       }`}>
-        <span className="text-sm text-green-600 font-bold">↑</span>
+        <span className={`text-sm font-bold transition-all duration-200 ${
+          isDragging && preview.willVote && preview.voteType === 'up' ? 'text-green-700 scale-125' : 'text-green-600'
+        }`}>↑</span>
       </div>
 
       {/* Ice Cream Cone */}
@@ -226,7 +230,7 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
           className={`transition-all duration-200 ${
             isDragging || isSticking ? 'scale-110 drop-shadow-lg' : 'drop-shadow-md'
           } ${
-            preview.willVote && isDragging ? 'brightness-110' : ''
+            preview.willVote && isDragging ? 'brightness-125 scale-125' : ''
           }`}
         >
           <defs>
@@ -284,11 +288,15 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
           <div className="text-sm font-semibold text-slate-700 space-y-1 min-w-[50px]">
             <div className="flex items-center justify-between gap-2">
               <span className="text-green-600">👍</span>
-              <span className="font-mono tabular-nums">{preview.upvotes}</span>
+              <span className={`font-mono tabular-nums ${preview.willVote && preview.voteType === 'up' ? 'text-green-700 font-bold' : ''}`}>
+                {preview.upvotes}
+              </span>
             </div>
             <div className="flex items-center justify-between gap-2">
               <span className="text-red-600">👎</span>
-              <span className="font-mono tabular-nums">{preview.downvotes}</span>
+              <span className={`font-mono tabular-nums ${preview.willVote && preview.voteType === 'down' ? 'text-red-700 font-bold' : ''}`}>
+                {preview.downvotes}
+              </span>
             </div>
             {feedbackMessage && (
               <div className="text-xs text-center text-slate-600 mt-1 pt-1 border-t border-slate-200">
@@ -299,22 +307,25 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
         </div>
       )}
 
-      {/* Vote Preview Indicator */}
+      {/* Vote Preview Indicator - now with pulse animation */}
       {isDragging && preview.willVote && !feedbackMessage && (
-        <div className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-40 px-3 py-2 rounded-lg text-sm font-bold shadow-lg backdrop-blur-sm border-2 ${
+        <div className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-40 px-4 py-2 rounded-lg text-sm font-bold shadow-lg backdrop-blur-sm border-2 animate-pulse ${
           preview.voteType === 'up' ? 
-            'bg-green-100/90 text-green-800 border-green-300' :
-            'bg-red-100/90 text-red-800 border-red-300'
+            'bg-green-200/90 text-green-800 border-green-400' :
+            'bg-red-200/90 text-red-800 border-red-400'
         }`}>
-          {preview.voteType === 'up' ? '+1 👍' : '+1 👎'}
+          {preview.voteType === 'up' ? '✓ UPVOTE 👍' : '✓ DOWNVOTE 👎'}
         </div>
       )}
 
       {/* Downvote Zone Indicator */}
       <div className={`w-full h-8 rounded-b-lg flex items-center justify-center transition-all duration-200 ${
+        isDragging && preview.willVote && preview.voteType === 'down' ? 'bg-red-500/40 scale-110' : 
         isDragging && isDownZone ? 'bg-red-400/30' : 'opacity-40'
       }`}>
-        <span className="text-sm text-red-600 font-bold">↓</span>
+        <span className={`text-sm font-bold transition-all duration-200 ${
+          isDragging && preview.willVote && preview.voteType === 'down' ? 'text-red-700 scale-125' : 'text-red-600'
+        }`}>↓</span>
       </div>
 
       {/* Instructions */}
