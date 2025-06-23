@@ -13,7 +13,10 @@ import {
   TagIcon,
   XMarkIcon,
   ShieldCheckIcon,
-  ChartBarIcon
+  ChartBarIcon,
+  CalendarIcon,
+  PhotoIcon,
+  FlagIcon
 } from '@heroicons/react/24/outline'
 
 export default function CreatePostPage() {
@@ -21,13 +24,16 @@ export default function CreatePostPage() {
   const searchParams = useSearchParams()
   const reviewForId = searchParams?.get('reviewFor')
   const reviewForUser = reviewForId ? sampleUsers.find(u => u.id === reviewForId) : null
+  const eventId = searchParams.get('event')
 
   const [formData, setFormData] = useState({
     reviewFor: reviewForUser?.id ? [reviewForUser.id] : [] as string[],
     category: '',
     content: '',
     location: '',
-    tags: [] as string[]
+    tags: [] as string[],
+    title: '',
+    postType: '',
   })
 
   const [friendSearch, setFriendSearch] = useState('')
@@ -115,332 +121,142 @@ export default function CreatePostPage() {
 
   return (
     <Layout>
-      <div className="p-4 space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <button
-            onClick={() => router.back()}
-            className="text-red-600 hover:text-red-700 font-medium"
-          >
-            ❌ Cancel
-          </button>
-          <h1 className="text-xl font-bold text-slate-800">Create Post</h1>
-          <button
-            onClick={handleSubmit}
-            disabled={formData.reviewFor.length === 0 || !formData.category || !formData.content}
-            className="text-green-600 hover:text-green-700 font-medium disabled:text-slate-400"
-          >
-            ✅ Post
-          </button>
+      <div className="max-w-4xl mx-auto p-4">
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold text-slate-800 mb-2">Create Post</h1>
+          <p className="text-slate-600">Share your thoughts, experiences, or ask a question</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Who Are You Reviewing */}
-          <div className="card-soft">
-            <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center">
-              <UserIcon className="w-5 h-5 mr-2 text-primary-500" />
-              👤 WHO ARE YOU REVIEWING?
-            </h3>
-            
-            <>
-              <div className="relative mb-4">
-                <MagnifyingGlassIcon className="absolute left-3 top-3 w-5 h-5 text-slate-400" />
-                <input
-                  type="text"
-                  value={friendSearch}
-                  onChange={(e) => setFriendSearch(e.target.value)}
-                  placeholder="Search your friends: Type friend's name..."
-                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                />
-              </div>
-
-              {selectedUsers.length > 0 && (
-                <div className="mb-4">
-                  <h4 className="text-sm font-medium text-slate-700 mb-2">✅ SELECTED FRIENDS:</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedUsers.map((user) => (
-                      <span
-                        key={user.id}
-                        className="inline-flex items-center space-x-2 px-3 py-1 bg-primary-100 text-primary-700 rounded-full text-sm"
-                      >
-                        <span>{user.name}</span>
-                        <button
-                          type="button"
-                          onClick={() => setFormData(prev => ({ 
-                            ...prev, 
-                            reviewFor: prev.reviewFor.filter(id => id !== user.id) 
-                          }))}
-                          className="hover:bg-primary-200 rounded-full p-0.5"
-                        >
-                          <XMarkIcon className="w-3 h-3" />
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <div>
-                <h4 className="text-sm font-medium text-slate-700 mb-3">📋 RECENT FRIENDS:</h4>
-                <div className="space-y-2">
-                  {filteredFriends.map((friend) => (
-                    <label
-                      key={friend.id}
-                      className="flex items-center space-x-3 p-3 hover:bg-slate-50 rounded-xl transition-colors duration-200 cursor-pointer"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={formData.reviewFor.includes(friend.id)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setFormData(prev => ({ 
-                              ...prev, 
-                              reviewFor: [...prev.reviewFor, friend.id] 
-                            }))
-                          } else {
-                            setFormData(prev => ({ 
-                              ...prev, 
-                              reviewFor: prev.reviewFor.filter(id => id !== friend.id) 
-                            }))
-                          }
-                        }}
-                        className="rounded border-slate-300 text-primary-600 focus:ring-primary-500"
-                      />
-                      <div className="flex-1 flex items-center justify-between">
-                        <span>{friend.name}</span>
-                        <span className="text-sm text-slate-500">(Trust: {friend.trustScore})</span>
-                      </div>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            </>
-          </div>
-
-          {/* Review Category */}
-          <div className="card-soft">
-            <h3 className="text-lg font-semibold text-slate-800 mb-4">📝 REVIEW CATEGORY</h3>
-            
-            <div className="grid grid-cols-2 gap-2">
-              {categories.map((category) => (
-                <button
-                  key={category.id}
-                  type="button"
-                  onClick={() => handleCategorySelect(category.id)}
-                  className={`p-3 rounded-xl text-sm font-medium transition-all duration-200 ${
-                    formData.category === category.id
-                      ? 'bg-primary-500 text-white shadow-lg'
-                      : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-                  }`}
-                >
-                  {category.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Write Your Review */}
-          <div className="card-soft">
-            <h3 className="text-lg font-semibold text-slate-800 mb-4">✍️ WRITE YOUR REVIEW</h3>
-            
-            <div className="space-y-4">
-              <p className="text-slate-600">What would you like to share about this person?</p>
-              
-              <textarea
-                value={formData.content}
-                onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
-                placeholder="Jessica was an incredible collaboration partner on our startup project. Her technical expertise and communication skills made the entire process smooth. Highly recommend working with her on any tech initiative..."
-                rows={6}
-                className="w-full p-4 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 resize-none"
-                maxLength={500}
-                required
+          {/* Post Preview */}
+          <div className="bg-white rounded-2xl shadow-soft p-6 space-y-4">
+            <div className="flex items-start space-x-4">
+              {/* User Avatar */}
+              <Image
+                src="/avatars/default.png"
+                alt="User"
+                width={40}
+                height={40}
+                className="rounded-full"
               />
               
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-slate-500">{formData.content.length}/500 characters • Be specific and helpful</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Location */}
-          <div className="card-soft">
-            <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center">
-              <MapPinIcon className="w-5 h-5 mr-2 text-primary-500" />
-              📍 LOCATION (Optional)
-            </h3>
-            
-            <div className="flex space-x-2">
-              <input
-                type="text"
-                value={formData.location}
-                onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
-                placeholder="Phoenix, AZ • WeWork Central"
-                className="flex-1 p-3 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-              />
-              <button
-                type="button"
-                className="px-4 py-3 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors duration-200"
-              >
-                📍
-              </button>
-              <button
-                type="button"
-                className="px-4 py-3 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors duration-200"
-              >
-                🗺️
-              </button>
-            </div>
-          </div>
-
-          {/* Add Tags */}
-          <div className="card-soft">
-            <h3 className="text-lg font-semibold text-slate-800 mb-4">🏷️ ADD TAGS</h3>
-            
-            <div className="space-y-4">
-              <p className="text-slate-600">Add relevant tags to help others find this review:</p>
-              
-              <div>
-                <h4 className="text-sm font-medium text-slate-700 mb-3">🔥 SUGGESTED TAGS:</h4>
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {suggestedTags.map((tag) => (
-                    <button
-                      key={tag}
-                      type="button"
-                      onClick={() => handleTagAdd(tag)}
-                      className={`px-3 py-1 rounded-full text-sm transition-all duration-200 ${
-                        formData.tags.includes(tag)
-                          ? 'bg-primary-500 text-white'
-                          : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-                      }`}
-                    >
-                      {tag}
-                    </button>
-                  ))}
+              {/* Post Content */}
+              <div className="flex-1">
+                {/* Post Header */}
+                <div className="flex flex-col space-y-2 mb-4">
+                  <input
+                    type="text"
+                    placeholder="Post title..."
+                    className="text-xl font-semibold text-slate-800 bg-transparent border-none focus:outline-none focus:ring-0 p-0"
+                    value={formData.title}
+                    onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                  />
+                  <textarea
+                    placeholder="What's on your mind?"
+                    className="w-full min-h-[120px] text-slate-600 bg-transparent border-none focus:outline-none focus:ring-0 p-0 resize-none"
+                    value={formData.content}
+                    onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
+                  />
                 </div>
-              </div>
 
-              <div>
-                <input
-                  type="text"
-                  placeholder="Custom tags: #startup, #react, #phoenix"
-                  className="w-full p-3 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault()
-                      const value = (e.target as HTMLInputElement).value.trim()
-                      if (value) {
-                        const tags = value.split(',').map(tag => tag.trim().startsWith('#') ? tag.trim() : `#${tag.trim()}`)
-                        tags.forEach(tag => handleTagAdd(tag));
-                        (e.target as HTMLInputElement).value = ''
-                      }
-                    }
-                  }}
-                />
-                <p className="text-xs text-slate-500 mt-1">(separate with commas: #startup, #react, #phoenix)</p>
-              </div>
+                {/* Post Metadata */}
+                <div className="flex flex-col space-y-2 text-sm text-slate-500">
+                  {/* Category */}
+                  <div className="flex items-center space-x-2">
+                    <TagIcon className="w-4 h-4" />
+                    <select
+                      className="bg-transparent border-none focus:outline-none focus:ring-0 p-0"
+                      value={formData.category}
+                      onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
+                    >
+                      <option value="">Select Category</option>
+                      <option value="question">Question</option>
+                      <option value="discussion">Discussion</option>
+                      <option value="review">Review</option>
+                      <option value="announcement">Announcement</option>
+                    </select>
+                  </div>
 
-              {formData.tags.length > 0 && (
-                <div>
-                  <h4 className="text-sm font-medium text-slate-700 mb-2">Selected:</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {formData.tags.map(tag => (
-                      <span
-                        key={tag}
-                        className="inline-flex items-center space-x-1 px-3 py-1 bg-primary-100 text-primary-700 rounded-full text-sm"
-                      >
-                        <span>{tag}</span>
-                        <button
-                          type="button"
-                          onClick={() => handleTagRemove(tag)}
-                          className="hover:bg-primary-200 rounded-full p-0.5"
-                        >
-                          <XMarkIcon className="w-3 h-3" />
-                        </button>
-                      </span>
-                    ))}
+                  {/* Post Type */}
+                  <div className="flex items-center space-x-2">
+                    <TagIcon className="w-4 h-4" />
+                    <select
+                      className="bg-transparent border-none focus:outline-none focus:ring-0 p-0"
+                      value={formData.postType}
+                      onChange={(e) => setFormData(prev => ({ ...prev, postType: e.target.value }))}
+                    >
+                      <option value="">Select Post Type</option>
+                      <option value="general">General</option>
+                      <option value="event-review">Event Review</option>
+                      <option value="recommendation">Recommendation</option>
+                    </select>
+                  </div>
+
+                  {/* Date */}
+                  <div className="flex items-center space-x-2">
+                    <CalendarIcon className="w-4 h-4" />
+                    <span>{new Date().toLocaleDateString()}</span>
+                  </div>
+
+                  {/* Location */}
+                  <div className="flex items-center space-x-2">
+                    <MapPinIcon className="w-4 h-4" />
+                    <input
+                      type="text"
+                      placeholder="Add location"
+                      className="bg-transparent border-none focus:outline-none focus:ring-0 p-0"
+                      value={formData.location}
+                      onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
+                    />
                   </div>
                 </div>
-              )}
-            </div>
-          </div>
 
-          {/* Privacy & Trust */}
-          <div className="card-soft">
-            <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center">
-              <ShieldCheckIcon className="w-5 h-5 mr-2 text-primary-500" />
-              🔒 PRIVACY & TRUST
-            </h3>
-            
-            <div className="space-y-3 text-sm">
-              <div className="flex items-center space-x-2">
-                <span className="text-green-600">✅</span>
-                <span className="text-slate-700">This review will be public to your network</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <span className="text-green-600">✅</span>
-                <span className="text-slate-700">The person being reviewed will be notified</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <span className="text-green-600">✅</span>
-                <span className="text-slate-700">Community validation will determine trust impact</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <span className="text-amber-500">⚠️</span>
-                <span className="text-slate-700">False or malicious reviews may affect your trust score</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Preview Trust Impact */}
-          <div className="card-soft">
-            <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center">
-              <ChartBarIcon className="w-5 h-5 mr-2 text-primary-500" />
-              📊 PREVIEW TRUST IMPACT
-            </h3>
-            
-            <div className="space-y-3 text-sm">
-              <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
-                <span className="text-slate-700">Your Trust Score:</span>
-                <span className="font-medium text-slate-800">95 → Likely 95-96 (positive review)</span>
-              </div>
-              {selectedUsers.length > 0 && (
-                <div className="space-y-2">
-                  {selectedUsers.map((user, index) => (
-                    <div key={user.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
-                      <span className="text-slate-700">{user.name}'s Trust Score:</span>
-                      <span className="font-medium text-slate-800">
-                        {user.trustScore || 95} → Likely {(user.trustScore || 95) + 1}-{(user.trustScore || 95) + 2} (if validated by community)
-                      </span>
+                {/* Event Details Box (if reviewing an event) */}
+                {eventId && formData.postType === 'event-review' && (
+                  <div className="mt-4 p-4 bg-cyan-50 rounded-xl border border-cyan-100">
+                    <h4 className="font-medium text-cyan-800 mb-2">Event Details</h4>
+                    <div className="text-sm text-cyan-600">
+                      {/* Event details would be populated here */}
+                      <p>Event Name: Sample Event</p>
+                      <p>Date: January 1, 2024</p>
+                      <p>Location: Sample Location</p>
                     </div>
-                  ))}
+                  </div>
+                )}
+
+                {/* Image Upload */}
+                <div className="mt-4">
+                  <button
+                    type="button"
+                    className="inline-flex items-center space-x-2 text-sm text-cyan-600 hover:text-cyan-700"
+                    onClick={() => {/* Handle image upload */}}
+                  >
+                    <PhotoIcon className="w-5 h-5" />
+                    <span>Add Photos</span>
+                  </button>
                 </div>
-              )}
-              {selectedUsers.length === 0 && (
-                <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
-                  <span className="text-slate-700">Their Trust Score:</span>
-                  <span className="font-medium text-slate-800">
-                    Select friends to see trust impact preview
-                  </span>
+
+                {/* Flag Button */}
+                <div className="absolute top-4 right-4">
+                  <button
+                    type="button"
+                    className="p-2 text-slate-400 hover:text-orange-500 rounded-full hover:bg-orange-50 transition-colors duration-200"
+                    onClick={() => {/* Handle flag */}}
+                  >
+                    <FlagIcon className="w-5 h-5" />
+                  </button>
                 </div>
-              )}
+              </div>
             </div>
           </div>
 
           {/* Submit Button */}
-          <div className="card-soft">
+          <div className="flex justify-end">
             <button
               type="submit"
-              disabled={isSubmitting || formData.reviewFor.length === 0 || !formData.category || !formData.content}
-              className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+              className="btn-primary bg-gradient-to-r from-cyan-500 to-teal-600 hover:from-cyan-600 hover:to-teal-700"
             >
-              {isSubmitting ? (
-                <div className="flex items-center justify-center space-x-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  <span>Publishing Review...</span>
-                </div>
-              ) : (
-                '✅ Publish Review'
-              )}
+              Post
             </button>
           </div>
         </form>

@@ -579,7 +579,27 @@ export function voteOnReview(reviewId: string, voteType: 'up' | 'down'): boolean
     if (reviewIndex !== -1) {
       const review = allReviews[reviewIndex]
       
-      // Update vote counts
+      // Check if user has already voted
+      if (review.hasVoted) {
+        // If trying to vote the same way again, remove the vote
+        if (review.voteType === voteType) {
+          if (voteType === 'up') {
+            allReviews[reviewIndex].upvotes -= 1
+            // Remove trust score boost from review author
+            updateTrustScore(review.reviewerId, 'upvote_removed')
+          } else {
+            allReviews[reviewIndex].downvotes -= 1
+            // Remove trust score penalty from review author
+            updateTrustScore(review.reviewerId, 'downvote_removed')
+          }
+          allReviews[reviewIndex].hasVoted = false
+          allReviews[reviewIndex].voteType = undefined
+        }
+        // If trying to vote differently, don't allow it
+        return false
+      }
+      
+      // Update vote counts for new vote
       if (voteType === 'up') {
         allReviews[reviewIndex].upvotes += 1
         // Give trust score boost to review author

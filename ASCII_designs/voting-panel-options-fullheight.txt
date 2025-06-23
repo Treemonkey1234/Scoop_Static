@@ -127,3 +127,50 @@ DESIGN NOTES:
 • Option 6: Floating elements without container for maximum space usage
 
 This spreads out the voting elements to make better use of the available space and creates better visual balance with the post content. 
+
+Post with Full-Height Vote Bar
+---------------------------
+
+┌──┐ ┌────────────────────────────────────────┐
+│▲ │ │ Sarah Chen                             │
+│12│ │ ★★★★★ Trust Score: 92                  │
+│▼ │ │                                        │
+└──┘ │ Event: Tech Meetup @ WeWork            │
+     │ 📅 June 15, 2025 | 👥 45 attended      │
+     │ 📍 WeWork Downtown Phoenix              │
+     │                                        │
+     │ "Great event! The presentations were..."│
+     │                                        │
+     │ [Comment] [Share] [Flag]               │
+     └────────────────────────────────────────┘
+
+Key Features:
+- Vote bar spans full height of post
+- Upvote/downvote at top/bottom
+- Vote count in middle
+- Clear visual separation from content 
+
+Full-Height Vote Bar Design
+-------------------------
+
+┌──┬────────────────────────────────────────────┐
+│▲ │ Sarah Chen                                 │
+│  │ ★★★★★ Trust Score: 92                      │
+│  │                                            │
+│12│ Event: Tech Meetup @ WeWork                │
+│  │ 📅 June 15, 2025 | 👥 45 attended          │
+│  │ 📍 WeWork Downtown Phoenix                  │
+│  │                                            │
+│  │ "Great event! The presentations were..."   │
+│  │                                            │
+│  │ [Comment] [Share]                          │
+│▼ │                                     [Flag] │
+└──┴────────────────────────────────────────────┘
+
+Key Features:
+- Vote bar spans entire height of post
+- Upvote at top
+- Vote count in middle
+- Downvote at bottom
+- Flag moved to bottom right
+- No gaps or breaks in vote bar 
