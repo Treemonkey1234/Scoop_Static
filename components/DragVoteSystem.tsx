@@ -24,6 +24,7 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
   const animationFrameRef = useRef<number>()
   const lastMoveTimeRef = useRef<number>(0)
   const resetTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const touchStartTimeRef = useRef<number>(0)
 
   const totalVotes = upvotes + downvotes
   const adjustedUpvotes = upvotes + (currentVote === 'up' ? 1 : 0)
@@ -54,6 +55,10 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
     if (now - lastMoveTimeRef.current < 16) return // Throttle to ~60fps
     lastMoveTimeRef.current = now
 
+    // Add delay for touch events to distinguish from taps
+    const timeSinceTouch = now - touchStartTimeRef.current
+    const shouldRespond = timeSinceTouch > 100 // Wait 100ms before responding to touch movement
+
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current)
     }
@@ -68,12 +73,15 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
       const maxRange = rect.height * 0.25 // Reduced from 35% to 25% to avoid mobile UI
       const constrainedY = Math.max(-maxRange, Math.min(maxRange, newY))
       
-      // Mark as moved if dragged more than 5px
-      if (Math.abs(constrainedY) > 5) {
+      // Mark as moved if dragged more than 15px (increased for better mobile touch detection)
+      // and enough time has passed to distinguish from tap
+      if (Math.abs(constrainedY) > 15 && shouldRespond) {
         setHasMoved(true)
+        setDragPosition({ x: 0, y: constrainedY })
+      } else if (shouldRespond) {
+        // Still update position for small movements after delay
+        setDragPosition({ x: 0, y: constrainedY })
       }
-      
-      setDragPosition({ x: 0, y: constrainedY })
     })
   }, [startY])
 
@@ -122,6 +130,7 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
 
     const touch = e.touches[0]
     const rect = containerRef.current.getBoundingClientRect()
+    touchStartTimeRef.current = Date.now() // Record touch start time
     setStartY(touch.clientY - rect.top)
     setDragPosition({ x: 0, y: 0 })
     setHasMoved(false)
@@ -180,8 +189,12 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
     
     let finalPosition = { x: 0, y: 0 }
     
-    // Only vote if user actually dragged (not just tapped)
-    if (hasMoved) {
+    // Check if this was a quick tap (less than 200ms) - don't vote on quick taps
+    const touchDuration = Date.now() - touchStartTimeRef.current
+    const wasQuickTap = touchDuration < 200
+    
+    // Only vote if user actually dragged (not just tapped) and it wasn't a quick tap
+    if (hasMoved && !wasQuickTap) {
       const containerHeight = containerRef.current.getBoundingClientRect().height
       const threshold = containerHeight * 0.12 // 12% threshold to work with 25% max range
       const maxRange = containerHeight * 0.25 // Maximum range for positioning
