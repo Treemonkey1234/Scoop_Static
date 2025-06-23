@@ -18,6 +18,7 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
   const [isDragging, setIsDragging] = useState(false)
   const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 })
   const [startY, setStartY] = useState(0)
+  const [hasMoved, setHasMoved] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
   const animationFrameRef = useRef<number>()
   const lastMoveTimeRef = useRef<number>(0)
@@ -61,9 +62,14 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
       const rect = containerRef.current.getBoundingClientRect()
       const newY = clientY - rect.top - startY
       
-      // Smooth constraint with easing at boundaries
-      const maxRange = rect.height * 0.35 // 35% range for smoother feel
+      // Constrain to smaller range to avoid home button area
+      const maxRange = rect.height * 0.25 // Reduced from 35% to 25% to avoid mobile UI
       const constrainedY = Math.max(-maxRange, Math.min(maxRange, newY))
+      
+      // Mark as moved if dragged more than 5px
+      if (Math.abs(constrainedY) > 5) {
+        setHasMoved(true)
+      }
       
       setDragPosition({ x: 0, y: constrainedY })
     })
@@ -86,6 +92,7 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
     const rect = containerRef.current.getBoundingClientRect()
     setStartY(e.clientY - rect.top)
     setDragPosition({ x: 0, y: 0 })
+    setHasMoved(false)
     setIsDragging(true)
     
     // Add global mouse events
@@ -104,68 +111,70 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
     document.removeEventListener('mouseup', handleGlobalMouseUp)
   }, [])
 
-  // Touch events
+  // Touch events - only handle on ice cream cone specifically
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    // Only handle if touching the ice cream cone directly
+    const target = e.target as HTMLElement
+    if (!target.closest('svg') && !target.closest('[data-ice-cream]')) {
+      return // Let normal touch behavior happen
+    }
+    
     e.preventDefault()
+    e.stopPropagation()
+    
     if (!containerRef.current || e.touches.length !== 1) return
 
     const touch = e.touches[0]
     const rect = containerRef.current.getBoundingClientRect()
     setStartY(touch.clientY - rect.top)
     setDragPosition({ x: 0, y: 0 })
+    setHasMoved(false)
     setIsDragging(true)
-    
-    // Lock page scroll
-    document.body.style.overflow = 'hidden'
-    document.body.style.position = 'fixed'
-    document.body.style.width = '100%'
-    document.body.style.top = `-${window.scrollY}px`
   }, [])
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    e.preventDefault()
     if (!isDragging || e.touches.length !== 1) return
+    
+    e.preventDefault()
+    e.stopPropagation()
     
     const touch = e.touches[0]
     updatePosition(touch.clientY)
   }, [isDragging, updatePosition])
 
   const handleTouchEnd = useCallback((e: React.TouchEvent) => {
-    e.preventDefault()
-    finishDrag()
+    if (!isDragging) return
     
-    // Unlock page scroll
-    const scrollY = document.body.style.top
-    document.body.style.overflow = ''
-    document.body.style.position = ''
-    document.body.style.width = ''
-    document.body.style.top = ''
-    if (scrollY) {
-      window.scrollTo(0, parseInt(scrollY || '0') * -1)
-    }
-  }, [])
+    e.preventDefault()
+    e.stopPropagation()
+    finishDrag()
+  }, [isDragging])
 
   const finishDrag = useCallback(() => {
     if (!isDragging || !containerRef.current) return
     
-    const containerHeight = containerRef.current.getBoundingClientRect().height
-    const threshold = containerHeight * 0.15 // 15% threshold for better sensitivity
-    
-    if (dragPosition.y < -threshold) {
-      onVote(postId, 'up')
-    } else if (dragPosition.y > threshold) {
-      onVote(postId, 'down')
+    // Only vote if user actually dragged (not just tapped)
+    if (hasMoved) {
+      const containerHeight = containerRef.current.getBoundingClientRect().height
+      const threshold = containerHeight * 0.12 // 12% threshold to work with 25% max range
+      
+      if (dragPosition.y < -threshold) {
+        onVote(postId, 'up')
+      } else if (dragPosition.y > threshold) {
+        onVote(postId, 'down')
+      }
     }
     
     setIsDragging(false)
     setDragPosition({ x: 0, y: 0 })
-  }, [isDragging, dragPosition.y, postId, onVote])
+    setHasMoved(false)
+  }, [isDragging, hasMoved, dragPosition.y, postId, onVote])
 
   // Calculate drag intensity for visual feedback
   const containerHeight = containerRef.current?.getBoundingClientRect().height || 100
-  const dragIntensity = Math.abs(dragPosition.y) / (containerHeight * 0.35)
-  const isUpZone = dragPosition.y < -10
-  const isDownZone = dragPosition.y > 10
+  const dragIntensity = Math.abs(dragPosition.y) / (containerHeight * 0.25)
+  const isUpZone = dragPosition.y < -8
+  const isDownZone = dragPosition.y > 8
 
   return (
     <div 
@@ -182,6 +191,7 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
 
       {/* Draggable Ice Cream Cone */}
       <div
+        data-ice-cream="true"
         className={`absolute cursor-grab active:cursor-grabbing transition-all ${
           isDragging ? 'scale-110 z-50' : 'z-20 duration-300'
         } hover:scale-105`}
