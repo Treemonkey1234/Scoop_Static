@@ -21,6 +21,24 @@ export default function UserProfilePage() {
   const router = useRouter()
   const userId = params?.id as string
 
+  // Ensure userId is a string and exists
+  if (!userId) {
+    return (
+      <Layout>
+        <div className="p-4 text-center">
+          <h1 className="text-xl font-semibold text-slate-800 mb-2">Invalid User ID</h1>
+          <p className="text-slate-600 mb-4">Please provide a valid user ID.</p>
+          <button
+            onClick={() => router.back()}
+            className="btn-primary"
+          >
+            Go Back
+          </button>
+        </div>
+      </Layout>
+    )
+  }
+
   const user = sampleUsers.find(u => u.id === userId)
   const userReviews = sampleReviews.filter(r => r.reviewedId === userId)
 

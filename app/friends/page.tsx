@@ -92,14 +92,22 @@ export default function FriendsPage() {
         
         <div className="flex-1 min-w-0">
           <div className="flex items-center space-x-2 mb-1">
-            <Link href={`/user/${user.id}`}>
-              <h3 className="font-semibold text-slate-800 hover:text-primary-600 transition-colors duration-200">
+            <Link 
+              href={`/user/${user.id}`}
+              className="hover:text-primary-600 transition-colors duration-200"
+            >
+              <h3 className="font-semibold text-slate-800">
                 {user.name}
               </h3>
             </Link>
             <TrustBadge score={user.trustScore} size="sm" />
           </div>
-          <p className="text-sm text-slate-600 mb-1">@{user.username}</p>
+          <Link 
+            href={`/user/${user.id}`}
+            className="block hover:text-primary-600 transition-colors duration-200"
+          >
+            <p className="text-sm text-slate-600 mb-1">@{user.username}</p>
+          </Link>
           <p className="text-sm text-slate-500 line-clamp-2">{user.bio}</p>
           
           {user.mutualFriends !== undefined && (

@@ -2,14 +2,16 @@
 
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import Layout from '@/components/Layout'
-import CustomPlatformModal from '@/components/CustomPlatformModal'
-import { getCurrentUser, User, SocialAccount, connectSocialAccount, socialPlatforms } from '@/lib/sampleData'
+import { getCurrentUser, User, connectSocialAccount, socialPlatforms } from '@/lib/sampleData'
 import { 
   ArrowLeftIcon,
   PlusIcon,
   CheckBadgeIcon,
-  FlagIcon
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  BoltIcon
 } from '@heroicons/react/24/outline'
 
 // Social media platform SVG components
@@ -150,199 +152,227 @@ const SocialIcon = ({ platform }: { platform: string }) => {
 }
 
 export default function ConnectedAccounts() {
+  const router = useRouter()
   const [currentUser, setCurrentUser] = useState<User | null>(null)
+  const [currentPage, setCurrentPage] = useState(0)
   const [selectedPlatform, setSelectedPlatform] = useState<string | null>(null)
   const [usernameInput, setUsernameInput] = useState('')
-  const [currentPage, setCurrentPage] = useState(0)
-  const [isCustomModalOpen, setIsCustomModalOpen] = useState(false)
+  const [startX, setStartX] = useState(0)
+  const platformsPerPage = 6
 
   useEffect(() => {
     const user = getCurrentUser()
     setCurrentUser(user)
   }, [])
 
-  const handleConfirmUsername = () => {
-    if (usernameInput.trim() && selectedPlatform && currentUser) {
-      // Add the new social account immediately
-      const newAccount: SocialAccount = {
-        platform: selectedPlatform,
-        handle: usernameInput.trim(),
-        verified: false,
-        icon: socialPlatforms[selectedPlatform as keyof typeof socialPlatforms] || '🔗'
-      }
-      
-      const updatedUser = {
-        ...currentUser,
-        socialAccounts: [...currentUser.socialAccounts, newAccount]
-      }
-      
-      // Update local storage and state immediately
-      localStorage.setItem('currentUser', JSON.stringify(updatedUser))
-      setCurrentUser(updatedUser)
-      
-      // Reset state
-      setSelectedPlatform(null)
-      setUsernameInput('')
-    }
-  }
-
-  const handleCustomPlatformConnect = (website: string, username: string) => {
+  const handleConnect = (platform: string) => {
     if (currentUser) {
-      // Create a platform name from the website
-      const platformName = website.replace(/^(?:https?:\/\/)?(?:www\.)?([^/]+).*$/, '$1')
-      
-      const newAccount: SocialAccount = {
-        platform: platformName,
-        handle: username,
-        verified: false,
-        icon: '🔗' // Default icon for custom platforms
-      }
-      
-      const updatedUser = {
-        ...currentUser,
-        socialAccounts: [...currentUser.socialAccounts, newAccount]
-      }
-      
-      // Update local storage
-      localStorage.setItem('currentUser', JSON.stringify(updatedUser))
+      connectSocialAccount(platform, currentUser.id)
+      // Refresh user data
+      const updatedUser = getCurrentUser()
       setCurrentUser(updatedUser)
     }
   }
 
-  const getSocialMediaUrl = (platform: string, handle: string): string => {
-    // Handle custom platforms
-    if (!socialPlatforms[platform as keyof typeof socialPlatforms]) {
-      return `https://${platform}/${handle}`
-    }
-    
-    switch (platform) {
-      case 'Facebook':
-        return `https://facebook.com/${handle}`
-      case 'Twitter':
-        return `https://twitter.com/${handle}`
-      case 'Instagram':
-        return `https://instagram.com/${handle}`
-      case 'LinkedIn':
-        return `https://linkedin.com/in/${handle}`
-      case 'TikTok':
-        return `https://tiktok.com/@${handle}`
-      case 'YouTube':
-        return `https://youtube.com/@${handle}`
-      case 'GitHub':
-        return `https://github.com/${handle}`
-      case 'Discord':
-        return `https://discord.com/users/${handle}`
-      case 'Reddit':
-        return `https://reddit.com/user/${handle}`
-      case 'Twitch':
-        return `https://twitch.tv/${handle}`
-      default:
-        return '#'
+  const platforms = Object.entries(socialPlatforms)
+  const totalPages = Math.ceil(platforms.length / platformsPerPage)
+  const currentPlatforms = platforms.slice(
+    currentPage * platformsPerPage,
+    (currentPage + 1) * platformsPerPage
+  )
+
+  // Touch event handlers for swipe navigation
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setStartX(e.touches[0].clientX)
+  }
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const endX = e.changedTouches[0].clientX
+    const diff = startX - endX
+
+    if (Math.abs(diff) > 50) { // Minimum swipe distance
+      if (diff > 0 && currentPage < totalPages - 1) {
+        // Swipe left - next page
+        setCurrentPage(prev => prev + 1)
+      } else if (diff < 0 && currentPage > 0) {
+        // Swipe right - previous page
+        setCurrentPage(prev => prev - 1)
+      }
     }
   }
 
   return (
     <Layout>
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <div className="mb-8 flex items-center">
-          <Link href="/profile" className="mr-4">
-            <ArrowLeftIcon className="w-6 h-6" />
-          </Link>
-          <h1 className="text-2xl font-bold">Connected Accounts</h1>
+      <div className="max-w-4xl mx-auto p-4">
+        {/* Header */}
+        <div className="mb-8 flex items-center justify-between">
+          <div className="flex items-center">
+            <Link href="/profile" className="mr-4">
+              <ArrowLeftIcon className="w-6 h-6 text-slate-600" />
+            </Link>
+            <h1 className="text-2xl font-bold text-slate-800">Connected Accounts</h1>
+          </div>
+          <div className="text-sm text-cyan-600 bg-cyan-50 px-3 py-1 rounded-full">
+            {currentUser?.socialAccounts.length || 0} connected
+          </div>
         </div>
 
-        {/* Connected Accounts List */}
-        <div className="bg-white rounded-lg shadow mb-6 p-6">
-          <h2 className="text-xl font-semibold mb-4">Your Connected Accounts</h2>
-          <div className="space-y-4">
+        {/* Connected Accounts */}
+        <div className="card-soft mb-8">
+          <h2 className="text-lg font-semibold text-slate-800 mb-4">Your Connected Accounts</h2>
+          <div className="space-y-3">
             {currentUser?.socialAccounts.map((account, index) => (
-              <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <div className="flex items-center space-x-3">
-                  <span className="text-2xl">{account.icon}</span>
+              <div key={index} className="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
+                <div className="flex items-center space-x-4">
+                  <div className="w-10 h-10 flex items-center justify-center bg-white rounded-full shadow-soft">
+                    <SocialIcon platform={account.platform} />
+                  </div>
                   <div>
-                    <p className="font-medium">{account.platform}</p>
-                    <p className="text-sm text-gray-600">@{account.handle}</p>
+                    <h3 className="font-medium text-slate-800">{account.platform}</h3>
+                    <p className="text-sm text-slate-500">@{account.handle}</p>
                   </div>
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-3">
                   {account.verified && (
-                    <CheckBadgeIcon className="w-5 h-5 text-green-500" />
+                    <span className="text-green-600 bg-green-50 px-2 py-1 rounded-full text-sm flex items-center">
+                      <CheckBadgeIcon className="w-4 h-4 mr-1" />
+                      Verified
+                    </span>
                   )}
-                  <a 
-                    href={getSocialMediaUrl(account.platform, account.handle)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 hover:text-blue-800"
-                  >
-                    View Profile
-                  </a>
                 </div>
               </div>
             ))}
           </div>
-
-          {/* Connect More Button */}
-          <button
-            onClick={() => setIsCustomModalOpen(true)}
-            className="mt-6 w-full btn-primary bg-gradient-to-r from-cyan-500 to-teal-600 hover:from-cyan-600 hover:to-teal-700 flex items-center justify-center space-x-2 py-2 px-4 rounded-lg text-white"
-          >
-            <PlusIcon className="w-5 h-5" />
-            <span>Connect More Accounts</span>
-          </button>
         </div>
 
-        {/* Available Platforms */}
-        <div className="bg-white rounded-lg shadow p-6 available-platforms">
-          <h2 className="text-xl font-semibold mb-4">Available Platforms</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-            {Object.entries(socialPlatforms).map(([platform, icon]) => (
+        {/* Available Platforms - Swipeable */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-lg font-semibold text-slate-800">Available Platforms</h2>
+            <div className="flex space-x-2">
               <button
-                key={platform}
-                onClick={() => setSelectedPlatform(platform)}
-                className={`p-4 rounded-lg border-2 transition-all ${
-                  selectedPlatform === platform
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-gray-200 hover:border-blue-300'
-                }`}
+                onClick={() => setCurrentPage(prev => prev > 0 ? prev - 1 : prev)}
+                disabled={currentPage === 0}
+                className="p-2 rounded-full hover:bg-slate-100 disabled:opacity-50 disabled:hover:bg-transparent"
               >
-                <div className="text-3xl mb-2">{icon}</div>
-                <div className="font-medium">{platform}</div>
+                <ChevronLeftIcon className="w-5 h-5" />
               </button>
-            ))}
+              <button
+                onClick={() => setCurrentPage(prev => prev < totalPages - 1 ? prev + 1 : prev)}
+                disabled={currentPage === totalPages - 1}
+                className="p-2 rounded-full hover:bg-slate-100 disabled:opacity-50 disabled:hover:bg-transparent"
+              >
+                <ChevronRightIcon className="w-5 h-5" />
+              </button>
+            </div>
           </div>
 
-          {/* Username Input */}
-          {selectedPlatform && (
-            <div className="mt-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Your {selectedPlatform} Username
-              </label>
-              <div className="flex space-x-2">
-                <input
-                  type="text"
-                  value={usernameInput}
-                  onChange={(e) => setUsernameInput(e.target.value)}
-                  placeholder={`Enter your ${selectedPlatform} username`}
-                  className="flex-1 rounded-lg border-gray-300"
-                />
-                <button
-                  onClick={handleConfirmUsername}
-                  disabled={!usernameInput.trim()}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg disabled:opacity-50"
+          {/* Swipe instruction for mobile */}
+          <div className="text-center text-sm text-slate-500 mb-4 md:hidden">
+            ← Swipe to navigate between platforms →
+          </div>
+
+          {/* Swipeable platform grid */}
+          <div 
+            className="grid grid-cols-2 sm:grid-cols-3 gap-4"
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+          >
+            {currentPlatforms.map(([platform, icon]) => {
+              const isConnected = currentUser?.socialAccounts.some(
+                account => account.platform === platform
+              )
+
+              return (
+                <div
+                  key={platform}
+                  className={`relative p-4 rounded-xl border-2 transition-all ${
+                    isConnected
+                      ? 'border-green-200 bg-green-50'
+                      : selectedPlatform === platform
+                      ? 'border-cyan-500 bg-cyan-50'
+                      : 'border-slate-200 hover:border-cyan-200'
+                  }`}
                 >
-                  <CheckBadgeIcon className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-          )}
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 flex items-center justify-center bg-white rounded-full shadow-soft">
+                      <SocialIcon platform={platform} />
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-slate-800">{platform}</h3>
+                      {isConnected ? (
+                        <span className="text-xs text-green-600 flex items-center">
+                          <CheckBadgeIcon className="w-3 h-3 mr-1" />
+                          Connected
+                        </span>
+                      ) : (
+                        <button
+                          onClick={() => setSelectedPlatform(platform)}
+                          className="text-xs text-cyan-600 hover:text-cyan-700"
+                        >
+                          Connect →
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {selectedPlatform === platform && (
+                    <div className="mt-4 space-y-3">
+                      <input
+                        type="text"
+                        value={usernameInput}
+                        onChange={(e) => setUsernameInput(e.target.value)}
+                        placeholder={`Your ${platform} username`}
+                        className="w-full px-3 py-2 rounded-lg border border-cyan-200 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
+                      />
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => {
+                            handleConnect(platform)
+                            setSelectedPlatform(null)
+                            setUsernameInput('')
+                          }}
+                          disabled={!usernameInput.trim()}
+                          className="flex-1 btn-primary disabled:opacity-50"
+                        >
+                          Connect
+                        </button>
+                        <button
+                          onClick={() => {
+                            setSelectedPlatform(null)
+                            setUsernameInput('')
+                          }}
+                          className="px-3 py-2 text-slate-600 hover:bg-slate-100 rounded-lg"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
         </div>
 
-        {/* Custom Platform Modal */}
-        <CustomPlatformModal
-          isOpen={isCustomModalOpen}
-          onClose={() => setIsCustomModalOpen(false)}
-          onConnect={handleCustomPlatformConnect}
-        />
+        {/* Trust Score Message */}
+        <div className="card-soft bg-gradient-to-br from-cyan-50 to-teal-50">
+          <div className="flex items-start space-x-4">
+            <div className="p-2 bg-white rounded-full">
+              <BoltIcon className="w-6 h-6 text-cyan-500" />
+            </div>
+            <div>
+              <h3 className="font-medium text-slate-800 mb-1">Boost Your Trust Score</h3>
+              <p className="text-sm text-slate-600">
+                Connect and verify more social accounts to increase your trust score. Each verified account adds to your credibility in the community.
+              </p>
+              <div className="mt-3 text-sm">
+                <span className="text-cyan-600 font-medium">Pro Tip:</span>
+                <span className="text-slate-600"> Add at least 5 accounts to unlock special features!</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </Layout>
   )
