@@ -375,7 +375,7 @@ export default function CommentThreadPage() {
                 {' '}• {new Date(review.timestamp).toLocaleDateString()}
               </p>
             </div>
-            <TrustBadge score={review.trustScore} size="sm" />
+            <TrustBadge score={reviewer?.trustScore || 0} size="sm" />
           </div>
           
           <div className="mb-4">
@@ -387,10 +387,9 @@ export default function CommentThreadPage() {
           <p className="text-slate-700 mb-4">{review.content}</p>
           
           <div className="flex items-center space-x-4 text-sm text-slate-500">
-            <span>⭐ {review.rating}/5</span>
-            <span>👍 {review.upvotes}</span>
-            <span>👎 {review.downvotes}</span>
-            <span>✅ {review.communityValidation}% validated</span>
+            <span className={`${review.votes > 0 ? 'text-trust-excellent' : review.votes < 0 ? 'text-orange-500' : 'text-slate-500'}`}>
+              {review.votes > 0 ? `+${review.votes}` : review.votes} votes
+            </span>
           </div>
         </div>
 
