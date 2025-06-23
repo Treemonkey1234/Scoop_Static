@@ -28,13 +28,30 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
   const hasMovedRef = useRef(false)
   const stickyTimeoutRef = useRef<NodeJS.Timeout>()
 
-  const THRESHOLD = 15  // Pixels to trigger vote (reduced from 25)
   const STICKY_DURATION = 1500  // How long cone sticks in position
-  const MAX_DRAG_RANGE = 80  // Maximum drag distance (increased from 60)
+  const COUNTER_SHOW_THRESHOLD = 20  // Distance from center before showing vote counter
+  
+  // Calculate dynamic thresholds based on container height
+  const getContainerDimensions = () => {
+    if (!containerRef.current) return { height: 200, threshold: 60, maxRange: 80 }
+    
+    const rect = containerRef.current.getBoundingClientRect()
+    const height = rect.height
+    
+    // Use 70% of container height as threshold to reach voting zones
+    const threshold = Math.floor(height * 0.35)  // Half height minus some buffer
+    const maxRange = Math.floor(height * 0.45)   // Slightly more than threshold
+    
+    // Debug logging
+    console.log(`Container height: ${height}px, threshold: ${threshold}px, maxRange: ${maxRange}px`)
+    
+    return { height, threshold, maxRange }
+  }
 
   // Calculate live vote preview
   const getVotePreview = () => {
-    if (!isDragging || Math.abs(dragY) < THRESHOLD) {
+    const { threshold } = getContainerDimensions()
+    if (!isDragging || Math.abs(dragY) < threshold) {
       return { upvotes, downvotes, willVote: false, voteType: null }
     }
     
@@ -73,7 +90,7 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
     startPosRef.current = { x: clientX, y: clientY }
     hasMovedRef.current = false
     setIsDragging(true)
-    setShowVoteCounter(true)
+    setShowVoteCounter(false)  // Don't show immediately
     setIsSticking(false)
     setFeedbackMessage('')
     clearTimeouts()
@@ -83,36 +100,51 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
   const updateDrag = useCallback((clientX: number, clientY: number) => {
     if (!isDragging || isSticking) return
     
+    const { threshold, maxRange } = getContainerDimensions()
     const deltaY = clientY - startPosRef.current.y
-    // Use the new MAX_DRAG_RANGE constant
-    const constrainedY = Math.max(-MAX_DRAG_RANGE, Math.min(MAX_DRAG_RANGE, deltaY))
+    // Use the dynamic maxRange
+    const constrainedY = Math.max(-maxRange, Math.min(maxRange, deltaY))
     
-    // Track if user has moved enough to count as intentional drag (reduced threshold)
+    // Track if user has moved enough to count as intentional drag
     if (Math.abs(deltaY) > 3) {
       hasMovedRef.current = true
     }
     
+    // Show vote counter only after moving away from center
+    if (Math.abs(constrainedY) > COUNTER_SHOW_THRESHOLD && !showVoteCounter) {
+      setShowVoteCounter(true)
+    }
+    
+    // Implement auto-sticking when reaching extremes
+    if (Math.abs(constrainedY) >= threshold && !isSticking) {
+      setIsSticking(true)
+      const stickyPosition = constrainedY < 0 ? -threshold : threshold
+      setDragY(stickyPosition)
+      setFeedbackMessage(constrainedY < 0 ? '👍 Ready to Vote' : '👎 Ready to Vote')
+      return
+    }
+    
     setDragY(constrainedY)
-  }, [isDragging, isSticking])
+  }, [isDragging, isSticking, showVoteCounter])
 
   // End dragging with vote registration and sticking
   const endDrag = useCallback(() => {
     if (!isDragging) return
     
     const preview = getVotePreview()
+    const { threshold } = getContainerDimensions()
     
     // Reset dragging state first
     setIsDragging(false)
     
-    // Register vote if threshold met and user actually moved
-    if (preview.willVote && hasMovedRef.current && preview.voteType) {
+    // Register vote if at extreme position and user actually moved
+    if (isSticking && hasMovedRef.current && preview.voteType) {
       onVote(postId, preview.voteType)
       
-      // Show sticky behavior with better positioning
-      setIsSticking(true)
-      const stickyPosition = preview.voteType === 'up' ? -50 : 50  // Increased from 40
+      // Keep sticky behavior after voting with confirmation
+      const stickyPosition = preview.voteType === 'up' ? -threshold : threshold
       setDragY(stickyPosition)
-      setFeedbackMessage(preview.voteType === 'up' ? 'Upvoted! 👍' : 'Downvoted! 👎')
+      setFeedbackMessage(preview.voteType === 'up' ? '👍 +1' : '👎 -1')
       
       // Return to center after sticky duration
       clearTimeouts()
@@ -124,13 +156,14 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
       }, STICKY_DURATION)
     } else {
       // No vote - return to center immediately
+      setIsSticking(false)
       setDragY(0)
       setShowVoteCounter(false)
       setFeedbackMessage('')
     }
     
     hasMovedRef.current = false
-  }, [isDragging, dragY, postId, onVote])
+  }, [isDragging, isSticking, postId, onVote])
 
   // Mouse handlers
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
@@ -186,13 +219,15 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
   }, [])
 
   const preview = getVotePreview()
-  const isUpZone = dragY < -THRESHOLD  // Use actual threshold instead of -10
-  const isDownZone = dragY > THRESHOLD  // Use actual threshold instead of 10
+  const { threshold } = getContainerDimensions()
+  const isUpZone = dragY < -COUNTER_SHOW_THRESHOLD
+  const isDownZone = dragY > COUNTER_SHOW_THRESHOLD
+  const isVoteReady = Math.abs(dragY) >= threshold
 
   return (
     <div 
       ref={containerRef}
-      className="flex flex-col items-center justify-between h-full w-14 rounded-xl border border-slate-200 shadow-sm p-2 relative overflow-hidden select-none bg-slate-50"
+      className="flex flex-col items-center justify-between h-full w-14 rounded-xl border border-slate-200 shadow-sm p-1 relative overflow-visible select-none bg-slate-50"
       style={{
         background: isDragging && preview.willVote ? 
           (preview.voteType === 'up' ? 'linear-gradient(to bottom, rgba(34, 197, 94, 0.2), rgba(248, 250, 252, 1))' :
@@ -201,12 +236,12 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
       }}
     >
       {/* Upvote Zone Indicator */}
-      <div className={`w-full h-8 rounded-t-lg flex items-center justify-center transition-all duration-200 ${
-        isDragging && preview.willVote && preview.voteType === 'up' ? 'bg-green-500/40 scale-110' : 
+      <div className={`w-full h-12 rounded-t-lg flex items-center justify-center transition-all duration-200 ${
+        isSticking && dragY < 0 ? 'bg-green-500/50 scale-110 animate-pulse' : 
         isDragging && isUpZone ? 'bg-green-400/30' : 'opacity-40'
       }`}>
-        <span className={`text-sm font-bold transition-all duration-200 ${
-          isDragging && preview.willVote && preview.voteType === 'up' ? 'text-green-700 scale-125' : 'text-green-600'
+        <span className={`text-lg font-bold transition-all duration-200 ${
+          isSticking && dragY < 0 ? 'text-green-700 scale-125' : 'text-green-600'
         }`}>↑</span>
       </div>
 
@@ -314,17 +349,17 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
             'bg-green-200/90 text-green-800 border-green-400' :
             'bg-red-200/90 text-red-800 border-red-400'
         }`}>
-          {preview.voteType === 'up' ? '✓ UPVOTE 👍' : '✓ DOWNVOTE 👎'}
+          {preview.voteType === 'up' ? '👍 +1' : '👎 -1'}
         </div>
       )}
 
       {/* Downvote Zone Indicator */}
-      <div className={`w-full h-8 rounded-b-lg flex items-center justify-center transition-all duration-200 ${
-        isDragging && preview.willVote && preview.voteType === 'down' ? 'bg-red-500/40 scale-110' : 
+      <div className={`w-full h-12 rounded-b-lg flex items-center justify-center transition-all duration-200 ${
+        isSticking && dragY > 0 ? 'bg-red-500/50 scale-110 animate-pulse' : 
         isDragging && isDownZone ? 'bg-red-400/30' : 'opacity-40'
       }`}>
-        <span className={`text-sm font-bold transition-all duration-200 ${
-          isDragging && preview.willVote && preview.voteType === 'down' ? 'text-red-700 scale-125' : 'text-red-600'
+        <span className={`text-lg font-bold transition-all duration-200 ${
+          isSticking && dragY > 0 ? 'text-red-700 scale-125' : 'text-red-600'
         }`}>↓</span>
       </div>
 
