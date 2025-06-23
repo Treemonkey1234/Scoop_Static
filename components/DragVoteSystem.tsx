@@ -38,9 +38,10 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
     const rect = containerRef.current.getBoundingClientRect()
     const height = rect.height
     
-    // Use 70% of container height as threshold to reach voting zones
-    const threshold = Math.floor(height * 0.35)  // Half height minus some buffer
-    const maxRange = Math.floor(height * 0.45)   // Slightly more than threshold
+    // Use 90% of container height as maxRange to ensure full reach
+    const maxRange = Math.floor(height * 0.9)   // Increased from 0.45 to 0.9 to allow much further movement
+    // Use 80% of maxRange as threshold to ensure sticking point is reachable
+    const threshold = Math.floor(maxRange * 0.8)  // Adjusted to be relative to maxRange
     
     // Debug logging
     console.log(`Container height: ${height}px, threshold: ${threshold}px, maxRange: ${maxRange}px`)
@@ -240,9 +241,14 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
         isSticking && dragY < 0 ? 'bg-green-500/50 scale-110 animate-pulse' : 
         isDragging && isUpZone ? 'bg-green-400/30' : 'opacity-40'
       }`}>
-        <span className={`text-lg font-bold transition-all duration-200 ${
-          isSticking && dragY < 0 ? 'text-green-700 scale-125' : 'text-green-600'
-        }`}>↑</span>
+        <div className="flex flex-col items-center">
+          <span className={`text-lg font-bold transition-all duration-200 ${
+            isSticking && dragY < 0 ? 'text-green-700 scale-125' : 'text-green-600'
+          }`}>↑</span>
+          {(showVoteCounter || isSticking) && dragY < 0 && (
+            <span className="text-sm font-semibold text-green-700">{preview.upvotes}</span>
+          )}
+        </div>
       </div>
 
       {/* Ice Cream Cone */}
@@ -317,27 +323,26 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
         </svg>
       </div>
 
-      {/* Live Vote Counter */}
-      {(showVoteCounter || feedbackMessage) && (
-        <div className="absolute top-1/2 left-16 transform -translate-y-1/2 z-40 bg-white/95 backdrop-blur-sm border border-slate-300 rounded-lg px-4 py-3 shadow-lg animate-in slide-in-from-left duration-200">
-          <div className="text-sm font-semibold text-slate-700 space-y-1 min-w-[50px]">
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-green-600">👍</span>
-              <span className={`font-mono tabular-nums ${preview.willVote && preview.voteType === 'up' ? 'text-green-700 font-bold' : ''}`}>
-                {preview.upvotes}
-              </span>
-            </div>
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-red-600">👎</span>
-              <span className={`font-mono tabular-nums ${preview.willVote && preview.voteType === 'down' ? 'text-red-700 font-bold' : ''}`}>
-                {preview.downvotes}
-              </span>
-            </div>
-            {feedbackMessage && (
-              <div className="text-xs text-center text-slate-600 mt-1 pt-1 border-t border-slate-200">
-                {feedbackMessage}
-              </div>
-            )}
+      {/* Downvote Zone Indicator */}
+      <div className={`w-full h-12 rounded-b-lg flex items-center justify-center transition-all duration-200 ${
+        isSticking && dragY > 0 ? 'bg-red-500/50 scale-110 animate-pulse' : 
+        isDragging && isDownZone ? 'bg-red-400/30' : 'opacity-40'
+      }`}>
+        <div className="flex flex-col items-center">
+          <span className={`text-lg font-bold transition-all duration-200 ${
+            isSticking && dragY > 0 ? 'text-red-700 scale-125' : 'text-red-600'
+          }`}>↓</span>
+          {(showVoteCounter || isSticking) && dragY > 0 && (
+            <span className="text-sm font-semibold text-red-700">{preview.downvotes}</span>
+          )}
+        </div>
+      </div>
+
+      {/* Instructions */}
+      {!isDragging && !showVoteCounter && !isSticking && (
+        <div className="absolute top-2 left-1/2 transform -translate-x-1/2 pointer-events-none z-30">
+          <div className="text-xs text-slate-500 bg-white/90 px-2 py-1 rounded-md shadow-sm border border-slate-200">
+            Drag 🍦
           </div>
         </div>
       )}
@@ -350,25 +355,6 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
             'bg-red-200/90 text-red-800 border-red-400'
         }`}>
           {preview.voteType === 'up' ? '👍 +1' : '👎 -1'}
-        </div>
-      )}
-
-      {/* Downvote Zone Indicator */}
-      <div className={`w-full h-12 rounded-b-lg flex items-center justify-center transition-all duration-200 ${
-        isSticking && dragY > 0 ? 'bg-red-500/50 scale-110 animate-pulse' : 
-        isDragging && isDownZone ? 'bg-red-400/30' : 'opacity-40'
-      }`}>
-        <span className={`text-lg font-bold transition-all duration-200 ${
-          isSticking && dragY > 0 ? 'text-red-700 scale-125' : 'text-red-600'
-        }`}>↓</span>
-      </div>
-
-      {/* Instructions */}
-      {!isDragging && !showVoteCounter && !isSticking && (
-        <div className="absolute top-2 left-1/2 transform -translate-x-1/2 pointer-events-none z-30">
-          <div className="text-xs text-slate-500 bg-white/90 px-2 py-1 rounded-md shadow-sm border border-slate-200">
-            Drag 🍦
-          </div>
         </div>
       )}
     </div>

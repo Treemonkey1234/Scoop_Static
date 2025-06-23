@@ -8,6 +8,7 @@ import TrustBadge from '@/components/TrustBadge'
 import FlagModal from '@/components/FlagModal'
 import LoadingSpinner from '@/components/LoadingSpinner'
 import DragVoteSystem from '@/components/DragVoteSystem'
+import ClassicVoteSystem from '@/components/ClassicVoteSystem'
 
 import { getCurrentUser, sampleUsers, getAllReviews, getAllEvents, User, voteOnReview } from '@/lib/sampleData'
 import { 
@@ -232,9 +233,9 @@ export default function HomePage() {
             return (
               <div key={review.id} className="card-premium hover:shadow-xl transition-all duration-300 border-cyan-200/50 overflow-hidden">
                 <div className="flex">
-                  {/* Left Drag-and-Drop Voting Section */}
+                  {/* Left Voting Section */}
                   <div className="mr-4 self-stretch w-12">
-                    <DragVoteSystem
+                    <ClassicVoteSystem
                       postId={review.id}
                       upvotes={review.upvotes}
                       downvotes={review.downvotes}

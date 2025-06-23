@@ -295,9 +295,18 @@ export default function EventsPage() {
     <Layout>
       <div className="p-4">
         {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-slate-800 mb-2">Events</h1>
-          <p className="text-slate-600">Discover and join amazing events in your community</p>
+        <div className="mb-6 flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-800 mb-2">Events</h1>
+            <p className="text-slate-600">Discover and join amazing events in your community</p>
+          </div>
+          <Link 
+            href="/my-events" 
+            className="btn-primary bg-gradient-to-r from-cyan-500 to-teal-600 hover:from-cyan-600 hover:to-teal-700 text-white py-2 px-4 rounded-xl flex items-center space-x-2"
+          >
+            <CalendarIcon className="w-5 h-5" />
+            <span>My Events</span>
+          </Link>
         </div>
 
         {/* Tabs */}
@@ -305,7 +314,7 @@ export default function EventsPage() {
           {[
             { key: 'upcoming', label: 'Upcoming', count: upcomingEvents.length },
             { key: 'past', label: 'Past', count: pastEvents.length },
-            { key: 'discover', label: 'Discover', count: '∞' }
+            { key: 'discover', label: 'Discover', count: events.length }
           ].map((tab) => (
             <button
               key={tab.key}

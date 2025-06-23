@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Layout from '@/components/Layout'
-import { getCurrentUser, User } from '@/lib/sampleData'
+import CustomPlatformModal from '@/components/CustomPlatformModal'
+import { getCurrentUser, User, SocialAccount, connectSocialAccount, socialPlatforms } from '@/lib/sampleData'
 import { 
   ArrowLeftIcon,
   PlusIcon,
@@ -73,7 +74,7 @@ const SocialIcon = ({ platform }: { platform: string }) => {
       case 'Discord':
         return (
           <svg width="24" height="24" viewBox="0 0 24 24" fill="#5865F2">
-            <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418Z"/>
+            <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418Z"/>
           </svg>
         )
       case 'Reddit':
@@ -91,7 +92,7 @@ const SocialIcon = ({ platform }: { platform: string }) => {
       case 'Telegram':
         return (
           <svg width="24" height="24" viewBox="0 0 24 24" fill="#0088CC">
-            <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+            <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.305.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
           </svg>
         )
       case 'Pinterest':
@@ -103,19 +104,19 @@ const SocialIcon = ({ platform }: { platform: string }) => {
       case 'Twitch':
         return (
           <svg width="24" height="24" viewBox="0 0 24 24" fill="#9146FF">
-            <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714Z"/>
+            <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.414V1.714h13.714Z"/>
           </svg>
         )
       case 'Steam':
         return (
           <svg width="24" height="24" viewBox="0 0 24 24" fill="#000">
-            <path d="M11.979 0C5.678 0 .511 4.86.022 11.037l6.432 2.658c.545-.371 1.203-.59 1.912-.59.063 0 .125.004.188.006l2.861-4.142V8.91c0-2.495 2.028-4.524 4.524-4.524 2.494 0 4.524 2.031 4.524 4.527s-2.030 4.525-4.524 4.525h-.105l-4.076 2.911c0 .052.004.105.004.159 0 1.875-1.515 3.396-3.39 3.396-1.635 0-3.016-1.173-3.331-2.727L.436 15.27C1.62 20.565 6.363 24.436 11.979 24c6.624.057 11.999-5.179 12.001-11.803C23.98 5.51 18.755.001 11.979 0zm-4.654 17.24l-1.665-.68c.317.652.923 1.134 1.667 1.134.995 0 1.807-.8 1.807-1.794 0-.992-.814-1.794-1.807-1.794-.28 0-.544.063-.782.177l1.713.7c.736.3 1.083 1.139.783 1.875-.297.732-1.140 1.082-1.875.783-.051-.021-.095-.049-.141-.080zm10.6-9.332c0-1.663-1.351-3.015-3.015-3.015-1.665 0-3.015 1.352-3.015 3.015 0 1.664 1.35 3.015 3.015 3.015 1.664 0 3.015-1.351 3.015-3.015zm-5.418 0c0-1.329 1.077-2.405 2.403-2.405 1.33 0 2.405 1.076 2.405 2.405 0 1.328-1.075 2.405-2.405 2.405-1.326 0-2.403-1.077-2.403-2.405z"/>
+            <path d="M11.979 0C5.678 0 .511 4.86.022 11.037l6.432 2.658c.545-.371 1.203-.59 1.912-.59.063 0 .125.004.188.006l2.861-4.142V8.91c0-2.495 2.028-4.524 4.524-4.524 2.494 0 4.524 2.031 4.524 4.527s-2.030 4.525-4.524 4.525h-.105l-4.076 2.911c0 .052.004.105.004.159 0 1.875-1.515 3.396-3.39 3.396-1.635 0-3.016-1.173-3.331-2.727L.436 15.27C1.62 20.565 6.363 24.436 11.979 24c6.624.057 11.89-5.179 12.001-11.803C23.98 5.51 18.755.001 11.979 0zm-4.654 17.24l-1.665-.68c.317.652.923 1.134 1.667 1.134.995 0 1.807-.8 1.807-1.794 0-.992-.814-1.794-1.807-1.794-.28 0-.544.063-.782.177l1.713.7c.736.3 1.083 1.139.783 1.875-.297.732-1.140 1.082-1.875.783-.051-.021-.095-.049-.141-.080zm10.6-9.332c0-1.663-1.351-3.015-3.015-3.015-1.665 0-3.015 1.352-3.015 3.015 0 1.664 1.35 3.015 3.015 3.015 1.664 0 3.015-1.351 3.015-3.015zm-5.418 0c0-1.329 1.077-2.405 2.403-2.405 1.33 0 2.405 1.076 2.405 2.405 0 1.328-1.075 2.405-2.405 2.405-1.326 0-2.403-1.077-2.403-2.405z"/>
           </svg>
         )
       case 'Signal':
         return (
           <svg width="24" height="24" viewBox="0 0 24 24" fill="#3A76F0">
-            <path d="M12.006 0C5.374 0 0 5.373 0 12.006S5.374 24.012 12.006 24.012c6.628 0 12.006-5.373 12.006-12.006S18.634.001 12.006.001zm5.618 8.177l-2.786 13.15c-.208.98-.757 1.223-1.535.761l-4.244-3.126-2.047 1.97c-.227.226-.416.415-.853.415l.305-4.317 7.865-7.112c.342-.305-.074-.475-.531-.17L6.305 14.235l-4.165-1.300c-.906-.283-.923-.906.189-1.34L17.618 6.22c.758-.283 1.42.17 1.174 1.197l-.168.76z"/>
+            <path d="M12.006 0C5.374 0 0 5.373 0 12.006S5.374 24.012 12.006 24.012c6.628 0 12.006-5.373 12.006-12.006S18.634.001 12.006.001zm5.618 8.177l-2.786 13.15c-.208.98-.757 1.223-1.535.761l-4.244-3.126-2.047 1.97c-.227.226-.416.415-.853.415l.305-4.317 7.865-7.112c.342-.305-.074-.475-.531-.17L17.618 6.22c.758-.283 1.42.17 1.174 1.197l-.168.76z"/>
           </svg>
         )
       case 'Clubhouse':
@@ -129,7 +130,7 @@ const SocialIcon = ({ platform }: { platform: string }) => {
       case 'BeReal':
         return (
           <svg width="24" height="24" viewBox="0 0 24 24" fill="#000">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-12S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
             <circle cx="9" cy="9" r="1.5"/>
             <circle cx="15" cy="9" r="1.5"/>
             <path d="M12 17.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/>
@@ -148,288 +149,200 @@ const SocialIcon = ({ platform }: { platform: string }) => {
   return <div className="w-6 h-6">{getIcon()}</div>
 }
 
-export default function ConnectedAccountsPage() {
+export default function ConnectedAccounts() {
   const [currentUser, setCurrentUser] = useState<User | null>(null)
-  const [currentPage, setCurrentPage] = useState(0)
   const [selectedPlatform, setSelectedPlatform] = useState<string | null>(null)
   const [usernameInput, setUsernameInput] = useState('')
-  const [startX, setStartX] = useState(0)
+  const [currentPage, setCurrentPage] = useState(0)
+  const [isCustomModalOpen, setIsCustomModalOpen] = useState(false)
 
   useEffect(() => {
     const user = getCurrentUser()
     setCurrentUser(user)
   }, [])
 
-  const handleFlagAccount = (platform: string, handle: string) => {
-    // In a real app, this would open a flag modal
-    alert(`Flag ${platform} account (${handle}) functionality would open here`)
-  }
-
-  // All available platforms organized by pages
-  const allPlatforms = [
-    // Page 1
-    ['Instagram', 'Facebook', 'Twitter', 'LinkedIn', 'TikTok', 'Snapchat'],
-    // Page 2  
-    ['YouTube', 'Discord', 'Reddit', 'GitHub', 'WhatsApp', 'Telegram'],
-    // Page 3
-    ['Pinterest', 'Twitch', 'Steam', 'Signal', 'Clubhouse', 'BeReal']
-  ]
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    setStartX(e.touches[0].clientX)
-  }
-
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    const endX = e.changedTouches[0].clientX
-    const diff = startX - endX
-
-    if (Math.abs(diff) > 50) { // Minimum swipe distance
-      if (diff > 0 && currentPage < allPlatforms.length - 1) {
-        // Swipe left - next page
-        setCurrentPage(currentPage + 1)
-        setSelectedPlatform(null) // Close any open input
-      } else if (diff < 0 && currentPage > 0) {
-        // Swipe right - previous page
-        setCurrentPage(currentPage - 1)
-        setSelectedPlatform(null) // Close any open input
-      }
-    }
-  }
-
-  const handlePlatformClick = (platform: string) => {
-    if (selectedPlatform === platform) {
-      setSelectedPlatform(null)
-      setUsernameInput('')
-    } else {
-      setSelectedPlatform(platform)
-      setUsernameInput('')
-    }
-  }
-
   const handleConfirmUsername = () => {
-    if (usernameInput.trim()) {
-      // In a real app, this would save the account connection
-      alert(`Connecting ${selectedPlatform} account: ${usernameInput}`)
+    if (usernameInput.trim() && selectedPlatform && currentUser) {
+      // Add the new social account immediately
+      const newAccount: SocialAccount = {
+        platform: selectedPlatform,
+        handle: usernameInput.trim(),
+        verified: false,
+        icon: socialPlatforms[selectedPlatform as keyof typeof socialPlatforms] || '🔗'
+      }
+      
+      const updatedUser = {
+        ...currentUser,
+        socialAccounts: [...currentUser.socialAccounts, newAccount]
+      }
+      
+      // Update local storage and state immediately
+      localStorage.setItem('currentUser', JSON.stringify(updatedUser))
+      setCurrentUser(updatedUser)
+      
+      // Reset state
       setSelectedPlatform(null)
       setUsernameInput('')
     }
   }
 
-  const handleCancelUsername = () => {
-    setSelectedPlatform(null)
-    setUsernameInput('')
+  const handleCustomPlatformConnect = (website: string, username: string) => {
+    if (currentUser) {
+      // Create a platform name from the website
+      const platformName = website.replace(/^(?:https?:\/\/)?(?:www\.)?([^/]+).*$/, '$1')
+      
+      const newAccount: SocialAccount = {
+        platform: platformName,
+        handle: username,
+        verified: false,
+        icon: '🔗' // Default icon for custom platforms
+      }
+      
+      const updatedUser = {
+        ...currentUser,
+        socialAccounts: [...currentUser.socialAccounts, newAccount]
+      }
+      
+      // Update local storage
+      localStorage.setItem('currentUser', JSON.stringify(updatedUser))
+      setCurrentUser(updatedUser)
+    }
   }
 
-  if (!currentUser) {
-    return (
-      <Layout>
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="w-8 h-8 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
-        </div>
-      </Layout>
-    )
+  const getSocialMediaUrl = (platform: string, handle: string): string => {
+    // Handle custom platforms
+    if (!socialPlatforms[platform as keyof typeof socialPlatforms]) {
+      return `https://${platform}/${handle}`
+    }
+    
+    switch (platform) {
+      case 'Facebook':
+        return `https://facebook.com/${handle}`
+      case 'Twitter':
+        return `https://twitter.com/${handle}`
+      case 'Instagram':
+        return `https://instagram.com/${handle}`
+      case 'LinkedIn':
+        return `https://linkedin.com/in/${handle}`
+      case 'TikTok':
+        return `https://tiktok.com/@${handle}`
+      case 'YouTube':
+        return `https://youtube.com/@${handle}`
+      case 'GitHub':
+        return `https://github.com/${handle}`
+      case 'Discord':
+        return `https://discord.com/users/${handle}`
+      case 'Reddit':
+        return `https://reddit.com/user/${handle}`
+      case 'Twitch':
+        return `https://twitch.tv/${handle}`
+      default:
+        return '#'
+    }
   }
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
-  }
-
-  // Filter out already connected platforms from current page
-  const currentPagePlatforms = allPlatforms[currentPage]?.filter(
-    platform => !currentUser?.socialAccounts.some(account => account.platform === platform)
-  ) || []
 
   return (
     <Layout>
-      <div className="p-4 space-y-6">
-        {/* Header */}
-        <div className="flex items-center space-x-4 mb-6">
-          <Link
-            href="/profile"
-            className="p-2 rounded-xl bg-white shadow-sm hover:shadow-md transition-all duration-200"
-          >
-            <ArrowLeftIcon className="w-5 h-5 text-slate-600" />
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        <div className="mb-8 flex items-center">
+          <Link href="/profile" className="mr-4">
+            <ArrowLeftIcon className="w-6 h-6" />
           </Link>
-          <h1 className="text-2xl font-bold text-slate-800">Connected Accounts</h1>
+          <h1 className="text-2xl font-bold">Connected Accounts</h1>
         </div>
 
         {/* Connected Accounts List */}
-        <div className="space-y-4">
-          {currentUser.socialAccounts.map((account, index) => (
-            <div key={index} className="card-soft hover:shadow-md transition-all duration-200">
-              <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-cyan-100 to-teal-100 rounded-xl flex items-center justify-center border border-cyan-200">
-                  <SocialIcon platform={account.platform} />
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center space-x-2">
-                    <h3 className="font-semibold text-slate-800">{account.platform}</h3>
-                    {account.verified && (
-                      <CheckBadgeIcon className="w-4 h-4 text-cyan-500" />
-                    )}
+        <div className="bg-white rounded-lg shadow mb-6 p-6">
+          <h2 className="text-xl font-semibold mb-4">Your Connected Accounts</h2>
+          <div className="space-y-4">
+            {currentUser?.socialAccounts.map((account, index) => (
+              <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div className="flex items-center space-x-3">
+                  <span className="text-2xl">{account.icon}</span>
+                  <div>
+                    <p className="font-medium">{account.platform}</p>
+                    <p className="text-sm text-gray-600">@{account.handle}</p>
                   </div>
-                  <p className="text-slate-600">{account.handle}</p>
-                  <p className="text-sm text-slate-500">Connected since: {formatDate(currentUser.joinDate)}</p>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <button 
-                    onClick={() => handleFlagAccount(account.platform, account.handle)}
-                    className="p-2 rounded-lg hover:bg-red-50 text-red-500 transition-all duration-200"
-                    title="Flag this account"
+                  {account.verified && (
+                    <CheckBadgeIcon className="w-5 h-5 text-green-500" />
+                  )}
+                  <a 
+                    href={getSocialMediaUrl(account.platform, account.handle)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:text-blue-800"
                   >
-                    <FlagIcon className="w-4 h-4" />
-                  </button>
-                  <button className="text-sm text-red-600 hover:text-red-700 font-medium">
-                    Disconnect
-                  </button>
+                    View Profile
+                  </a>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
 
-          {currentUser.socialAccounts.length === 0 && (
-            <div className="card-soft text-center py-8">
-              <div className="text-4xl mb-4">🔗</div>
-              <h3 className="text-lg font-semibold text-slate-800 mb-2">No Connected Accounts</h3>
-              <p className="text-slate-600 mb-4">Connect your social media accounts to boost your trust score!</p>
+          {/* Connect More Button */}
+          <button
+            onClick={() => setIsCustomModalOpen(true)}
+            className="mt-6 w-full btn-primary bg-gradient-to-r from-cyan-500 to-teal-600 hover:from-cyan-600 hover:to-teal-700 flex items-center justify-center space-x-2 py-2 px-4 rounded-lg text-white"
+          >
+            <PlusIcon className="w-5 h-5" />
+            <span>Connect More Accounts</span>
+          </button>
+        </div>
+
+        {/* Available Platforms */}
+        <div className="bg-white rounded-lg shadow p-6 available-platforms">
+          <h2 className="text-xl font-semibold mb-4">Available Platforms</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            {Object.entries(socialPlatforms).map(([platform, icon]) => (
+              <button
+                key={platform}
+                onClick={() => setSelectedPlatform(platform)}
+                className={`p-4 rounded-lg border-2 transition-all ${
+                  selectedPlatform === platform
+                    ? 'border-blue-500 bg-blue-50'
+                    : 'border-gray-200 hover:border-blue-300'
+                }`}
+              >
+                <div className="text-3xl mb-2">{icon}</div>
+                <div className="font-medium">{platform}</div>
+              </button>
+            ))}
+          </div>
+
+          {/* Username Input */}
+          {selectedPlatform && (
+            <div className="mt-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Your {selectedPlatform} Username
+              </label>
+              <div className="flex space-x-2">
+                <input
+                  type="text"
+                  value={usernameInput}
+                  onChange={(e) => setUsernameInput(e.target.value)}
+                  placeholder={`Enter your ${selectedPlatform} username`}
+                  className="flex-1 rounded-lg border-gray-300"
+                />
+                <button
+                  onClick={handleConfirmUsername}
+                  disabled={!usernameInput.trim()}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg disabled:opacity-50"
+                >
+                  <CheckBadgeIcon className="w-5 h-5" />
+                </button>
+              </div>
             </div>
           )}
         </div>
 
-        {/* Enhanced Available Platforms with Swipe Navigation */}
-        {currentPagePlatforms.length > 0 && (
-          <div className="card-soft">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-slate-800">Available Platforms</h3>
-              <div className="flex space-x-2">
-                {allPlatforms.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => {
-                      setCurrentPage(index)
-                      setSelectedPlatform(null)
-                    }}
-                    className={`w-2 h-2 rounded-full transition-all duration-200 ${
-                      currentPage === index ? 'bg-cyan-500' : 'bg-slate-300'
-                    }`}
-                  />
-                ))}
-              </div>
-            </div>
-            
-            <div className="text-center text-sm text-slate-500 mb-4">
-              Page {currentPage + 1} of {allPlatforms.length} • Swipe to navigate
-            </div>
-
-            <div 
-              className="grid grid-cols-2 gap-3"
-              onTouchStart={handleTouchStart}
-              onTouchEnd={handleTouchEnd}
-            >
-              {currentPagePlatforms.map((platform) => (
-                <div key={platform} className="space-y-3">
-                  {selectedPlatform === platform ? (
-                    // Username input mode
-                    <div className="p-3 rounded-xl border-2 border-cyan-300 bg-cyan-50">
-                      <div className="flex items-center space-x-2 mb-3">
-                        <SocialIcon platform={platform} />
-                        <span className="font-medium text-slate-700">{platform}</span>
-                      </div>
-                      <input
-                        type="text"
-                        value={usernameInput}
-                        onChange={(e) => setUsernameInput(e.target.value)}
-                        placeholder={`Enter your ${platform} username...`}
-                        className="w-full p-2 text-sm border border-cyan-200 rounded-lg focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 transition-all duration-200"
-                        autoFocus
-                      />
-                      <div className="flex items-center justify-end space-x-2 mt-2">
-                        <button
-                          onClick={handleCancelUsername}
-                          className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-all duration-200"
-                        >
-                          ✗
-                        </button>
-                        <button
-                          onClick={handleConfirmUsername}
-                          disabled={!usernameInput.trim()}
-                          className="p-2 text-green-500 hover:bg-green-50 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          ✓
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    // Regular platform button
-                    <button
-                      onClick={() => handlePlatformClick(platform)}
-                      className="flex items-center space-x-3 p-3 rounded-xl border border-slate-200 hover:border-cyan-300 hover:bg-cyan-50 transition-all duration-200"
-                    >
-                      <SocialIcon platform={platform} />
-                      <span className="font-medium text-slate-700">{platform}</span>
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            {/* Navigation buttons for non-touch devices */}
-            <div className="flex items-center justify-between mt-4">
-              <button
-                onClick={() => {
-                  if (currentPage > 0) {
-                    setCurrentPage(currentPage - 1)
-                    setSelectedPlatform(null)
-                  }
-                }}
-                disabled={currentPage === 0}
-                className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-slate-600 hover:text-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <span>←</span>
-                <span>Previous</span>
-              </button>
-              
-              <button
-                onClick={() => {
-                  if (currentPage < allPlatforms.length - 1) {
-                    setCurrentPage(currentPage + 1)
-                    setSelectedPlatform(null)
-                  }
-                }}
-                disabled={currentPage === allPlatforms.length - 1}
-                className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-slate-600 hover:text-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <span>Next</span>
-                <span>→</span>
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Connect More Button */}
-        <button className="w-full btn-primary bg-gradient-to-r from-cyan-500 to-teal-600 hover:from-cyan-600 hover:to-teal-700 flex items-center justify-center space-x-2">
-          <PlusIcon className="w-5 h-5" />
-          <span>Connect More Accounts</span>
-        </button>
-
-        {/* Trust Score Boost Info */}
-        <div className="card-soft bg-gradient-to-r from-cyan-50 to-teal-50 border-cyan-200">
-          <h3 className="text-lg font-semibold text-slate-800 mb-2">📈 Boost Your Trust Score</h3>
-          <p className="text-slate-600 text-sm mb-3">
-            Each verified social media account increases your trust score. Connect more platforms to build community confidence!
-          </p>
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div>
-              <span className="font-medium text-cyan-700">+10 points</span>
-              <span className="text-slate-600"> per account</span>
-            </div>
-            <div>
-              <span className="font-medium text-cyan-700">+5 bonus</span>
-              <span className="text-slate-600"> if verified</span>
-            </div>
-          </div>
-        </div>
+        {/* Custom Platform Modal */}
+        <CustomPlatformModal
+          isOpen={isCustomModalOpen}
+          onClose={() => setIsCustomModalOpen(false)}
+          onConnect={handleCustomPlatformConnect}
+        />
       </div>
     </Layout>
   )

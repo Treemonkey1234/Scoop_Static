@@ -451,7 +451,7 @@ export default function AnalyticsPage() {
           <div className="space-y-3">
             <div className="flex items-center space-x-3 p-3 bg-white/80 rounded-xl">
               <div className="w-2 h-2 bg-cyan-500 rounded-full"></div>
-              <span className="text-sm text-slate-700">Connect more social accounts (Currently {analytics.social.connectedAccounts})</span>
+              <span className="text-sm text-slate-700">Verify your social accounts to build community trust</span>
             </div>
             <div className="flex items-center space-x-3 p-3 bg-white/80 rounded-xl">
               <div className="w-2 h-2 bg-teal-500 rounded-full"></div>

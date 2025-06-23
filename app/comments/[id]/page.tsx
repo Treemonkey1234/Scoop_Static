@@ -14,6 +14,7 @@ import {
 } from '@heroicons/react/24/outline'
 import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid'
 import Image from 'next/image'
+import Link from 'next/link'
 
 export default function CommentThreadPage() {
   const params = useParams()
@@ -113,7 +114,11 @@ export default function CommentThreadPage() {
                   height={24}
                   className="rounded-full"
                 />
-                <span className="font-medium text-slate-800">{commenter.name}</span>
+                <Link href={`/user/${commenter.id}`}>
+                  <span className="font-medium text-slate-800 hover:text-cyan-600 transition-colors duration-200">
+                    {commenter.name}
+                  </span>
+                </Link>
                 <TrustBadge score={commenter.trustScore} size="sm" />
                 <span className="text-xs text-slate-500">
                   {new Date(comment.timestamp).toLocaleDateString()}
@@ -355,9 +360,19 @@ export default function CommentThreadPage() {
               className="rounded-full"
             />
             <div>
-              <h3 className="font-semibold text-slate-800">{reviewer?.name}</h3>
+              <Link href={`/user/${reviewer?.id}`}>
+                <h3 className="font-semibold text-slate-800 hover:text-cyan-600 transition-colors duration-200">
+                  {reviewer?.name}
+                </h3>
+              </Link>
               <p className="text-sm text-slate-500">
-                reviewed {reviewed?.name} • {new Date(review.timestamp).toLocaleDateString()}
+                reviewed{' '}
+                <Link href={`/user/${reviewed?.id}`}>
+                  <span className="hover:text-cyan-600 transition-colors duration-200">
+                    {reviewed?.name}
+                  </span>
+                </Link>
+                {' '}• {new Date(review.timestamp).toLocaleDateString()}
               </p>
             </div>
             <TrustBadge score={review.trustScore} size="sm" />

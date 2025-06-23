@@ -24,6 +24,43 @@ export default function UserProfilePage() {
   const user = sampleUsers.find(u => u.id === userId)
   const userReviews = sampleReviews.filter(r => r.reviewedId === userId)
 
+  const getSocialMediaUrl = (platform: string, handle: string): string => {
+    switch (platform) {
+      case 'Facebook':
+        return `https://facebook.com/${handle}`
+      case 'Twitter':
+        return `https://twitter.com/${handle}`
+      case 'Instagram':
+        return `https://instagram.com/${handle}`
+      case 'LinkedIn':
+        return `https://linkedin.com/in/${handle}`
+      case 'TikTok':
+        return `https://tiktok.com/@${handle}`
+      case 'YouTube':
+        return `https://youtube.com/@${handle}`
+      case 'GitHub':
+        return `https://github.com/${handle}`
+      case 'Discord':
+        return `https://discord.com/users/${handle}`
+      case 'Reddit':
+        return `https://reddit.com/user/${handle}`
+      case 'Twitch':
+        return `https://twitch.tv/${handle}`
+      case 'Pinterest':
+        return `https://pinterest.com/${handle}`
+      case 'Snapchat':
+        return `https://snapchat.com/add/${handle}`
+      case 'WhatsApp':
+        return `https://wa.me/${handle}`
+      case 'Telegram':
+        return `https://t.me/${handle}`
+      case 'BeReal':
+        return `https://bere.al/${handle}`
+      default:
+        return '#'
+    }
+  }
+
   if (!user) {
     return (
       <Layout>
@@ -148,9 +185,12 @@ export default function UserProfilePage() {
             <h3 className="text-lg font-semibold text-slate-800 mb-4">Connected Accounts</h3>
             <div className="grid grid-cols-2 gap-3">
               {user.socialAccounts.map((account, index) => (
-                <div
+                <a
                   key={index}
-                  className="flex items-center space-x-3 p-3 bg-slate-50 rounded-xl"
+                  href={getSocialMediaUrl(account.platform, account.handle)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center space-x-3 p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors duration-200"
                 >
                   <span className="text-2xl">{account.icon}</span>
                   <div className="flex-1 min-w-0">
@@ -160,9 +200,9 @@ export default function UserProfilePage() {
                         <span className="text-green-500 text-xs">✓</span>
                       )}
                     </div>
-                                         <p className="text-xs text-slate-500 truncate">@{account.handle}</p>
+                    <p className="text-xs text-slate-500 truncate">@{account.handle}</p>
                   </div>
-                </div>
+                </a>
               ))}
             </div>
           </div>

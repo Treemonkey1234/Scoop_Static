@@ -209,10 +209,16 @@ export default function SearchPage() {
                       
                       <div className="flex-1">
                         <div className="flex items-center space-x-2 mb-1">
-                          <h3 className="font-semibold text-slate-800">{user.name}</h3>
+                          <Link href={`/user/${user.id}`}>
+                            <h3 className="font-semibold text-slate-800 hover:text-cyan-600 transition-colors duration-200">
+                              {user.name}
+                            </h3>
+                          </Link>
                           <TrustBadge score={user.trustScore} size="sm" />
                         </div>
-                        <p className="text-sm text-slate-600 mb-1">@{user.username}</p>
+                        <Link href={`/user/${user.id}`} className="hover:text-cyan-600 transition-colors duration-200">
+                          <p className="text-sm text-slate-600 mb-1">@{user.username}</p>
+                        </Link>
                         <p className="text-sm text-slate-500 line-clamp-1">{user.bio}</p>
                         <div className="flex items-center space-x-1 mt-2 text-xs text-slate-500">
                           <MapPinIcon className="w-3 h-3" />

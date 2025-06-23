@@ -173,6 +173,43 @@ export default function ProfilePage() {
 
   const visibleSocials = showAllSocials ? currentUser.socialAccounts : currentUser.socialAccounts.slice(0, 6)
 
+  const getSocialMediaUrl = (platform: string, handle: string): string => {
+    switch (platform) {
+      case 'Facebook':
+        return `https://facebook.com/${handle}`
+      case 'Twitter':
+        return `https://twitter.com/${handle}`
+      case 'Instagram':
+        return `https://instagram.com/${handle}`
+      case 'LinkedIn':
+        return `https://linkedin.com/in/${handle}`
+      case 'TikTok':
+        return `https://tiktok.com/@${handle}`
+      case 'YouTube':
+        return `https://youtube.com/@${handle}`
+      case 'GitHub':
+        return `https://github.com/${handle}`
+      case 'Discord':
+        return `https://discord.com/users/${handle}`
+      case 'Reddit':
+        return `https://reddit.com/user/${handle}`
+      case 'Twitch':
+        return `https://twitch.tv/${handle}`
+      case 'Pinterest':
+        return `https://pinterest.com/${handle}`
+      case 'Snapchat':
+        return `https://snapchat.com/add/${handle}`
+      case 'WhatsApp':
+        return `https://wa.me/${handle}`
+      case 'Telegram':
+        return `https://t.me/${handle}`
+      case 'BeReal':
+        return `https://bere.al/${handle}`
+      default:
+        return '#'
+    }
+  }
+
   // Recent Activity Component
   const RecentActivitySection = ({ userId }: { userId: string }) => {
     const activities = getUserActivities().filter(activity => activity.userId === userId).slice(0, 5)
@@ -388,19 +425,25 @@ export default function ProfilePage() {
           {/* Icons Only View */}
           <div className="flex flex-wrap gap-3 mb-4">
             {visibleSocials.map((account, index) => (
-              <div 
+              <a 
                 key={index}
+                href={getSocialMediaUrl(account.platform, account.handle)}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="w-12 h-12 bg-gradient-to-br from-cyan-100 to-teal-100 rounded-xl flex items-center justify-center text-2xl hover:scale-110 transition-transform duration-200 cursor-pointer border border-cyan-200"
                 title={`${account.platform}: ${account.handle}`}
               >
                 <SocialIcon platform={account.platform} />
-              </div>
+              </a>
             ))}
             
             {/* Add Account Button */}
-            <div className="w-12 h-12 bg-slate-100 hover:bg-slate-200 rounded-xl flex items-center justify-center text-xl cursor-pointer transition-all duration-200 border-2 border-dashed border-slate-300">
+            <Link
+              href="/connected-accounts"
+              className="w-12 h-12 bg-slate-100 hover:bg-slate-200 rounded-xl flex items-center justify-center text-xl cursor-pointer transition-all duration-200 border-2 border-dashed border-slate-300"
+            >
               ➕
-            </div>
+            </Link>
           </div>
 
           {/* View More / View Less Button */}
