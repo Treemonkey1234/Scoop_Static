@@ -1,12 +1,12 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import Layout from '@/components/Layout'
 import TrustBadge from '@/components/TrustBadge'
 import FlagModal from '@/components/FlagModal'
-import { sampleUsers, getAllEvents, sampleReviews } from '@/lib/sampleData'
+import { sampleUsers, getAllEvents, getAllReviews, Event, Review, getCurrentUser } from '@/lib/sampleData'
 import { 
   CalendarIcon,
   MapPinIcon,
@@ -16,7 +16,8 @@ import {
   HeartIcon,
   GlobeAltIcon,
   LockClosedIcon,
-  StarIcon
+  StarIcon,
+  FlagIcon
 } from '@heroicons/react/24/outline'
 import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid'
 
@@ -24,8 +25,9 @@ export default function EventsPage() {
   const [activeTab, setActiveTab] = useState<'upcoming' | 'past' | 'discover'>('upcoming')
   const [likedEvents, setLikedEvents] = useState<{[key: string]: boolean}>({})
   const [startX, setStartX] = useState(0)
-  const [events, setEvents] = useState<any[]>([])
-  const [reviews, setReviews] = useState<any[]>([])
+  const [events, setEvents] = useState<Event[]>([])
+  const [reviews, setReviews] = useState<Review[]>([])
+  const [currentUser, setCurrentUser] = useState<any>(null)
   const [flagModal, setFlagModal] = useState<{
     isOpen: boolean
     contentType: 'post' | 'event' | 'social'
@@ -37,6 +39,16 @@ export default function EventsPage() {
     contentId: '',
     contentTitle: ''
   })
+
+  // Load events, reviews and current user on component mount
+  useEffect(() => {
+    const allEvents = getAllEvents()
+    const allReviews = getAllReviews()
+    const user = getCurrentUser()
+    setEvents(allEvents)
+    setReviews(allReviews)
+    setCurrentUser(user)
+  }, [])
 
   const handleLike = (eventId: string) => {
     setLikedEvents(prev => ({
@@ -63,67 +75,51 @@ export default function EventsPage() {
     })
   }
 
-  const getEventDate = (dateStr: string) => {
-    const date = new Date(dateStr)
-    const now = new Date()
-    const isUpcoming = date > now
-    
-    return {
-      isUpcoming,
-      formatted: date.toLocaleDateString('en-US', {
-        weekday: 'short',
-        month: 'short',
-        day: 'numeric'
-      })
-    }
-  }
-
-  // Load events and reviews on component mount
-  React.useEffect(() => {
-    const allEvents = getAllEvents()
-    const allReviews = sampleReviews.filter(review => review.isEventReview)
-    setEvents(allEvents)
-    setReviews(allReviews)
-  }, [])
-
-  const upcomingEvents = events.filter(event => event.isPast === false)
-  const pastEvents = events.filter(event => event.isPast === true)
-
-  // Get reviews for an event
-  const getEventReviews = (eventId: string) => {
-    return reviews.filter(review => review.eventId === eventId)
-  }
-
   // Tab order for swipe navigation
-  const tabOrder: ('upcoming' | 'past' | 'discover')[] = ['upcoming', 'past', 'discover']
+  const tabOrder = ['upcoming', 'past', 'discover']
 
+  // Handle touch events for swipe navigation
   const handleTouchStart = (e: React.TouchEvent) => {
     setStartX(e.touches[0].clientX)
   }
 
   const handleTouchEnd = (e: React.TouchEvent) => {
-    const endX = e.changedTouches[0].clientX
-    const diff = startX - endX
+    const diff = startX - e.changedTouches[0].clientX
+    const currentIndex = tabOrder.indexOf(activeTab)
 
-    if (Math.abs(diff) > 50) { // Minimum swipe distance
-      const currentIndex = tabOrder.indexOf(activeTab)
-      
-      if (diff > 0 && currentIndex < tabOrder.length - 1) {
-        // Swipe left - next tab
-        setActiveTab(tabOrder[currentIndex + 1])
-      } else if (diff < 0 && currentIndex > 0) {
-        // Swipe right - previous tab
-        setActiveTab(tabOrder[currentIndex - 1])
-      }
+    if (Math.abs(diff) < 50) return // Minimum swipe distance
+
+    if (diff > 0 && currentIndex < tabOrder.length - 1) {
+      // Swipe left - next tab
+      setActiveTab(tabOrder[currentIndex + 1] as any)
+    } else if (diff < 0 && currentIndex > 0) {
+      // Swipe right - previous tab
+      setActiveTab(tabOrder[currentIndex - 1] as any)
     }
   }
 
-  const renderEventCard = (event: any, isPast = false) => {
+  // Filter events based on current user and status
+  const upcomingEvents = events.filter(event => !event.isPast)
+  const pastEvents = events.filter(event => 
+    event.isPast && 
+    event.attendees?.includes(currentUser?.id) // Only show past events the user attended
+  )
+
+  // Check if user has reviewed an event
+  const hasUserReviewedEvent = (eventId: string) => {
+    return reviews.some(review => 
+      review.isEventReview && 
+      review.eventId === eventId && 
+      review.reviewerId === currentUser?.id
+    )
+  }
+
+  const renderEventCard = (event: Event, isPast = false) => {
     const host = sampleUsers.find(u => u.id === event.hostId)
     if (!host) return null
 
-    const dateInfo = getEventDate(event.date)
     const spotsLeft = event.maxAttendees - event.attendeeCount
+    const hasReviewed = isPast && hasUserReviewedEvent(event.id)
 
     return (
       <div key={event.id} className="card-soft">
@@ -153,7 +149,7 @@ export default function EventsPage() {
             
             {/* Event Category Badge */}
             <div className="bg-teal-500/80 backdrop-blur-sm text-white px-3 py-1 rounded-full">
-              <span className="text-sm font-medium">{event.category || 'Social Event'}</span>
+              <span className="text-sm font-medium">{event.category}</span>
             </div>
           </div>
           
@@ -183,7 +179,9 @@ export default function EventsPage() {
               className="rounded-full"
             />
             <div>
-              <h3 className="font-semibold text-slate-800">{host.name}</h3>
+              <Link href={`/user/${host.id}`} className="font-medium text-slate-800 hover:text-cyan-600">
+                {host.name}
+              </Link>
               <p className="text-sm text-slate-500">hosting</p>
             </div>
           </div>
@@ -198,7 +196,7 @@ export default function EventsPage() {
           <div className="space-y-2 text-sm text-slate-600">
             <div className="flex items-center space-x-2">
               <CalendarIcon className="w-4 h-4 text-cyan-500" />
-              <span>{dateInfo.formatted} at {event.time}</span>
+              <span>{event.date} at {event.time}</span>
             </div>
             <div className="flex items-center space-x-2">
               <MapPinIcon className="w-4 h-4 text-cyan-500" />
@@ -232,40 +230,33 @@ export default function EventsPage() {
           </div>
         </div>
 
-        {/* RSVP Status */}
-        {event.rsvpStatus && (
-          <div className="mb-4">
-            <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-              event.rsvpStatus === 'going' 
-                ? 'bg-cyan-100 text-cyan-700 border border-cyan-200'
-                : event.rsvpStatus === 'interested'
-                ? 'bg-teal-100 text-teal-700 border border-teal-200'
-                : 'bg-slate-100 text-slate-600'
-            }`}>
-              {event.rsvpStatus === 'going' && '✓ You\'re going'}
-              {event.rsvpStatus === 'interested' && '⭐ You\'re interested'}
-              {event.rsvpStatus === 'not-going' && '✗ Not attending'}
-            </div>
-          </div>
-        )}
-
         {/* Event Actions */}
         <div className="flex items-center space-x-3">
-          {isPast && event.userAttended ? (
-            // Show review button for past events the user attended
-            <Link
-              href={`/create-post?event=${event.id}`}
-              className="flex-1 bg-gradient-to-r from-cyan-500 to-teal-600 text-white py-2 px-4 rounded-xl text-center font-medium hover:from-cyan-600 hover:to-teal-700 transition-all duration-200 flex items-center justify-center space-x-2"
-            >
-              <StarIcon className="w-4 h-4" />
-              <span>Review?</span>
-            </Link>
+          {isPast ? (
+            hasReviewed ? (
+              // Show view details if already reviewed
+              <Link
+                href={`/events/${event.id}`}
+                className="flex-1 btn-primary text-center py-2"
+              >
+                View Details
+              </Link>
+            ) : (
+              // Show review button if not reviewed yet
+              <Link
+                href={`/create-post?event=${event.id}`}
+                className="flex-1 bg-gradient-to-r from-cyan-500 to-teal-600 text-white py-2 px-4 rounded-xl text-center font-medium hover:from-cyan-600 hover:to-teal-700 transition-all duration-200 flex items-center justify-center space-x-2"
+              >
+                <StarIcon className="w-4 h-4" />
+                <span>Review?</span>
+              </Link>
+            )
           ) : (
             <Link
               href={`/events/${event.id}`}
               className="flex-1 btn-primary text-center py-2"
             >
-              {isPast ? 'View Details' : 'View & RSVP'}
+              View & RSVP
             </Link>
           )}
           
@@ -290,9 +281,7 @@ export default function EventsPage() {
             }}
             className="p-2 rounded-xl hover:bg-orange-100 transition-colors duration-200"
           >
-            <svg className="w-5 h-5 text-slate-500 hover:text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6v1a2 2 0 01-2-2H5a2 2 0 01-2-2z" />
-            </svg>
+            <FlagIcon className="w-5 h-5 text-orange-500" />
           </button>
         </div>
       </div>
@@ -339,7 +328,7 @@ export default function EventsPage() {
         </div>
 
         {/* Content - Swipeable */}
-        <div 
+        <div
           className="space-y-4"
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
@@ -370,56 +359,7 @@ export default function EventsPage() {
             <>
               {pastEvents.length > 0 ? (
                 <div className="space-y-8">
-                  {pastEvents.map(event => {
-                    const eventReviews = getEventReviews(event.id)
-                    return (
-                      <div key={event.id} className="space-y-4">
-                        {/* Event Card */}
-                        {renderEventCard(event, true)}
-                        
-                        {/* Event Reviews */}
-                        {eventReviews.length > 0 && (
-                          <div className="ml-4 pl-4 border-l-2 border-cyan-200">
-                            <h4 className="text-sm font-medium text-slate-600 mb-3">
-                              Reviews for this event:
-                            </h4>
-                            <div className="space-y-3">
-                              {eventReviews.map(review => {
-                                const reviewer = sampleUsers.find(u => u.id === review.reviewerId)
-                                if (!reviewer) return null
-                                
-                                return (
-                                  <div key={review.id} className="bg-white rounded-lg p-4 shadow-soft">
-                                    <div className="flex items-center space-x-3 mb-2">
-                                      <Image
-                                        src={reviewer.avatar}
-                                        alt={reviewer.name}
-                                        width={32}
-                                        height={32}
-                                        className="rounded-full"
-                                      />
-                                      <div>
-                                        <h5 className="font-medium text-slate-800">{reviewer.name}</h5>
-                                        <div className="flex items-center space-x-2 text-sm">
-                                          <span className="text-slate-500">
-                                            {new Date(review.timestamp).toLocaleDateString()}
-                                          </span>
-                                          <span className="text-cyan-600">
-                                            {review.rating} ★
-                                          </span>
-                                        </div>
-                                      </div>
-                                    </div>
-                                    <p className="text-slate-600 text-sm">{review.content}</p>
-                                  </div>
-                                )
-                              })}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )
-                  })}
+                  {pastEvents.map(event => renderEventCard(event, true))}
                 </div>
               ) : (
                 <div className="card-soft text-center py-12">
@@ -432,37 +372,28 @@ export default function EventsPage() {
           )}
 
           {activeTab === 'discover' && (
-            <div className="space-y-4">
-              <div className="card-soft text-center py-8">
-                <GlobeAltIcon className="w-16 h-16 text-cyan-300 mx-auto mb-4" />
-                <Link href="/discover" className="btn-primary">
-                  Open Map View
-                </Link>
-              </div>
-              
-              {/* All Events for Discovery */}
-              {events.map(event => renderEventCard(event))}
-            </div>
+            <>
+              {events.length > 0 ? (
+                events.map(event => renderEventCard(event))
+              ) : (
+                <div className="card-soft text-center py-12">
+                  <CalendarIcon className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-slate-600 mb-2">No events found</h3>
+                  <p className="text-slate-500">Try adjusting your search filters</p>
+                </div>
+              )}
+            </>
           )}
         </div>
-
-        {/* Load More */}
-        {(activeTab !== 'discover') && (
-          <div className="flex justify-center py-8">
-            <button className="btn-secondary">
-              Load More Events
-            </button>
-          </div>
-        )}
       </div>
 
       {/* Flag Modal */}
       <FlagModal
         isOpen={flagModal.isOpen}
-        onClose={closeFlagModal}
         contentType={flagModal.contentType}
         contentId={flagModal.contentId}
         contentTitle={flagModal.contentTitle}
+        onClose={closeFlagModal}
       />
     </Layout>
   )

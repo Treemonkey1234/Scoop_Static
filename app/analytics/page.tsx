@@ -40,7 +40,7 @@ export default function AnalyticsPage() {
   const userActivities = getUserActivities().filter(activity => activity.userId === currentUser.id)
   
   // Calculate dynamic metrics
-  const totalUpvotes = userReviews.reduce((sum, review) => sum + review.upvotes, 0)
+  const totalUpvotes = userReviews.reduce((sum, review) => sum + review.votes, 0)
   const recentActivities = userActivities.filter(activity => {
     const activityDate = new Date(activity.timestamp)
     const weekAgo = new Date()

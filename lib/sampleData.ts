@@ -58,6 +58,7 @@ export interface Event {
   isPast: boolean
   trustRequirement: number
   tags: string[]
+  attendees?: string[]
 }
 
 export interface Comment {
@@ -461,7 +462,8 @@ export function createNewEvent(eventData: {
     isPrivate: eventData.eventType === 'private',
     isPast: false,
     trustRequirement: eventData.trustRequirement,
-    tags: []
+    tags: [],
+    attendees: eventData.invitedFriends
   }
   
   // Add to existing events
@@ -824,149 +826,86 @@ export const sampleReviews: Review[] = [
 ]
 
 // Sample Past Events (for reviews)
-export const pastEvents = [
-  {
-    id: 'past-1',
-    title: 'ASU Student-Business Mixer',
-    description: 'Connecting ASU students with local business owners for internships and mentorship opportunities.',
-    hostId: '3', // Emily Rodriguez
-    date: '2025-06-10',
-    time: '6:00 PM',
-    location: 'ASU Downtown Campus',
-    address: '411 N Central Ave, Phoenix, AZ 85004',
-    coordinates: [-112.0740, 33.4484],
-    attendeeCount: 75,
-    maxAttendees: 100,
-    trustRequirement: 70,
-    isPrivate: false,
-    category: 'Networking',
-    price: 0,
-    imageUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600',
-    tags: ['students', 'networking', 'business', 'education'],
-    isPast: true,
-    reviews: ['6']
-  },
-  {
-    id: 'past-4',
-    title: 'Summer Singles Mixer',
-    description: 'A sophisticated evening of meeting new people, enjoying craft cocktails, and engaging activities.',
-    hostId: '5', // Lisa Thompson
-    date: '2025-06-08',
-    time: '7:00 PM',
-    location: 'Jake\'s Loft Bar & Grill',
-    address: '250 E Downtown Blvd, Phoenix, AZ 85004',
-    coordinates: [-112.0740, 33.4484],
-    attendeeCount: 45,
-    maxAttendees: 50,
-    trustRequirement: 85,
-    isPrivate: false,
-    category: 'Social',
-    price: 30,
-    imageUrl: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=600',
-    tags: ['singles', 'social', 'dating', 'mixer'],
-    isPast: true,
-    reviews: ['3']
-  },
-  {
-    id: 'past-5',
-    title: 'Singles Mixer at Jake\'s',
-    description: 'An evening of meeting new people in the heart of downtown Phoenix.',
-    hostId: '5', // Lisa Thompson
-    date: '2025-06-05',
-    time: '7:00 PM',
-    location: 'Jake\'s Loft Bar & Grill',
-    address: '250 E Downtown Blvd, Phoenix, AZ 85004',
-    coordinates: [-112.0740, 33.4484],
-    attendeeCount: 48,
-    maxAttendees: 50,
-    trustRequirement: 85,
-    isPrivate: false,
-    category: 'Social',
-    price: 30,
-    imageUrl: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=600',
-    tags: ['singles', 'social', 'dating', 'mixer'],
-    isPast: true,
-    reviews: ['7']
-  }
-]
-
-// Sample Events
 export const sampleEvents: Event[] = [
   {
     id: 'event1',
-    title: 'Phoenix Tech Meetup',
-    description: 'Monthly gathering of tech enthusiasts in Phoenix. This month featuring talks on AI and Machine Learning.',
+    title: 'Tech Meetup & Networking',
+    description: 'Join us for an evening of tech talks, networking, and delicious catering by Emily Rodriguez. Perfect for developers, designers, and tech enthusiasts.',
     hostId: '1', // Jake Martinez
-    date: '2024-03-15',
-    time: '18:30',
-    location: 'The Hub Phoenix',
-    address: '123 Tech Ave, Phoenix, AZ',
+    date: '2024-03-06', // Day before review
+    time: '6:00 PM',
+    location: 'Jake\'s Loft',
+    address: '123 Downtown Ave, Phoenix, AZ 85004',
     category: 'Technology',
-    imageUrl: '/images/events/tech-meetup.jpg',
-    maxAttendees: 60,
-    attendeeCount: 45,
+    imageUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600',
+    maxAttendees: 100,
+    attendeeCount: 85,
     price: 0,
     isPrivate: false,
-    isPast: false,
-    trustRequirement: 50,
-    tags: ['tech', 'networking', 'ai', 'machine-learning']
+    isPast: true,
+    trustRequirement: 60,
+    tags: ['tech', 'networking', 'catering', 'talks'],
+    attendees: ['1', '2', '3'] // Jake, Sarah, Emily (Emily catered and reviewed)
   },
   {
     id: 'event2',
-    title: 'Phoenix Tech Summit',
-    description: 'Annual technology conference featuring industry leaders, workshops, and networking opportunities.',
+    title: 'Phoenix Tech Summit 2024',
+    description: 'The biggest tech conference in Phoenix! Join us for a day of inspiring speakers, workshops, and networking opportunities with industry leaders.',
     hostId: '1', // Jake Martinez
-    date: '2024-02-20',
-    time: '09:00',
-    location: 'Phoenix Convention Center',
-    address: '100 N 3rd St, Phoenix, AZ',
-    category: 'Conference',
-    imageUrl: '/images/events/tech-summit.jpg',
-    maxAttendees: 500,
-    attendeeCount: 478,
-    price: 199,
+    date: '2024-03-04', // Day before review
+    time: '9:00 AM',
+    location: 'Jake\'s Loft - Main Hall',
+    address: '123 Downtown Ave, Phoenix, AZ 85004',
+    category: 'Technology',
+    imageUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600',
+    maxAttendees: 200,
+    attendeeCount: 180,
+    price: 25,
     isPrivate: false,
     isPast: true,
     trustRequirement: 70,
-    tags: ['conference', 'tech', 'professional', 'networking']
+    tags: ['tech', 'conference', 'workshops', 'networking'],
+    attendees: ['1', '2', '4', '5'] // Jake, Sarah (reviewed), David, Lisa
   },
   {
     id: 'event3',
     title: 'Community Art Fair',
-    description: 'Showcase of local artists featuring paintings, sculptures, and interactive installations.',
+    description: 'Celebrate local artists at our monthly art fair! Featuring live music, food trucks, and amazing artwork from Phoenix\'s creative community.',
     hostId: '1', // Jake Martinez
-    date: '2024-02-15',
-    time: '11:00',
-    location: 'The Hub Phoenix',
-    address: '123 Tech Ave, Phoenix, AZ',
-    category: 'Art & Culture',
-    imageUrl: '/images/events/art-fair.jpg',
-    maxAttendees: 200,
-    attendeeCount: 185,
-    price: 10,
+    date: '2024-03-03', // Day before review
+    time: '11:00 AM',
+    location: 'Jake\'s Loft - Garden Space',
+    address: '123 Downtown Ave, Phoenix, AZ 85004',
+    category: 'Arts & Culture',
+    imageUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600',
+    maxAttendees: 300,
+    attendeeCount: 250,
+    price: 0,
     isPrivate: false,
     isPast: true,
-    trustRequirement: 0,
-    tags: ['art', 'community', 'culture', 'local']
+    trustRequirement: 50,
+    tags: ['art', 'community', 'music', 'food'],
+    attendees: ['1', '3', '5'] // Jake, Emily (reviewed), Lisa
   },
   {
     id: 'event4',
     title: 'Startup Networking Night',
-    description: 'Connect with fellow entrepreneurs, investors, and startup enthusiasts.',
+    description: 'Connect with fellow entrepreneurs, investors, and startup enthusiasts. Perfect for networking, pitching ideas, and finding potential collaborators.',
     hostId: '1', // Jake Martinez
-    date: '2024-02-10',
-    time: '19:00',
-    location: 'The Hub Phoenix',
-    address: '123 Tech Ave, Phoenix, AZ',
-    category: 'Networking',
-    imageUrl: '/images/events/startup-night.jpg',
-    maxAttendees: 100,
-    attendeeCount: 98,
-    price: 25,
+    date: '2024-03-02', // Day before review
+    time: '7:00 PM',
+    location: 'Jake\'s Loft - Mezzanine',
+    address: '123 Downtown Ave, Phoenix, AZ 85004',
+    category: 'Business',
+    imageUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600',
+    maxAttendees: 150,
+    attendeeCount: 130,
+    price: 15,
     isPrivate: false,
     isPast: true,
-    trustRequirement: 60,
-    tags: ['startup', 'networking', 'business', 'entrepreneurship']
+    trustRequirement: 65,
+    tags: ['startup', 'business', 'networking', 'entrepreneurship'],
+    attendees: ['1', '2', '4', '5'] // Jake, Sarah, David, Lisa (reviewed)
   }
 ]
 
