@@ -112,11 +112,12 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
 
   const handleGlobalMouseUp = useCallback(() => {
     finishDrag()
+    // Always clean up listeners
     document.removeEventListener('mousemove', handleGlobalMouseMove)
     document.removeEventListener('mouseup', handleGlobalMouseUp)
   }, [])
 
-  // Touch events - using global event listeners like mouse events for better mobile support
+  // Touch events - simplified for better mobile support
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     e.preventDefault()
     e.stopPropagation()
@@ -125,20 +126,20 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
 
     const touch = e.touches[0]
     const rect = containerRef.current.getBoundingClientRect()
-    touchStartTimeRef.current = Date.now() // Record touch start time
+    touchStartTimeRef.current = Date.now()
     setStartY(touch.clientY - rect.top)
     setDragPosition({ x: 0, y: 0 })
     setHasMoved(false)
     setIsDragging(true)
-    setVisualVoteState(null) // Reset vote state when starting new drag
+    setVisualVoteState(null)
     
-    // Clear any pending reset timeout to allow manual interaction
+    // Clear any pending reset timeout
     if (resetTimeoutRef.current) {
       clearTimeout(resetTimeoutRef.current)
       resetTimeoutRef.current = null
     }
     
-    // Add global touch events for better mobile support
+    // Add global touch events
     document.addEventListener('touchmove', handleGlobalTouchMove, { passive: false })
     document.addEventListener('touchend', handleGlobalTouchEnd, { passive: false })
   }, [])
@@ -157,10 +158,34 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
     e.preventDefault()
     finishDrag()
     
-    // Clean up global touch events
+    // Always clean up global touch events
     document.removeEventListener('touchmove', handleGlobalTouchMove)
     document.removeEventListener('touchend', handleGlobalTouchEnd)
   }, [isDragging])
+
+  // Simple click handler for mobile taps that don't register as drags
+  const handleClick = useCallback((e: React.MouseEvent) => {
+    // Only handle clicks if not currently dragging and no recent drag activity
+    if (!isDragging && !hasMoved) {
+      e.preventDefault()
+      e.stopPropagation()
+      
+      // Quick upvote on click (can be changed to downvote or toggle)
+      onVote(postId, 'up')
+      
+      // Brief visual feedback
+      setVisualVoteState('up')
+      const containerHeight = containerRef.current?.getBoundingClientRect().height || 100
+      const maxRange = containerHeight * 0.25
+      setDragPosition({ x: 0, y: -maxRange * 0.8 })
+      
+      // Reset after short time
+      setTimeout(() => {
+        setDragPosition({ x: 0, y: 0 })
+        setVisualVoteState(null)
+      }, 400)
+    }
+  }, [isDragging, hasMoved, postId, onVote])
 
   // Clean up animation frame, timeouts, and event listeners on unmount
   useEffect(() => {
@@ -182,70 +207,43 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
   const finishDrag = useCallback(() => {
     if (!isDragging || !containerRef.current) return
     
-    let finalPosition = { x: 0, y: 0 }
+    // ALWAYS reset dragging state immediately to prevent mouse sticking
+    setIsDragging(false)
+    setHasMoved(false)
     
-    // Check if this was a quick tap vs deliberate drag
-    const touchDuration = Date.now() - touchStartTimeRef.current
-    const wasQuickTap = touchDuration < 150 && !hasMoved // Reduced from 200ms to 150ms and require no movement
+    const containerHeight = containerRef.current.getBoundingClientRect().height
+    const threshold = containerHeight * 0.12 // 12% threshold to work with 25% max range
+    const maxRange = containerHeight * 0.25 // Maximum range for positioning
     
-    // Vote if user actually dragged OR if it was a deliberate tap in a vote zone
-    const shouldProcessVote = hasMoved || (wasQuickTap && Math.abs(dragPosition.y) > 8)
-    
-    if (shouldProcessVote) {
-      const containerHeight = containerRef.current.getBoundingClientRect().height
-      const threshold = containerHeight * 0.12 // 12% threshold to work with 25% max range
-      const maxRange = containerHeight * 0.25 // Maximum range for positioning
-      
+    // Simple voting logic: if dragged far enough, register vote
+    if (Math.abs(dragPosition.y) > threshold) {
       if (dragPosition.y < -threshold) {
         onVote(postId, 'up')
-        // Stick to upvote position briefly for visual feedback
-        finalPosition = { x: 0, y: -maxRange * 0.8 }
+        // Stick to upvote position briefly
+        setDragPosition({ x: 0, y: -maxRange * 0.8 })
         setVisualVoteState('up')
-        
-        // Shorter auto-reset for better responsiveness - allow manual interruption
-        if (resetTimeoutRef.current) {
-          clearTimeout(resetTimeoutRef.current)
-        }
-        resetTimeoutRef.current = setTimeout(() => {
-          // Only reset if user isn't currently dragging
-          if (!isDragging) {
-            setDragPosition({ x: 0, y: 0 })
-            setVisualVoteState(null)
-            resetTimeoutRef.current = null
-          }
-        }, 800) // Reduced from 1200ms to 800ms
       } else if (dragPosition.y > threshold) {
         onVote(postId, 'down')
-        // Stick to downvote position briefly for visual feedback
-        finalPosition = { x: 0, y: maxRange * 0.8 }
+        // Stick to downvote position briefly
+        setDragPosition({ x: 0, y: maxRange * 0.8 })
         setVisualVoteState('down')
-        
-        // Shorter auto-reset for better responsiveness - allow manual interruption
-        if (resetTimeoutRef.current) {
-          clearTimeout(resetTimeoutRef.current)
-        }
-        resetTimeoutRef.current = setTimeout(() => {
-          // Only reset if user isn't currently dragging
-          if (!isDragging) {
-            setDragPosition({ x: 0, y: 0 })
-            setVisualVoteState(null)
-            resetTimeoutRef.current = null
-          }
-        }, 800) // Reduced from 1200ms to 800ms
-      } else {
-        // Reset visual state if no vote threshold reached
-        setVisualVoteState(null)
       }
-      // If no vote threshold reached, return to center (default finalPosition)
+      
+      // Auto-reset after brief feedback (no conditions, just reset)
+      if (resetTimeoutRef.current) {
+        clearTimeout(resetTimeoutRef.current)
+      }
+      resetTimeoutRef.current = setTimeout(() => {
+        setDragPosition({ x: 0, y: 0 })
+        setVisualVoteState(null)
+        resetTimeoutRef.current = null
+      }, 600) // Shorter feedback time
     } else {
-      // For invalid gestures, always return to center
+      // No vote, return to center immediately
+      setDragPosition({ x: 0, y: 0 })
       setVisualVoteState(null)
     }
-    
-    setIsDragging(false)
-    setDragPosition(finalPosition)
-    setHasMoved(false)
-  }, [isDragging, hasMoved, dragPosition.y, postId, onVote])
+  }, [isDragging, dragPosition.y, postId, onVote])
 
   // Calculate drag intensity for visual feedback
   const containerHeight = containerRef.current?.getBoundingClientRect().height || 100
@@ -313,6 +311,7 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
         }}
         onMouseDown={handleMouseDown}
         onTouchStart={handleTouchStart}
+        onClick={handleClick}
       >
         <svg 
           width="36" 
