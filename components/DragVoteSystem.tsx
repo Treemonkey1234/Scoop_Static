@@ -19,9 +19,11 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
   const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 })
   const [startY, setStartY] = useState(0)
   const [hasMoved, setHasMoved] = useState(false)
+  const [visualVoteState, setVisualVoteState] = useState<'up' | 'down' | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const animationFrameRef = useRef<number>()
   const lastMoveTimeRef = useRef<number>(0)
+  const resetTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const totalVotes = upvotes + downvotes
   const adjustedUpvotes = upvotes + (currentVote === 'up' ? 1 : 0)
@@ -75,11 +77,14 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
     })
   }, [startY])
 
-  // Clean up animation frame on unmount
+  // Clean up animation frame and timeouts on unmount
   useEffect(() => {
     return () => {
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current)
+      }
+      if (resetTimeoutRef.current) {
+        clearTimeout(resetTimeoutRef.current)
       }
     }
   }, [])
@@ -94,6 +99,13 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
     setDragPosition({ x: 0, y: 0 })
     setHasMoved(false)
     setIsDragging(true)
+    setVisualVoteState(null) // Reset vote state when starting new drag
+    
+    // Clear any pending reset timeout
+    if (resetTimeoutRef.current) {
+      clearTimeout(resetTimeoutRef.current)
+      resetTimeoutRef.current = null
+    }
     
     // Add global mouse events
     document.addEventListener('mousemove', handleGlobalMouseMove)
@@ -124,6 +136,13 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
     setDragPosition({ x: 0, y: 0 })
     setHasMoved(false)
     setIsDragging(true)
+    setVisualVoteState(null) // Reset vote state when starting new drag
+    
+    // Clear any pending reset timeout
+    if (resetTimeoutRef.current) {
+      clearTimeout(resetTimeoutRef.current)
+      resetTimeoutRef.current = null
+    }
   }, [])
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
@@ -147,20 +166,53 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
   const finishDrag = useCallback(() => {
     if (!isDragging || !containerRef.current) return
     
+    let finalPosition = { x: 0, y: 0 }
+    
     // Only vote if user actually dragged (not just tapped)
     if (hasMoved) {
       const containerHeight = containerRef.current.getBoundingClientRect().height
       const threshold = containerHeight * 0.12 // 12% threshold to work with 25% max range
+      const maxRange = containerHeight * 0.25 // Maximum range for positioning
       
       if (dragPosition.y < -threshold) {
         onVote(postId, 'up')
+        // Stick to upvote position
+        finalPosition = { x: 0, y: -maxRange * 0.8 }
+        setVisualVoteState('up')
+        
+        // Auto-reset to center after 1.2 seconds to show the vote was registered
+        if (resetTimeoutRef.current) {
+          clearTimeout(resetTimeoutRef.current)
+        }
+        resetTimeoutRef.current = setTimeout(() => {
+          setDragPosition({ x: 0, y: 0 })
+          setVisualVoteState(null)
+          resetTimeoutRef.current = null
+        }, 1200)
       } else if (dragPosition.y > threshold) {
         onVote(postId, 'down')
+        // Stick to downvote position
+        finalPosition = { x: 0, y: maxRange * 0.8 }
+        setVisualVoteState('down')
+        
+        // Auto-reset to center after 1.2 seconds to show the vote was registered
+        if (resetTimeoutRef.current) {
+          clearTimeout(resetTimeoutRef.current)
+        }
+        resetTimeoutRef.current = setTimeout(() => {
+          setDragPosition({ x: 0, y: 0 })
+          setVisualVoteState(null)
+          resetTimeoutRef.current = null
+        }, 1200)
+      } else {
+        // Reset visual state if no vote threshold reached
+        setVisualVoteState(null)
       }
+      // If no vote threshold reached, return to center (default finalPosition)
     }
     
     setIsDragging(false)
-    setDragPosition({ x: 0, y: 0 })
+    setDragPosition(finalPosition)
     setHasMoved(false)
   }, [isDragging, hasMoved, dragPosition.y, postId, onVote])
 
@@ -169,6 +221,34 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
   const dragIntensity = Math.abs(dragPosition.y) / (containerHeight * 0.25)
   const isUpZone = dragPosition.y < -8
   const isDownZone = dragPosition.y > 8
+
+  // Calculate preview vote state based on drag position
+  const getPreviewVoteState = () => {
+    if (!isDragging || Math.abs(dragPosition.y) <= 15) {
+      return { upvotes: adjustedUpvotes, downvotes: adjustedDownvotes, ratio: positiveRatio }
+    }
+    
+    const threshold = containerHeight * 0.12
+    if (dragPosition.y < -threshold) {
+      // Preview upvote
+      const previewUpvotes = currentVote === 'up' ? upvotes : upvotes + 1
+      const previewDownvotes = currentVote === 'down' ? downvotes - 1 : downvotes
+      const previewTotal = previewUpvotes + previewDownvotes
+      const previewRatio = previewTotal > 0 ? (previewUpvotes / previewTotal) * 100 : 50
+      return { upvotes: previewUpvotes, downvotes: previewDownvotes, ratio: previewRatio }
+    } else if (dragPosition.y > threshold) {
+      // Preview downvote
+      const previewUpvotes = currentVote === 'up' ? upvotes - 1 : upvotes
+      const previewDownvotes = currentVote === 'down' ? downvotes : downvotes + 1
+      const previewTotal = previewUpvotes + previewDownvotes
+      const previewRatio = previewTotal > 0 ? (previewUpvotes / previewTotal) * 100 : 50
+      return { upvotes: previewUpvotes, downvotes: previewDownvotes, ratio: previewRatio }
+    }
+    
+    return { upvotes: adjustedUpvotes, downvotes: adjustedDownvotes, ratio: positiveRatio }
+  }
+
+  const previewState = getPreviewVoteState()
 
   return (
     <div 
@@ -207,10 +287,13 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
           height="52" 
           viewBox="0 0 32 48" 
           xmlns="http://www.w3.org/2000/svg"
-          className={`drop-shadow-lg ${isDragging ? 'animate-pulse' : ''}`}
+          className="drop-shadow-lg transition-all duration-300"
           style={{ 
-            filter: isDragging ? `brightness(${1 + dragIntensity * 0.3})` : 'brightness(1)',
-            animationDuration: '0.6s'
+            filter: isDragging ? `brightness(${1 + dragIntensity * 0.3})` : 
+                   visualVoteState === 'up' ? 'brightness(1.2) saturate(1.2)' :
+                   visualVoteState === 'down' ? 'brightness(0.9) saturate(1.2)' : 'brightness(1)',
+            transform: visualVoteState === 'up' ? 'scale(1.1)' : 
+                      visualVoteState === 'down' ? 'scale(1.05)' : 'scale(1)'
           }}
         >
           <defs>
@@ -272,15 +355,34 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
         </svg>
       </div>
 
-      {/* Vote Score Display - only visible when dragging */}
-      {isDragging && Math.abs(dragPosition.y) > 15 && (
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white/95 backdrop-blur-sm rounded-lg px-3 py-2 z-10 shadow-lg border border-slate-200 animate-in fade-in duration-200">
-          <div className="text-sm font-bold text-slate-800 text-center">
-            {adjustedUpvotes - adjustedDownvotes}
+      {/* Vote Score Display - visible when dragging and shows preview */}
+      {isDragging && Math.abs(dragPosition.y) > 8 && (
+        <div className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white/95 backdrop-blur-sm rounded-lg px-3 py-2 z-10 shadow-lg border-2 opacity-100 transition-all duration-200 ${
+          isUpZone ? 'border-green-400 bg-green-50/95' : 
+          isDownZone ? 'border-red-400 bg-red-50/95' : 
+          'border-slate-200'
+        }`}>
+          <div className={`text-sm font-bold text-center transition-colors duration-200 ${
+            isUpZone ? 'text-green-700' : 
+            isDownZone ? 'text-red-700' : 
+            'text-slate-800'
+          }`}>
+            {previewState.upvotes - previewState.downvotes}
           </div>
-          <div className="text-xs text-slate-600 text-center">
-            {Math.round(positiveRatio)}%
+          <div className={`text-xs text-center transition-colors duration-200 ${
+            isUpZone ? 'text-green-600' : 
+            isDownZone ? 'text-red-600' : 
+            'text-slate-600'
+          }`}>
+            {Math.round(previewState.ratio)}%
           </div>
+          {Math.abs(dragPosition.y) > containerHeight * 0.12 && (
+            <div className={`text-xs font-medium text-center mt-1 transition-colors duration-200 ${
+              isUpZone ? 'text-green-600' : 'text-red-600'
+            }`}>
+              {isUpZone ? '+1 👍' : '+1 👎'}
+            </div>
+          )}
         </div>
       )}
 
@@ -294,7 +396,7 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
       {/* Drag Instructions */}
       {!isDragging && (
         <div className="absolute top-1 left-1/2 transform -translate-x-1/2 pointer-events-none z-30">
-          <div className="text-xs text-slate-500 text-center bg-white/80 backdrop-blur-sm px-2 py-1 rounded-md shadow-sm animate-pulse">
+          <div className="text-xs text-slate-500 text-center bg-white/80 backdrop-blur-sm px-2 py-1 rounded-md shadow-sm">
             Drag 🍦
           </div>
         </div>
