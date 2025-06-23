@@ -15,28 +15,29 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
   currentVote,
   onVote
 }) => {
-  // Simplified state - only what we actually need
+  // Core state
   const [isDragging, setIsDragging] = useState(false)
   const [dragY, setDragY] = useState(0)
-  const [showFeedback, setShowFeedback] = useState(false)
-  const [feedbackType, setFeedbackType] = useState<'up' | 'down' | null>(null)
-  const [isSticking, setIsSticking] = useState(false) // New state for sticking behavior
+  const [isSticking, setIsSticking] = useState(false)
+  const [showVoteCounter, setShowVoteCounter] = useState(false)
+  const [feedbackMessage, setFeedbackMessage] = useState('')
   
+  // Refs
   const containerRef = useRef<HTMLDivElement>(null)
-  const startYRef = useRef(0)
-  const hasDraggedRef = useRef(false)
-  const feedbackTimeoutRef = useRef<NodeJS.Timeout>()
+  const startPosRef = useRef({ x: 0, y: 0 })
+  const hasMovedRef = useRef(false)
+  const stickyTimeoutRef = useRef<NodeJS.Timeout>()
 
-  // Calculate preview vote counts during drag
-  const getPreviewVoteCounts = () => {
-    if (!isDragging || !containerRef.current) return { upvotes, downvotes }
+  const THRESHOLD = 25  // Pixels to trigger vote
+  const STICKY_DURATION = 1500  // How long cone sticks in position
+
+  // Calculate live vote preview
+  const getVotePreview = () => {
+    if (!isDragging || Math.abs(dragY) < THRESHOLD) {
+      return { upvotes, downvotes, willVote: false, voteType: null }
+    }
     
-    const threshold = containerRef.current.getBoundingClientRect().height * 0.15
-    const willVote = Math.abs(dragY) > threshold
-    
-    if (!willVote) return { upvotes, downvotes }
-    
-    const isUpVote = dragY < -threshold
+    const voteType: 'up' | 'down' = dragY < 0 ? 'up' : 'down'
     let newUpvotes = upvotes
     let newDownvotes = downvotes
     
@@ -45,115 +46,103 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
     if (currentVote === 'down') newDownvotes--
     
     // Add new vote
-    if (isUpVote) newUpvotes++
+    if (voteType === 'up') newUpvotes++
     else newDownvotes++
     
-    return { upvotes: newUpvotes, downvotes: newDownvotes }
-  }
-
-  // Dynamic container styling
-  const getContainerStyle = () => {
-    if (isDragging) {
-      const isUpZone = dragY < -10
-      return {
-        background: isUpZone ? 'linear-gradient(to bottom, rgba(34, 197, 94, 0.1), rgba(248, 250, 252, 1))' :
-                              'linear-gradient(to top, rgba(239, 68, 68, 0.1), rgba(248, 250, 252, 1))'
-      }
-    }
-    return {}
-  }
-
-  const clearFeedbackTimeout = () => {
-    if (feedbackTimeoutRef.current) {
-      clearTimeout(feedbackTimeoutRef.current)
-      feedbackTimeoutRef.current = undefined
+    return { 
+      upvotes: newUpvotes, 
+      downvotes: newDownvotes, 
+      willVote: true, 
+      voteType 
     }
   }
 
-  // Start drag operation
-  const startDrag = useCallback((clientY: number) => {
+  // Clear any existing timeouts
+  const clearTimeouts = () => {
+    if (stickyTimeoutRef.current) {
+      clearTimeout(stickyTimeoutRef.current)
+      stickyTimeoutRef.current = undefined
+    }
+  }
+
+  // Start dragging
+  const startDrag = useCallback((clientX: number, clientY: number) => {
     if (!containerRef.current) return
     
-    const rect = containerRef.current.getBoundingClientRect()
-    startYRef.current = clientY - rect.top - rect.height / 2
-    hasDraggedRef.current = false
+    startPosRef.current = { x: clientX, y: clientY }
+    hasMovedRef.current = false
     setIsDragging(true)
-    setDragY(0)
-    setIsSticking(false) // Reset sticking when starting new drag
-    clearFeedbackTimeout()
+    setShowVoteCounter(true)
+    setIsSticking(false)
+    setFeedbackMessage('')
+    clearTimeouts()
   }, [])
 
-  // Update drag position
-  const updateDrag = useCallback((clientY: number) => {
-    if (!isDragging || !containerRef.current || isSticking) return
+  // Update drag position  
+  const updateDrag = useCallback((clientX: number, clientY: number) => {
+    if (!isDragging || isSticking) return
     
-    const rect = containerRef.current.getBoundingClientRect()
-    const newY = clientY - rect.top - rect.height / 2 - startYRef.current
+    const deltaY = clientY - startPosRef.current.y
+    const maxRange = 60 // Maximum drag distance
+    const constrainedY = Math.max(-maxRange, Math.min(maxRange, deltaY))
     
-    // Constrain to reasonable range
-    const maxRange = rect.height * 0.3
-    const constrainedY = Math.max(-maxRange, Math.min(maxRange, newY))
-    
-    // Track if user has actually dragged
-    if (Math.abs(constrainedY) > 10) {
-      hasDraggedRef.current = true
+    // Track if user has moved enough to count as intentional drag
+    if (Math.abs(deltaY) > 5) {
+      hasMovedRef.current = true
     }
     
     setDragY(constrainedY)
   }, [isDragging, isSticking])
 
-  // End drag operation with sticking behavior
+  // End dragging with vote registration and sticking
   const endDrag = useCallback(() => {
-    if (!isDragging || !containerRef.current) return
+    if (!isDragging) return
     
-    const rect = containerRef.current.getBoundingClientRect()
-    const threshold = rect.height * 0.15
+    const preview = getVotePreview()
     
-    // Determine if vote should be registered
-    let voteType: 'up' | 'down' | null = null
-    if (Math.abs(dragY) > threshold) {
-      voteType = dragY < 0 ? 'up' : 'down'
-    }
-    
-    // Reset drag state immediately
+    // Reset dragging state first
     setIsDragging(false)
     
-    // Register vote and show sticking behavior if applicable
-    if (voteType && hasDraggedRef.current) {
-      onVote(postId, voteType)
+    // Register vote if threshold met and user actually moved
+    if (preview.willVote && hasMovedRef.current && preview.voteType) {
+      onVote(postId, preview.voteType)
       
-      // Stick to voted position immediately
+      // Show sticky behavior
       setIsSticking(true)
-      const stickPosition = voteType === 'up' ? -rect.height * 0.3 : rect.height * 0.3
-      setDragY(stickPosition)
+      const stickyPosition = preview.voteType === 'up' ? -40 : 40
+      setDragY(stickyPosition)
+      setFeedbackMessage(preview.voteType === 'up' ? 'Upvoted! 👍' : 'Downvoted! 👎')
       
-      // Show feedback
-      setFeedbackType(voteType)
-      setShowFeedback(true)
-      
-      // After sticking, return to center
-      clearFeedbackTimeout()
-      feedbackTimeoutRef.current = setTimeout(() => {
-        setIsSticking(false) // Stop sticking first
-        setDragY(0) // Then return to center
-        setShowFeedback(false)
-        setFeedbackType(null)
-      }, 1200) // Stick for 1.2 seconds
+      // Return to center after sticky duration
+      clearTimeouts()
+      stickyTimeoutRef.current = setTimeout(() => {
+        setIsSticking(false)
+        setDragY(0)
+        setShowVoteCounter(false)
+        setFeedbackMessage('')
+      }, STICKY_DURATION)
     } else {
       // No vote - return to center immediately
       setDragY(0)
+      setShowVoteCounter(false)
+      setFeedbackMessage('')
     }
     
-    hasDraggedRef.current = false
+    hasMovedRef.current = false
   }, [isDragging, dragY, postId, onVote])
 
-  // Mouse event handlers
+  // Mouse handlers
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault()
-    startDrag(e.clientY)
+    startDrag(e.clientX, e.clientY)
     
-    const handleMouseMove = (e: MouseEvent) => updateDrag(e.clientY)
-    const handleMouseUp = () => {
+    const handleMouseMove = (e: MouseEvent) => {
+      e.preventDefault()
+      updateDrag(e.clientX, e.clientY)
+    }
+    
+    const handleMouseUp = (e: MouseEvent) => {
+      e.preventDefault()
       endDrag()
       document.removeEventListener('mousemove', handleMouseMove)
       document.removeEventListener('mouseup', handleMouseUp)
@@ -163,20 +152,24 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
     document.addEventListener('mouseup', handleMouseUp)
   }, [startDrag, updateDrag, endDrag])
 
-  // Touch event handlers
+  // Touch handlers
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     e.preventDefault()
     if (e.touches.length !== 1) return
     
-    startDrag(e.touches[0].clientY)
+    const touch = e.touches[0]
+    startDrag(touch.clientX, touch.clientY)
     
     const handleTouchMove = (e: TouchEvent) => {
+      e.preventDefault()
       if (e.touches.length === 1) {
-        e.preventDefault()
-        updateDrag(e.touches[0].clientY)
+        const touch = e.touches[0]
+        updateDrag(touch.clientX, touch.clientY)
       }
     }
-    const handleTouchEnd = () => {
+    
+    const handleTouchEnd = (e: TouchEvent) => {
+      e.preventDefault()
       endDrag()
       document.removeEventListener('touchmove', handleTouchMove)
       document.removeEventListener('touchend', handleTouchEnd)
@@ -186,176 +179,148 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
     document.addEventListener('touchend', handleTouchEnd)
   }, [startDrag, updateDrag, endDrag])
 
-  // Simple click handler for quick votes (when not dragging)
-  const handleClick = useCallback((e: React.MouseEvent) => {
-    // Only handle click if we haven't dragged
-    if (!hasDraggedRef.current && !isDragging && !isSticking) {
-      e.preventDefault()
-      onVote(postId, 'up') // Default to upvote on click
-      
-      // Show quick sticking animation
-      setIsSticking(true)
-      setDragY(-containerRef.current!.getBoundingClientRect().height * 0.3)
-      setFeedbackType('up')
-      setShowFeedback(true)
-      
-      clearFeedbackTimeout()
-      feedbackTimeoutRef.current = setTimeout(() => {
-        setIsSticking(false)
-        setDragY(0)
-        setShowFeedback(false)
-        setFeedbackType(null)
-      }, 1000)
-    }
-  }, [isDragging, isSticking, postId, onVote])
-
-  // Cleanup on unmount
+  // Cleanup
   useEffect(() => {
-    return () => {
-      clearFeedbackTimeout()
-    }
+    return () => clearTimeouts()
   }, [])
 
-  // Determine current zone and vote preview
-  const threshold = containerRef.current ? containerRef.current.getBoundingClientRect().height * 0.15 : 20
+  const preview = getVotePreview()
   const isUpZone = dragY < -10
   const isDownZone = dragY > 10
-  const willVote = Math.abs(dragY) > threshold
-  const previewCounts = getPreviewVoteCounts()
 
   return (
     <div 
       ref={containerRef}
-      className="flex flex-col items-center justify-between h-full w-12 rounded-xl border border-slate-200 shadow-sm p-1 relative overflow-hidden select-none"
-      style={getContainerStyle()}
+      className="flex flex-col items-center justify-between h-full w-14 rounded-xl border border-slate-200 shadow-sm p-2 relative overflow-hidden select-none bg-slate-50"
+      style={{
+        background: isDragging && preview.willVote ? 
+          (isUpZone ? 'linear-gradient(to bottom, rgba(34, 197, 94, 0.15), rgba(248, 250, 252, 1))' :
+           'linear-gradient(to top, rgba(239, 68, 68, 0.15), rgba(248, 250, 252, 1))') : 
+          undefined
+      }}
     >
-      {/* Top zone indicator */}
-      <div className={`w-full h-6 rounded-t-lg flex items-center justify-center transition-all duration-200 ${
-        isDragging && isUpZone ? 'bg-green-400/40' : 'opacity-30'
+      {/* Upvote Zone Indicator */}
+      <div className={`w-full h-8 rounded-t-lg flex items-center justify-center transition-all duration-200 ${
+        isDragging && isUpZone ? 'bg-green-400/30' : 'opacity-40'
       }`}>
-        <span className="text-xs text-green-600 font-bold">↑</span>
+        <span className="text-sm text-green-600 font-bold">↑</span>
       </div>
 
-      {/* Ice cream cone */}
+      {/* Ice Cream Cone */}
       <div
-        className={`absolute cursor-grab active:cursor-grabbing hover:scale-105 ${
-          isDragging || isSticking ? 'scale-110 z-50' : 'z-20'
-        } flex items-center justify-center select-none touch-none`}
+        className={`absolute inset-0 flex items-center justify-center cursor-grab active:cursor-grabbing touch-none select-none ${
+          isDragging || isSticking ? 'z-50' : 'z-20'
+        }`}
         style={{
-          top: '50%',
-          left: '50%',
-          width: '48px',
-          height: '64px',
-          transform: `translate(-50%, -50%) translateY(${dragY}px)`,
-          // Only apply transition when not dragging AND not sticking
-          transition: (!isDragging && !isSticking) ? 'transform 0.4s ease-out' : 'none',
+          transform: `translateY(${dragY}px)`,
+          transition: isSticking ? 'transform 0.3s ease-out' : 
+                     (!isDragging ? 'transform 0.5s ease-out' : 'none'),
         }}
         onMouseDown={handleMouseDown}
         onTouchStart={handleTouchStart}
-        onClick={handleClick}
       >
         <svg 
-          width="32" 
-          height="48" 
-          viewBox="0 0 32 48" 
+          width="40" 
+          height="56" 
+          viewBox="0 0 40 56" 
           className={`transition-all duration-200 ${
-            showFeedback ? 'drop-shadow-lg' : 'drop-shadow-md'
+            isDragging || isSticking ? 'scale-110 drop-shadow-lg' : 'drop-shadow-md'
           } ${
-            feedbackType === 'up' ? 'brightness-110 scale-110' :
-            feedbackType === 'down' ? 'brightness-90 scale-105' :
-            isDragging && willVote ? 'brightness-110' : ''
+            preview.willVote && isDragging ? 'brightness-110' : ''
           }`}
         >
           <defs>
             <linearGradient id={`cone-${postId}`} x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#D2691E"/>
-              <stop offset="100%" stopColor="#8B4513"/>
+              <stop offset="0%" stopColor="#DEB887"/>
+              <stop offset="100%" stopColor="#8B7355"/>
             </linearGradient>
             <linearGradient id={`scoop-${postId}`} x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#FFB6C1"/>
+              <stop offset="0%" stopColor="#FFE4E1"/>
+              <stop offset="50%" stopColor="#FFB6C1"/>
               <stop offset="100%" stopColor="#FF69B4"/>
             </linearGradient>
           </defs>
           
           {/* Cone */}
           <path 
-            d="M10 28 L16 44 L22 28 Z" 
+            d="M12 32 L20 52 L28 32 Z" 
             fill={`url(#cone-${postId})`}
-            stroke="#8B4513"
-            strokeWidth="0.5"
+            stroke="#8B7355"
+            strokeWidth="1"
           />
+          
+          {/* Crosshatch pattern on cone */}
+          <path d="M14 35 L26 35 M15 38 L25 38 M16 41 L24 41 M17 44 L23 44 M18 47 L22 47" 
+                stroke="#8B7355" strokeWidth="0.5" />
           
           {/* Ice cream scoop */}
           <circle 
-            cx="16" 
-            cy="24" 
-            r="8" 
+            cx="20" 
+            cy="28" 
+            r="10" 
             fill={`url(#scoop-${postId})`}
             stroke="#FF1493"
-            strokeWidth="0.3"
+            strokeWidth="0.5"
           />
           
-          {/* Highlight */}
+          {/* Highlight on scoop */}
           <ellipse 
-            cx="13" 
-            cy="21" 
-            rx="2.5" 
-            ry="3" 
-            fill="rgba(255,255,255,0.5)"
+            cx="16" 
+            cy="24" 
+            rx="3" 
+            ry="4" 
+            fill="rgba(255,255,255,0.6)"
           />
           
-          {/* Cherry */}
-          <circle cx="16" cy="18" r="1.5" fill="#FF1744"/>
+          {/* Cherry on top */}
+          <circle cx="20" cy="20" r="2" fill="#DC143C"/>
+          <ellipse cx="19" cy="19" rx="0.8" ry="1" fill="rgba(255,255,255,0.4)"/>
         </svg>
       </div>
 
-      {/* Live Vote Counter - shows during drag */}
-      {isDragging && hasDraggedRef.current && (
-        <div className="absolute top-1/2 left-16 transform -translate-y-1/2 z-40 bg-white/95 backdrop-blur-sm border border-slate-200 rounded-lg px-3 py-2 shadow-lg animate-in slide-in-from-left duration-200">
-          <div className="text-xs font-semibold text-slate-700 space-y-1 min-w-[40px]">
-            <div className="flex items-center gap-1">
+      {/* Live Vote Counter */}
+      {(showVoteCounter || feedbackMessage) && (
+        <div className="absolute top-1/2 left-16 transform -translate-y-1/2 z-40 bg-white/95 backdrop-blur-sm border border-slate-300 rounded-lg px-4 py-3 shadow-lg animate-in slide-in-from-left duration-200">
+          <div className="text-sm font-semibold text-slate-700 space-y-1 min-w-[50px]">
+            <div className="flex items-center justify-between gap-2">
               <span className="text-green-600">👍</span>
-              <span className="font-mono">{previewCounts.upvotes}</span>
+              <span className="font-mono tabular-nums">{preview.upvotes}</span>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center justify-between gap-2">
               <span className="text-red-600">👎</span>
-              <span className="font-mono">{previewCounts.downvotes}</span>
+              <span className="font-mono tabular-nums">{preview.downvotes}</span>
             </div>
+            {feedbackMessage && (
+              <div className="text-xs text-center text-slate-600 mt-1 pt-1 border-t border-slate-200">
+                {feedbackMessage}
+              </div>
+            )}
           </div>
         </div>
       )}
 
-      {/* Vote preview during drag */}
-      {isDragging && willVote && (
-        <div className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-40 px-3 py-2 rounded-lg text-sm font-bold shadow-lg backdrop-blur-sm ${
-          isUpZone ? 'bg-green-100/90 text-green-700 border border-green-300' :
-          'bg-red-100/90 text-red-700 border border-red-300'
+      {/* Vote Preview Indicator */}
+      {isDragging && preview.willVote && !feedbackMessage && (
+        <div className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-40 px-3 py-2 rounded-lg text-sm font-bold shadow-lg backdrop-blur-sm border-2 ${
+          preview.voteType === 'up' ? 
+            'bg-green-100/90 text-green-800 border-green-300' :
+            'bg-red-100/90 text-red-800 border-red-300'
         }`}>
-          {isUpZone ? '+1 👍' : '+1 👎'}
+          {preview.voteType === 'up' ? '+1 👍' : '+1 👎'}
         </div>
       )}
 
-      {/* Feedback display */}
-      {showFeedback && (
-        <div className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-40 px-3 py-2 rounded-lg text-sm font-bold shadow-lg backdrop-blur-sm animate-in fade-in duration-200 ${
-          feedbackType === 'up' ? 'bg-green-100/90 text-green-700 border border-green-300' :
-          'bg-red-100/90 text-red-700 border border-red-300'
-        }`}>
-          {feedbackType === 'up' ? 'Upvoted! 👍' : 'Downvoted! 👎'}
-        </div>
-      )}
-
-      {/* Bottom zone indicator */}
-      <div className={`w-full h-6 rounded-b-lg flex items-center justify-center transition-all duration-200 ${
-        isDragging && isDownZone ? 'bg-red-400/40' : 'opacity-30'
+      {/* Downvote Zone Indicator */}
+      <div className={`w-full h-8 rounded-b-lg flex items-center justify-center transition-all duration-200 ${
+        isDragging && isDownZone ? 'bg-red-400/30' : 'opacity-40'
       }`}>
-        <span className="text-xs text-red-600 font-bold">↓</span>
+        <span className="text-sm text-red-600 font-bold">↓</span>
       </div>
 
       {/* Instructions */}
-      {!isDragging && !showFeedback && !isSticking && (
-        <div className="absolute top-1 left-1/2 transform -translate-x-1/2 pointer-events-none z-30">
-          <div className="text-xs text-slate-500 bg-white/80 px-2 py-1 rounded shadow-sm">
+      {!isDragging && !showVoteCounter && !isSticking && (
+        <div className="absolute top-2 left-1/2 transform -translate-x-1/2 pointer-events-none z-30">
+          <div className="text-xs text-slate-500 bg-white/90 px-2 py-1 rounded-md shadow-sm border border-slate-200">
             Drag 🍦
           </div>
         </div>
