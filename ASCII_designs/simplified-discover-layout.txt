@@ -1,0 +1,64 @@
+┌─────────────────────────────────────────────────────────────────────┐
+│                          🗺️ SIMPLIFIED DISCOVER LAYOUT               │
+│                     (Stays within tab system - no breakout)          │
+└─────────────────────────────────────────────────────────────────────┘
+
+📱 MOBILE & DESKTOP FRIENDLY LAYOUT:
+
+┌─────────────────────────────────────────────────────────────────────┐
+│ Events > [Upcoming] [Past] [🗺️ Discover] ← Tab stays in place        │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│ 🔍 Explore Mode  🎯 Journey  📤 Share  🔽 Filters                    │
+│                                                                     │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│                    🗺️ INTERACTIVE MAPBOX MAP                        │
+│                         (Full width, 60% height)                   │
+│   📍 Event markers with live data • Zoom controls • Click to fly   │
+│                                                                     │
+├─────────────────────────┬───────────────────────────────────────────┤
+│     📋 DISCOVERY        │        🧳 JOURNEY PLANNER                │
+│    (Left Panel 50%)     │       (Right Panel 50%)                  │
+│                         │                                           │
+│ 🃏 Swipe Cards:         │ 📊 Your Journey Stats:                   │
+│ ┌─────────────────────┐ │ • 4 events • 5h duration                 │
+│ │ 🎉 Rooftop Social   │ │ • $32 total • 88% avg trust              │
+│ │ Tonight 10:30 PM    │ │                                           │
+│ │ 32 attending • $12  │ │ 🎯 Journey Timeline:                      │
+│ │ ⭐ 89% trust        │ │ 1. 7:00 PM - JS Workshop (60min)         │
+│ │ Journey Fit: 88%    │ │ 2. 8:30 PM - Coffee & Code (30min)       │
+│ │                     │ │ 3. 9:00 PM - Art Gallery (120min)        │
+│ │ [Skip] [Maybe] [❤️] │ │ 4. 10:30 PM - Rooftop Social (90min)     │
+│ │      [+ Add] ←──────┼─│                                           │
+│ └─────────────────────┘ │ 🚀 [Start Your Journey]                  │
+│                         │                                           │
+│ Progress: 12/50 viewed  │ Quick Actions:                            │
+│ 🎯 3 added to journey   │ • [Remove Event] • [Optimize Route]      │
+│                         │ • [Time Adjustment] • [Add Break]        │
+└─────────────────────────┴───────────────────────────────────────────┘
+
+KEY IMPROVEMENTS:
+✅ NO page breakout - stays within Events tab system
+✅ Map on top = always visible reference point
+✅ Two equal sidebars below = no cramped mobile experience  
+✅ Persistent layout = no collapsing/expanding complexity
+✅ Clear information hierarchy = map → discovery → planning
+
+RESPONSIVE BEHAVIOR:
+📱 Mobile: Stack vertically (Map → Discovery → Journey)
+💻 Desktop: Side-by-side panels under map
+🖥️ Large screens: All three visible simultaneously
+
+This eliminates:
+❌ Full-screen takeover breaking tab navigation
+❌ Complex collapsible panel logic causing mobile issues  
+❌ Journey panel competing for space with map
+❌ User confusion about where they are in the app
+
+BENEFITS:
+🎯 Always see map context while swiping through events
+📍 Clear spatial relationship between events and journey
+🔄 Smooth workflow: Discover on map → Swipe cards → Plan journey
+📱 Mobile-friendly with natural vertical scrolling
+⚡ Simpler state management = fewer bugs 
