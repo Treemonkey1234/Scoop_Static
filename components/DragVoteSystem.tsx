@@ -55,10 +55,6 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
     if (now - lastMoveTimeRef.current < 16) return // Throttle to ~60fps
     lastMoveTimeRef.current = now
 
-    // Add delay for touch events to distinguish from taps
-    const timeSinceTouch = now - touchStartTimeRef.current
-    const shouldRespond = timeSinceTouch > 100 // Wait 100ms before responding to touch movement
-
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current)
     }
@@ -73,15 +69,13 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
       const maxRange = rect.height * 0.25 // Reduced from 35% to 25% to avoid mobile UI
       const constrainedY = Math.max(-maxRange, Math.min(maxRange, newY))
       
-      // Mark as moved if dragged more than 15px (increased for better mobile touch detection)
-      // and enough time has passed to distinguish from tap
-      if (Math.abs(constrainedY) > 15 && shouldRespond) {
+      // Mark as moved if dragged more than 8px (reduced from 15px for better mobile responsiveness)
+      if (Math.abs(constrainedY) > 8) {
         setHasMoved(true)
-        setDragPosition({ x: 0, y: constrainedY })
-      } else if (shouldRespond) {
-        // Still update position for small movements after delay
-        setDragPosition({ x: 0, y: constrainedY })
       }
+      
+      // Always update position immediately for responsive feedback
+      setDragPosition({ x: 0, y: constrainedY })
     })
   }, [startY])
 
@@ -93,6 +87,7 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
     if (!containerRef.current) return
 
     const rect = containerRef.current.getBoundingClientRect()
+    touchStartTimeRef.current = Date.now() // Record start time for both mouse and touch
     setStartY(e.clientY - rect.top)
     setDragPosition({ x: 0, y: 0 })
     setHasMoved(false)
@@ -137,7 +132,7 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
     setIsDragging(true)
     setVisualVoteState(null) // Reset vote state when starting new drag
     
-    // Clear any pending reset timeout
+    // Clear any pending reset timeout to allow manual interaction
     if (resetTimeoutRef.current) {
       clearTimeout(resetTimeoutRef.current)
       resetTimeoutRef.current = null
@@ -189,51 +184,62 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
     
     let finalPosition = { x: 0, y: 0 }
     
-    // Check if this was a quick tap (less than 200ms) - don't vote on quick taps
+    // Check if this was a quick tap vs deliberate drag
     const touchDuration = Date.now() - touchStartTimeRef.current
-    const wasQuickTap = touchDuration < 200
+    const wasQuickTap = touchDuration < 150 && !hasMoved // Reduced from 200ms to 150ms and require no movement
     
-    // Only vote if user actually dragged (not just tapped) and it wasn't a quick tap
-    if (hasMoved && !wasQuickTap) {
+    // Vote if user actually dragged OR if it was a deliberate tap in a vote zone
+    const shouldProcessVote = hasMoved || (wasQuickTap && Math.abs(dragPosition.y) > 8)
+    
+    if (shouldProcessVote) {
       const containerHeight = containerRef.current.getBoundingClientRect().height
       const threshold = containerHeight * 0.12 // 12% threshold to work with 25% max range
       const maxRange = containerHeight * 0.25 // Maximum range for positioning
       
       if (dragPosition.y < -threshold) {
         onVote(postId, 'up')
-        // Stick to upvote position
+        // Stick to upvote position briefly for visual feedback
         finalPosition = { x: 0, y: -maxRange * 0.8 }
         setVisualVoteState('up')
         
-        // Auto-reset to center after 1.2 seconds to show the vote was registered
+        // Shorter auto-reset for better responsiveness - allow manual interruption
         if (resetTimeoutRef.current) {
           clearTimeout(resetTimeoutRef.current)
         }
         resetTimeoutRef.current = setTimeout(() => {
-          setDragPosition({ x: 0, y: 0 })
-          setVisualVoteState(null)
-          resetTimeoutRef.current = null
-        }, 1200)
+          // Only reset if user isn't currently dragging
+          if (!isDragging) {
+            setDragPosition({ x: 0, y: 0 })
+            setVisualVoteState(null)
+            resetTimeoutRef.current = null
+          }
+        }, 800) // Reduced from 1200ms to 800ms
       } else if (dragPosition.y > threshold) {
         onVote(postId, 'down')
-        // Stick to downvote position
+        // Stick to downvote position briefly for visual feedback
         finalPosition = { x: 0, y: maxRange * 0.8 }
         setVisualVoteState('down')
         
-        // Auto-reset to center after 1.2 seconds to show the vote was registered
+        // Shorter auto-reset for better responsiveness - allow manual interruption
         if (resetTimeoutRef.current) {
           clearTimeout(resetTimeoutRef.current)
         }
         resetTimeoutRef.current = setTimeout(() => {
-          setDragPosition({ x: 0, y: 0 })
-          setVisualVoteState(null)
-          resetTimeoutRef.current = null
-        }, 1200)
+          // Only reset if user isn't currently dragging
+          if (!isDragging) {
+            setDragPosition({ x: 0, y: 0 })
+            setVisualVoteState(null)
+            resetTimeoutRef.current = null
+          }
+        }, 800) // Reduced from 1200ms to 800ms
       } else {
         // Reset visual state if no vote threshold reached
         setVisualVoteState(null)
       }
       // If no vote threshold reached, return to center (default finalPosition)
+    } else {
+      // For invalid gestures, always return to center
+      setVisualVoteState(null)
     }
     
     setIsDragging(false)
