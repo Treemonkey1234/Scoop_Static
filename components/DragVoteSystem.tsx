@@ -20,31 +20,49 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
   const [dragY, setDragY] = useState(0)
   const [showFeedback, setShowFeedback] = useState(false)
   const [feedbackType, setFeedbackType] = useState<'up' | 'down' | null>(null)
+  const [isSticking, setIsSticking] = useState(false) // New state for sticking behavior
   
   const containerRef = useRef<HTMLDivElement>(null)
   const startYRef = useRef(0)
   const hasDraggedRef = useRef(false)
   const feedbackTimeoutRef = useRef<NodeJS.Timeout>()
 
-  // Calculate display values
-  const totalVotes = upvotes + downvotes
-  const displayUpvotes = upvotes + (currentVote === 'up' ? 1 : 0)
-  const displayDownvotes = downvotes + (currentVote === 'down' ? 1 : 0)
-  const displayTotal = displayUpvotes + displayDownvotes
-  const positiveRatio = displayTotal > 0 ? (displayUpvotes / displayTotal) * 100 : 50
-
-  // Simple gradient based on ratio
-  const getContainerStyle = () => {
-    if (positiveRatio >= 70) {
-      return { background: 'linear-gradient(to bottom, rgba(34, 197, 94, 0.3), rgba(148, 163, 184, 0.1))' }
-    } else if (positiveRatio <= 30) {
-      return { background: 'linear-gradient(to bottom, rgba(148, 163, 184, 0.1), rgba(239, 68, 68, 0.3))' }
-    } else {
-      return { background: 'linear-gradient(to bottom, rgba(148, 163, 184, 0.1), rgba(148, 163, 184, 0.1))' }
-    }
+  // Calculate preview vote counts during drag
+  const getPreviewVoteCounts = () => {
+    if (!isDragging || !containerRef.current) return { upvotes, downvotes }
+    
+    const threshold = containerRef.current.getBoundingClientRect().height * 0.15
+    const willVote = Math.abs(dragY) > threshold
+    
+    if (!willVote) return { upvotes, downvotes }
+    
+    const isUpVote = dragY < -threshold
+    let newUpvotes = upvotes
+    let newDownvotes = downvotes
+    
+    // Remove current vote if exists
+    if (currentVote === 'up') newUpvotes--
+    if (currentVote === 'down') newDownvotes--
+    
+    // Add new vote
+    if (isUpVote) newUpvotes++
+    else newDownvotes++
+    
+    return { upvotes: newUpvotes, downvotes: newDownvotes }
   }
 
-  // Clean up any pending timeouts
+  // Dynamic container styling
+  const getContainerStyle = () => {
+    if (isDragging) {
+      const isUpZone = dragY < -10
+      return {
+        background: isUpZone ? 'linear-gradient(to bottom, rgba(34, 197, 94, 0.1), rgba(248, 250, 252, 1))' :
+                              'linear-gradient(to top, rgba(239, 68, 68, 0.1), rgba(248, 250, 252, 1))'
+      }
+    }
+    return {}
+  }
+
   const clearFeedbackTimeout = () => {
     if (feedbackTimeoutRef.current) {
       clearTimeout(feedbackTimeoutRef.current)
@@ -61,12 +79,13 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
     hasDraggedRef.current = false
     setIsDragging(true)
     setDragY(0)
+    setIsSticking(false) // Reset sticking when starting new drag
     clearFeedbackTimeout()
   }, [])
 
   // Update drag position
   const updateDrag = useCallback((clientY: number) => {
-    if (!isDragging || !containerRef.current) return
+    if (!isDragging || !containerRef.current || isSticking) return
     
     const rect = containerRef.current.getBoundingClientRect()
     const newY = clientY - rect.top - rect.height / 2 - startYRef.current
@@ -81,9 +100,9 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
     }
     
     setDragY(constrainedY)
-  }, [isDragging])
+  }, [isDragging, isSticking])
 
-  // End drag operation
+  // End drag operation with sticking behavior
   const endDrag = useCallback(() => {
     if (!isDragging || !containerRef.current) return
     
@@ -96,22 +115,33 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
       voteType = dragY < 0 ? 'up' : 'down'
     }
     
-    // Always reset drag state immediately
+    // Reset drag state immediately
     setIsDragging(false)
-    setDragY(0)
     
-    // Register vote and show feedback if applicable
+    // Register vote and show sticking behavior if applicable
     if (voteType && hasDraggedRef.current) {
       onVote(postId, voteType)
+      
+      // Stick to voted position
+      setIsSticking(true)
+      const stickPosition = voteType === 'up' ? -rect.height * 0.25 : rect.height * 0.25
+      setDragY(stickPosition)
+      
+      // Show feedback
       setFeedbackType(voteType)
       setShowFeedback(true)
       
-      // Clear feedback after a short time
+      // After sticking, return to center
       clearFeedbackTimeout()
       feedbackTimeoutRef.current = setTimeout(() => {
+        setDragY(0)
+        setIsSticking(false)
         setShowFeedback(false)
         setFeedbackType(null)
-      }, 800)
+      }, 1000) // Stick for 1 second
+    } else {
+      // No vote - return to center immediately
+      setDragY(0)
     }
     
     hasDraggedRef.current = false
@@ -159,20 +189,25 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
   // Simple click handler for quick votes (when not dragging)
   const handleClick = useCallback((e: React.MouseEvent) => {
     // Only handle click if we haven't dragged
-    if (!hasDraggedRef.current && !isDragging) {
+    if (!hasDraggedRef.current && !isDragging && !isSticking) {
       e.preventDefault()
       onVote(postId, 'up') // Default to upvote on click
       
+      // Show quick sticking animation
+      setIsSticking(true)
+      setDragY(-containerRef.current!.getBoundingClientRect().height * 0.25)
       setFeedbackType('up')
       setShowFeedback(true)
       
       clearFeedbackTimeout()
       feedbackTimeoutRef.current = setTimeout(() => {
+        setDragY(0)
+        setIsSticking(false)
         setShowFeedback(false)
         setFeedbackType(null)
-      }, 600)
+      }, 800)
     }
-  }, [isDragging, postId, onVote])
+  }, [isDragging, isSticking, postId, onVote])
 
   // Cleanup on unmount
   useEffect(() => {
@@ -181,11 +216,12 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
     }
   }, [])
 
-  // Determine current zone
+  // Determine current zone and vote preview
   const threshold = containerRef.current ? containerRef.current.getBoundingClientRect().height * 0.15 : 20
   const isUpZone = dragY < -10
   const isDownZone = dragY > 10
   const willVote = Math.abs(dragY) > threshold
+  const previewCounts = getPreviewVoteCounts()
 
   return (
     <div 
@@ -203,7 +239,7 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
       {/* Ice cream cone */}
       <div
         className={`absolute cursor-grab active:cursor-grabbing transition-transform duration-200 ease-out hover:scale-105 ${
-          isDragging ? 'scale-110 z-50' : 'z-20'
+          isDragging || isSticking ? 'scale-110 z-50' : 'z-20'
         } flex items-center justify-center select-none touch-none`}
         style={{
           top: '50%',
@@ -272,6 +308,22 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
         </svg>
       </div>
 
+      {/* Live Vote Counter - shows during drag */}
+      {isDragging && (
+        <div className="absolute top-1/2 left-16 transform -translate-y-1/2 z-40 bg-white/95 backdrop-blur-sm border border-slate-200 rounded-lg px-3 py-2 shadow-lg">
+          <div className="text-xs font-semibold text-slate-700 space-y-1">
+            <div className="flex items-center gap-1">
+              <span className="text-green-600">👍</span>
+              <span>{previewCounts.upvotes}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="text-red-600">👎</span>
+              <span>{previewCounts.downvotes}</span>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Vote preview during drag */}
       {isDragging && willVote && (
         <div className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-40 px-3 py-2 rounded-lg text-sm font-bold shadow-lg backdrop-blur-sm ${
@@ -300,7 +352,7 @@ const DragVoteSystem: React.FC<DragVoteSystemProps> = ({
       </div>
 
       {/* Instructions */}
-      {!isDragging && !showFeedback && (
+      {!isDragging && !showFeedback && !isSticking && (
         <div className="absolute top-1 left-1/2 transform -translate-x-1/2 pointer-events-none z-30">
           <div className="text-xs text-slate-500 bg-white/80 px-2 py-1 rounded shadow-sm">
             Drag 🍦
