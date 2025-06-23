@@ -1,0 +1,151 @@
+POST CARD LAYOUT OPTIONS - 10 VARIATIONS
+=========================================
+
+OPTION 1: COMPACT HORIZONTAL FLOW
+==================================
+┌─────────────────────────────────────────────────────────────────┐
+│ [Vote] │ [Pic] Name → Target [Trust] [Flag]                     │
+│  Up/   │       Category • Event Review • Date • Location        │
+│  Down  │       ─────────────────────────────────────────────────│
+│        │       "Review content preview text here..."           │
+│        │       [Comment] [Share]                                │
+│        │       Event Box (if event review)                     │
+└─────────────────────────────────────────────────────────────────┘
+
+OPTION 2: VERTICAL STACK WITH SIDEBAR
+======================================
+┌─────────────────────────────────────────────────────────────────┐
+│ [Vote] │ Header: [Pic] Name → Target [Trust] [Flag]             │
+│  Up/   │ ─────────────────────────────────────────────────────  │
+│  Down  │ Tags: Category • Event Review • Date • Location       │
+│        │ ─────────────────────────────────────────────────────  │
+│        │ Content: "Review content preview..."                   │
+│        │ ─────────────────────────────────────────────────────  │
+│        │ Actions: [Comment] [Share]    Event Box (if applicable)│
+└─────────────────────────────────────────────────────────────────┘
+
+OPTION 3: GRID LAYOUT WITH FLOATING EVENT
+==========================================
+┌─────────────────────────────────────────────────────────────────┐
+│ [Vote] │ [Pic] Name → Target [Trust]              [Flag]        │
+│  Up/   │ ┌─────────────────────┐ ┌─────────────────────────────┐│
+│  Down  │ │ Category            │ │ Event Box (floating)        ││
+│        │ │ Event Review        │ │ Event: Title                ││
+│        │ │ Date • Location     │ │ Location • Date • Attendees ││
+│        │ └─────────────────────┘ └─────────────────────────────┘│
+│        │ "Review content preview text here..."                  │
+│        │ [Comment] [Share]                                      │
+└─────────────────────────────────────────────────────────────────┘
+
+OPTION 4: CARD-IN-CARD DESIGN
+==============================
+┌─────────────────────────────────────────────────────────────────┐
+│ [Vote] │ ┌─────────────────────────────────────────────────────┐│
+│  Up/   │ │ [Pic] Name → Target [Trust]              [Flag]    ││
+│  Down  │ │ Category • Event Review • Date • Location          ││
+│        │ └─────────────────────────────────────────────────────┘│
+│        │ ┌─────────────────────────────────────────────────────┐│
+│        │ │ "Review content preview text here..."               ││
+│        │ └─────────────────────────────────────────────────────┘│
+│        │ [Comment] [Share]    [Event Box if applicable]        │
+└─────────────────────────────────────────────────────────────────┘
+
+OPTION 5: TIMELINE STYLE
+=========================
+┌─────────────────────────────────────────────────────────────────┐
+│ [Vote] │ [Pic] Name → Target [Trust]              [Flag]        │
+│  Up/   │   │                                                    │
+│  Down  │   ├─ Category • Event Review • Date • Location        │
+│        │   │                                                    │
+│        │   ├─ "Review content preview text here..."            │
+│        │   │                                                    │
+│        │   └─ [Comment] [Share] │ Event Box (if applicable)    │
+└─────────────────────────────────────────────────────────────────┘
+
+OPTION 6: MAGAZINE LAYOUT
+=========================
+┌─────────────────────────────────────────────────────────────────┐
+│ [Vote] │ [Pic] Name → Target                      [Trust] [Flag]│
+│  Up/   │ ─────────────────────────────────────────────────────  │
+│  Down  │ Category │ Event Review │ Date │ Location              │
+│        │ ─────────────────────────────────────────────────────  │
+│        │ "Review content preview text here and it can be       │
+│        │  longer in this layout style..."                      │
+│        │ ─────────────────────────────────────────────────────  │
+│        │ [Comment] [Share]              [Event Box if needed]  │
+└─────────────────────────────────────────────────────────────────┘
+
+OPTION 7: MOBILE-FIRST STACK
+=============================
+┌─────────────────────────────────────────────────────────────────┐
+│ [Vote] │ [Pic] Name → Target [Trust] [Flag]                     │
+│  Up/   │                                                        │
+│  Down  │ Category                                               │
+│        │ Event Review (if applicable)                          │
+│        │ Date • Location                                        │
+│        │                                                        │
+│        │ "Review content preview text here..."                 │
+│        │                                                        │
+│        │ Event Box (if applicable)                             │
+│        │                                                        │
+│        │ [Comment] [Share]                                      │
+└─────────────────────────────────────────────────────────────────┘
+
+OPTION 8: SIDEBAR EVENT INFO
+============================
+┌─────────────────────────────────────────────────────────────────┐
+│ [Vote] │ [Pic] Name → Target [Trust] [Flag] │ Event Info        │
+│  Up/   │ Category • Event Review • Date     │ ┌─────────────────┐│
+│  Down  │ Location                           │ │ Event: Title    ││
+│        │                                    │ │ Date • Location ││
+│        │ "Review content preview text here  │ │ Attendees: 45   ││
+│        │  and more content..."              │ └─────────────────┘│
+│        │                                    │                   │
+│        │ [Comment] [Share]                  │                   │
+└─────────────────────────────────────────────────────────────────┘
+
+OPTION 9: FLOATING HEADER
+==========================
+┌─────────────────────────────────────────────────────────────────┐
+│        │ ┌─[Pic] Name → Target [Trust]──────────────[Flag]─┐   │
+│ [Vote] │ │ Category • Event Review • Date • Location      │   │
+│  Up/   │ └─────────────────────────────────────────────────┘   │
+│  Down  │                                                        │
+│        │ "Review content preview text here and can be longer   │
+│        │  in this floating header design..."                   │
+│        │                                                        │
+│        │ Event Box (if applicable)                             │
+│        │                                                        │
+│        │ [Comment] [Share]                                      │
+└─────────────────────────────────────────────────────────────────┘
+
+OPTION 10: COMPACT DENSE
+=========================
+┌─────────────────────────────────────────────────────────────────┐
+│ [Vote] │ [Pic] Name→Target [Trust] │ Cat│EvRev│ Date │ Loc [Flag]│
+│  Up/   │ ─────────────────────────────────────────────────────  │
+│  Down  │ "Review content preview text here..."                  │
+│        │ [Comment] [Share] │ Event: Title • Date • Attendees   │
+└─────────────────────────────────────────────────────────────────┘
+
+ANALYSIS & RECOMMENDATIONS:
+===========================
+
+DEAD ZONE ISSUES ADDRESSED:
+- Option 1: Eliminates gaps with horizontal flow
+- Option 2: Clear sections prevent empty spaces
+- Option 3: Grid fills all space efficiently
+- Option 4: Card-in-card creates visual hierarchy
+- Option 5: Timeline connects all elements
+- Option 6: Magazine style uses full width
+- Option 7: Mobile-first stacks everything tightly
+- Option 8: Sidebar utilizes all horizontal space
+- Option 9: Floating header creates visual interest
+- Option 10: Ultra-compact eliminates all gaps
+
+BEST FOR MOBILE: Options 1, 7, 10
+BEST FOR DESKTOP: Options 3, 6, 8
+MOST UNIQUE: Options 5, 9
+MOST PRACTICAL: Options 2, 4, 6
+
+VOTING AREA: Unchanged in all options (left sidebar) 

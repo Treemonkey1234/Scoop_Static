@@ -136,6 +136,24 @@ export function createNewUser(userData: {
     isVerified: false
   }
   
+  // Set up initial user in localStorage for metrics tracking
+  saveCurrentUser(newUser)
+  
+  // Give bonuses for initial setup
+  setTimeout(() => {
+    // Profile completion bonus (has name, email, phone)
+    completeProfile(newUser.id)
+    
+    // Phone verification bonus (since they provided phone)
+    verifyPhone(newUser.id)
+    
+    // Record account creation
+    recordUserActivity(newUser.id, 'account_created', {
+      name: userData.fullName,
+      email: userData.email
+    })
+  }, 100) // Small delay to ensure user is saved first
+  
   return newUser
 }
 
@@ -144,6 +162,183 @@ export function updateUserProfile(updates: Partial<User>): User {
   const updatedUser = { ...currentUser, ...updates }
   saveCurrentUser(updatedUser)
   return updatedUser
+}
+
+// User Metrics Management Functions
+export function incrementUserReviews(userId: string): void {
+  if (typeof window === 'undefined') return
+  
+  try {
+    // Update current user if it's them
+    const currentUser = getCurrentUser()
+    if (currentUser.id === userId) {
+      const updatedUser = {
+        ...currentUser,
+        reviewsCount: currentUser.reviewsCount + 1,
+        trustScore: calculateNewTrustScore(currentUser.trustScore, 'review_created')
+      }
+      updatedUser.trustLevel = getTrustLevel(updatedUser.trustScore)
+      saveCurrentUser(updatedUser)
+    }
+    
+    // Update in sample users if exists
+    const userIndex = sampleUsers.findIndex(user => user.id === userId)
+    if (userIndex !== -1) {
+      sampleUsers[userIndex].reviewsCount += 1
+      sampleUsers[userIndex].trustScore = calculateNewTrustScore(sampleUsers[userIndex].trustScore, 'review_created')
+      sampleUsers[userIndex].trustLevel = getTrustLevel(sampleUsers[userIndex].trustScore)
+    }
+  } catch (error) {
+    console.error('Error incrementing user reviews:', error)
+  }
+}
+
+export function incrementUserEvents(userId: string): void {
+  if (typeof window === 'undefined') return
+  
+  try {
+    // Update current user if it's them
+    const currentUser = getCurrentUser()
+    if (currentUser.id === userId) {
+      const updatedUser = {
+        ...currentUser,
+        eventsAttended: currentUser.eventsAttended + 1,
+        trustScore: calculateNewTrustScore(currentUser.trustScore, 'event_attended')
+      }
+      updatedUser.trustLevel = getTrustLevel(updatedUser.trustScore)
+      saveCurrentUser(updatedUser)
+    }
+    
+    // Update in sample users if exists
+    const userIndex = sampleUsers.findIndex(user => user.id === userId)
+    if (userIndex !== -1) {
+      sampleUsers[userIndex].eventsAttended += 1
+      sampleUsers[userIndex].trustScore = calculateNewTrustScore(sampleUsers[userIndex].trustScore, 'event_attended')
+      sampleUsers[userIndex].trustLevel = getTrustLevel(sampleUsers[userIndex].trustScore)
+    }
+  } catch (error) {
+    console.error('Error incrementing user events:', error)
+  }
+}
+
+export function incrementUserFriends(userId: string): void {
+  if (typeof window === 'undefined') return
+  
+  try {
+    // Update current user if it's them
+    const currentUser = getCurrentUser()
+    if (currentUser.id === userId) {
+      const updatedUser = {
+        ...currentUser,
+        friendsCount: currentUser.friendsCount + 1,
+        trustScore: calculateNewTrustScore(currentUser.trustScore, 'friend_added')
+      }
+      updatedUser.trustLevel = getTrustLevel(updatedUser.trustScore)
+      saveCurrentUser(updatedUser)
+    }
+    
+    // Update in sample users if exists
+    const userIndex = sampleUsers.findIndex(user => user.id === userId)
+    if (userIndex !== -1) {
+      sampleUsers[userIndex].friendsCount += 1
+      sampleUsers[userIndex].trustScore = calculateNewTrustScore(sampleUsers[userIndex].trustScore, 'friend_added')
+      sampleUsers[userIndex].trustLevel = getTrustLevel(sampleUsers[userIndex].trustScore)
+    }
+  } catch (error) {
+    console.error('Error incrementing user friends:', error)
+  }
+}
+
+export function updateTrustScore(userId: string, activity: string, amount?: number): void {
+  if (typeof window === 'undefined') return
+  
+  try {
+    // Update current user if it's them
+    const currentUser = getCurrentUser()
+    if (currentUser.id === userId) {
+      const newScore = amount ? currentUser.trustScore + amount : calculateNewTrustScore(currentUser.trustScore, activity)
+      const updatedUser = {
+        ...currentUser,
+        trustScore: Math.max(0, Math.min(100, newScore)), // Keep between 0-100
+        trustLevel: getTrustLevel(Math.max(0, Math.min(100, newScore)))
+      }
+      saveCurrentUser(updatedUser)
+    }
+    
+    // Update in sample users if exists
+    const userIndex = sampleUsers.findIndex(user => user.id === userId)
+    if (userIndex !== -1) {
+      const newScore = amount ? sampleUsers[userIndex].trustScore + amount : calculateNewTrustScore(sampleUsers[userIndex].trustScore, activity)
+      sampleUsers[userIndex].trustScore = Math.max(0, Math.min(100, newScore))
+      sampleUsers[userIndex].trustLevel = getTrustLevel(sampleUsers[userIndex].trustScore)
+    }
+  } catch (error) {
+    console.error('Error updating trust score:', error)
+  }
+}
+
+export function calculateNewTrustScore(currentScore: number, activity: string): number {
+  const scoreChanges: { [key: string]: number } = {
+    'review_created': 2,        // +2 for writing a review
+    'review_received': 1,       // +1 for getting reviewed
+    'event_created': 3,         // +3 for hosting an event
+    'event_attended': 1,        // +1 for attending an event
+    'friend_added': 0.5,        // +0.5 for making a friend
+    'profile_completed': 5,     // +5 for completing profile
+    'phone_verified': 10,       // +10 for phone verification
+    'social_connected': 3,      // +3 for connecting social account
+    'upvote_received': 0.5,     // +0.5 for getting upvoted
+    'downvote_received': -1,    // -1 for getting downvoted
+    'reported': -5,             // -5 for being reported
+    'content_removed': -10      // -10 for content removal
+  }
+  
+  const change = scoreChanges[activity] || 0
+  return Math.max(0, Math.min(100, currentScore + change))
+}
+
+export function recordUserActivity(userId: string, activity: string, metadata?: any): void {
+  if (typeof window === 'undefined') return
+  
+  try {
+    const activities = getUserActivities()
+    const newActivity = {
+      id: Date.now().toString(),
+      userId,
+      activity,
+      timestamp: new Date().toISOString(),
+      metadata: metadata || {}
+    }
+    
+    activities.unshift(newActivity) // Add to beginning
+    
+    // Keep only last 100 activities per user
+    const userActivities = activities.filter(a => a.userId === userId)
+    if (userActivities.length > 100) {
+      const activitiesToKeep = activities.filter(a => a.userId !== userId)
+      const recentUserActivities = userActivities.slice(0, 100)
+      localStorage.setItem('userActivities', JSON.stringify([...activitiesToKeep, ...recentUserActivities]))
+    } else {
+      localStorage.setItem('userActivities', JSON.stringify(activities))
+    }
+    
+    // Update trust score based on activity
+    updateTrustScore(userId, activity)
+  } catch (error) {
+    console.error('Error recording user activity:', error)
+  }
+}
+
+export function getUserActivities(): any[] {
+  if (typeof window === 'undefined') return []
+  
+  try {
+    const activities = localStorage.getItem('userActivities')
+    return activities ? JSON.parse(activities) : []
+  } catch (error) {
+    console.error('Error getting user activities:', error)
+    return []
+  }
 }
 
 // Post Management Functions
@@ -211,7 +406,234 @@ export function createNewReview(reviewData: {
   allReviews.unshift(newReview) // Add to beginning (newest first)
   saveAllReviews(allReviews)
   
+  // Update user metrics
+  incrementUserReviews(currentUser.id)
+  recordUserActivity(currentUser.id, 'review_created', {
+    reviewId: newReview.id,
+    reviewedId: reviewData.reviewedId,
+    category: reviewData.category
+  })
+  
+  // Give trust score boost to person being reviewed
+  updateTrustScore(reviewData.reviewedId, 'review_received')
+  
   return newReview
+}
+
+// Event Management Functions
+export function getAllEvents(): Event[] {
+  if (typeof window === 'undefined') {
+    return sampleEvents
+  }
+
+  try {
+    const storedEvents = localStorage.getItem('scoopEvents')
+    if (storedEvents) {
+      const events = JSON.parse(storedEvents)
+      // Sort by date (newest first)
+      return events.sort((a: Event, b: Event) => 
+        new Date(b.date).getTime() - new Date(a.date).getTime()
+      )
+    }
+  } catch (error) {
+    console.error('Error parsing stored events:', error)
+  }
+  
+  // Initialize with sample data and sort by date
+  const sortedEvents = [...sampleEvents].sort((a, b) => 
+    new Date(b.date).getTime() - new Date(a.date).getTime()
+  )
+  saveAllEvents(sortedEvents)
+  return sortedEvents
+}
+
+export function saveAllEvents(events: Event[]): void {
+  if (typeof window === 'undefined') return
+  
+  try {
+    localStorage.setItem('scoopEvents', JSON.stringify(events))
+  } catch (error) {
+    console.error('Error saving events:', error)
+  }
+}
+
+export function createNewEvent(eventData: {
+  title: string
+  category: string
+  description: string
+  date: string
+  startTime: string
+  endTime: string
+  venueName: string
+  address: string
+  eventType: 'public' | 'private' | 'friends'
+  trustRequirement: number
+  maxAttendees: number
+  invitedFriends: string[]
+}): Event {
+  const currentUser = getCurrentUser()
+  const newEvent: Event = {
+    id: Date.now().toString(),
+    title: eventData.title,
+    description: eventData.description,
+    hostId: currentUser.id,
+    date: eventData.date,
+    time: eventData.startTime,
+    location: eventData.venueName,
+    address: eventData.address,
+    coordinates: [-74.006, 40.7128], // Default coordinates
+    attendeeCount: 1, // Host is automatically attending
+    maxAttendees: eventData.maxAttendees,
+    trustRequirement: eventData.trustRequirement,
+    isPrivate: eventData.eventType === 'private',
+    category: eventData.category,
+    price: 0, // Default free
+    imageUrl: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=600', // Default event image
+    tags: [],
+    isPast: false
+  }
+  
+  // Add to existing events
+  const allEvents = getAllEvents()
+  allEvents.unshift(newEvent) // Add to beginning (newest first)
+  saveAllEvents(allEvents)
+  
+  // Update user metrics - creating an event gives trust score boost
+  updateTrustScore(currentUser.id, 'event_created')
+  recordUserActivity(currentUser.id, 'event_created', {
+    eventId: newEvent.id,
+    eventTitle: newEvent.title,
+    category: newEvent.category
+  })
+  
+  return newEvent
+}
+
+// Event Attendance Functions
+export function attendEvent(eventId: string, userId?: string): boolean {
+  if (typeof window === 'undefined') return false
+  
+  try {
+    const currentUser = getCurrentUser()
+    const attendeeId = userId || currentUser.id
+    
+    // Update event attendance count
+    const allEvents = getAllEvents()
+    const eventIndex = allEvents.findIndex(event => event.id === eventId)
+    
+    if (eventIndex !== -1) {
+      allEvents[eventIndex].attendeeCount += 1
+      allEvents[eventIndex].rsvpStatus = 'going'
+      saveAllEvents(allEvents)
+      
+      // Update user metrics
+      incrementUserEvents(attendeeId)
+      recordUserActivity(attendeeId, 'event_attended', {
+        eventId,
+        eventTitle: allEvents[eventIndex].title
+      })
+      
+      return true
+    }
+    
+    return false
+  } catch (error) {
+    console.error('Error attending event:', error)
+    return false
+  }
+}
+
+// Friend Management Functions
+export function addFriend(friendId: string): boolean {
+  if (typeof window === 'undefined') return false
+  
+  try {
+    const currentUser = getCurrentUser()
+    
+    // Prevent adding self as friend
+    if (currentUser.id === friendId) return false
+    
+    // Update both users' friend counts
+    incrementUserFriends(currentUser.id)
+    incrementUserFriends(friendId)
+    
+    // Record activities
+    recordUserActivity(currentUser.id, 'friend_added', { friendId })
+    recordUserActivity(friendId, 'friend_added', { friendId: currentUser.id })
+    
+    return true
+  } catch (error) {
+    console.error('Error adding friend:', error)
+    return false
+  }
+}
+
+// Voting Functions
+export function voteOnReview(reviewId: string, voteType: 'up' | 'down'): boolean {
+  if (typeof window === 'undefined') return false
+  
+  try {
+    const allReviews = getAllReviews()
+    const reviewIndex = allReviews.findIndex(review => review.id === reviewId)
+    
+    if (reviewIndex !== -1) {
+      const review = allReviews[reviewIndex]
+      
+      // Update vote counts
+      if (voteType === 'up') {
+        allReviews[reviewIndex].upvotes += 1
+        // Give trust score boost to review author
+        updateTrustScore(review.reviewerId, 'upvote_received')
+      } else {
+        allReviews[reviewIndex].downvotes += 1
+        // Slight trust score penalty to review author
+        updateTrustScore(review.reviewerId, 'downvote_received')
+      }
+      
+      allReviews[reviewIndex].hasVoted = true
+      allReviews[reviewIndex].voteType = voteType
+      saveAllReviews(allReviews)
+      
+      // Record activity
+      const currentUser = getCurrentUser()
+      recordUserActivity(currentUser.id, `vote_${voteType}`, {
+        reviewId,
+        reviewAuthor: review.reviewerId
+      })
+      
+      return true
+    }
+    
+    return false
+  } catch (error) {
+    console.error('Error voting on review:', error)
+    return false
+  }
+}
+
+// Profile Enhancement Functions
+export function completeProfile(userId?: string): void {
+  const currentUser = getCurrentUser()
+  const targetUserId = userId || currentUser.id
+  
+  updateTrustScore(targetUserId, 'profile_completed')
+  recordUserActivity(targetUserId, 'profile_completed')
+}
+
+export function verifyPhone(userId?: string): void {
+  const currentUser = getCurrentUser()
+  const targetUserId = userId || currentUser.id
+  
+  updateTrustScore(targetUserId, 'phone_verified')
+  recordUserActivity(targetUserId, 'phone_verified')
+}
+
+export function connectSocialAccount(platform: string, userId?: string): void {
+  const currentUser = getCurrentUser()
+  const targetUserId = userId || currentUser.id
+  
+  updateTrustScore(targetUserId, 'social_connected')
+  recordUserActivity(targetUserId, 'social_connected', { platform })
 }
 
 // Sample Users
@@ -234,8 +656,8 @@ export const sampleUsers: User[] = [
       { platform: 'Twitter', handle: '@sarahc_ux', verified: true, icon: '🐦' },
     ],
     friendsCount: 3,
-    reviewsCount: 87,
-    eventsAttended: 45,
+    reviewsCount: 2,
+    eventsAttended: 3,
     isVerified: true,
   },
   {
@@ -255,8 +677,8 @@ export const sampleUsers: User[] = [
       { platform: 'YouTube', handle: 'MarcusTrains', verified: false, icon: '📺' },
     ],
     friendsCount: 156,
-    reviewsCount: 92,
-    eventsAttended: 38,
+    reviewsCount: 2,
+    eventsAttended: 2,
     isVerified: true,
   },
   {
@@ -277,8 +699,8 @@ export const sampleUsers: User[] = [
       { platform: 'Facebook', handle: 'Elena Rodriguez Chef', verified: false, icon: '👥' },
     ],
     friendsCount: 312,
-    reviewsCount: 156,
-    eventsAttended: 67,
+    reviewsCount: 2,
+    eventsAttended: 4,
     isVerified: true,
   },
   {
@@ -298,8 +720,8 @@ export const sampleUsers: User[] = [
       { platform: 'YouTube', handle: 'AlexOutdoors', verified: false, icon: '📺' },
     ],
     friendsCount: 89,
-    reviewsCount: 34,
-    eventsAttended: 23,
+    reviewsCount: 1,
+    eventsAttended: 3,
     isVerified: false,
   },
   {
@@ -320,13 +742,13 @@ export const sampleUsers: User[] = [
       { platform: 'Twitter', handle: '@maya_codes', verified: false, icon: '🐦' },
     ],
     friendsCount: 167,
-    reviewsCount: 73,
-    eventsAttended: 29,
+    reviewsCount: 2,
+    eventsAttended: 3,
     isVerified: true,
   }
 ]
 
-// Sample Reviews
+// Sample Reviews - Remixed Timeline for Better Distribution
 export const sampleReviews: Review[] = [
   {
     id: '1',
@@ -335,10 +757,26 @@ export const sampleReviews: Review[] = [
     category: 'Professional',
     rating: 5,
     content: "Sarah's design work is absolutely sweet! 🍦 She delivered a premium vanilla experience with strawberry-level attention to detail. Her creative process is smooth as gelato and the final product was a triple-scoop delight. Highly recommend this flavor artist!",
-    timestamp: '2025-06-14T10:30:00Z',
+    timestamp: '2025-06-18T10:30:00Z',
     upvotes: 24,
     downvotes: 2,
     hasVoted: false,
+    trustScore: 92,
+    communityValidation: 94,
+  },
+  {
+    id: '6',
+    reviewerId: '1',
+    reviewedId: '3',
+    category: 'Professional',
+    rating: 5,
+    content: 'Elena\'s Sunday Brunch & Networking event was absolutely phenomenal! The venue was perfect, the food was incredible, and she created such a welcoming atmosphere. I made 3 new professional connections and the whole experience felt effortless. Elena is a natural at bringing people together.',
+    timestamp: '2025-06-17T14:30:00Z',
+    upvotes: 18,
+    downvotes: 1,
+    hasVoted: false,
+    isEventReview: true,
+    eventId: 'past-1',
     trustScore: 92,
     communityValidation: 94,
   },
@@ -349,7 +787,7 @@ export const sampleReviews: Review[] = [
     category: 'Fitness',
     rating: 5,
     content: "Marcus is the Rocky Road of personal trainers - tough but incredibly rewarding! 💪🍨 His training sessions are like getting the perfect scoop - challenging but never overwhelming. He helped me achieve my fitness goals with a mint-chip level of freshness in his approach.",
-    timestamp: '2025-06-13T14:45:00Z',
+    timestamp: '2025-06-16T14:45:00Z',
     upvotes: 31,
     downvotes: 1,
     hasVoted: false,
@@ -363,56 +801,12 @@ export const sampleReviews: Review[] = [
     category: 'Culinary',
     rating: 5,
     content: "Elena's cooking class was a sundae of amazing flavors! 🍽️🍨 She taught us to layer ingredients like building the perfect ice cream sundae. Her passion for food is as rich as chocolate fudge, and her teaching style is as refreshing as sorbet on a hot day.",
-    timestamp: '2025-06-12T18:20:00Z',
+    timestamp: '2025-06-15T18:20:00Z',
     upvotes: 18,
     downvotes: 0,
     hasVoted: false,
     trustScore: 94,
     communityValidation: 98,
-  },
-  {
-    id: '4',
-    reviewerId: '5',
-    reviewedId: '4',
-    category: 'Social',
-    rating: 4,
-    content: 'Alex organized an amazing hiking trip to Rocky Mountain National Park. Great photographer too - got some incredible shots of our group. Definitely joining his next adventure!',
-    timestamp: '2025-06-05T16:45:00Z',
-    upvotes: 12,
-    downvotes: 2,
-    hasVoted: false,
-    trustScore: 76,
-    communityValidation: 78,
-  },
-  {
-    id: '5',
-    reviewerId: '3',
-    reviewedId: '5',
-    category: 'Professional',
-    rating: 5,
-    content: 'Maya built our restaurant\'s online ordering system and it\'s been flawless. She\'s responsive, professional, and delivered exactly what we needed on time and under budget.',
-    timestamp: '2025-06-01T11:30:00Z',
-    upvotes: 22,
-    downvotes: 0,
-    hasVoted: false,
-    trustScore: 85,
-    communityValidation: 89,
-  },
-  {
-    id: '6',
-    reviewerId: '1',
-    reviewedId: '3',
-    category: 'Professional',
-    rating: 5,
-    content: 'Elena\'s Sunday Brunch & Networking event was absolutely phenomenal! The venue was perfect, the food was incredible, and she created such a welcoming atmosphere. I made 3 new professional connections and the whole experience felt effortless. Elena is a natural at bringing people together.',
-    timestamp: '2025-06-20T14:30:00Z',
-    upvotes: 18,
-    downvotes: 1,
-    hasVoted: false,
-    isEventReview: true,
-    eventId: 'past-1',
-    trustScore: 92,
-    communityValidation: 94,
   },
   {
     id: '7',
@@ -421,7 +815,7 @@ export const sampleReviews: Review[] = [
     category: 'Creative',
     rating: 4,
     content: 'Alex\'s Mountain Photography Workshop was an amazing experience! The location was breathtaking and he really knows his stuff about landscape photography. Only minor issue was we started a bit late due to weather, but Alex handled it well and we still got great shots. Would definitely attend another workshop by him.',
-    timestamp: '2025-06-18T16:45:00Z',
+    timestamp: '2025-06-14T16:45:00Z',
     upvotes: 12,
     downvotes: 0,
     hasVoted: false,
@@ -437,7 +831,7 @@ export const sampleReviews: Review[] = [
     category: 'Professional',
     rating: 5,
     content: 'Maya\'s Tech Meetup was incredibly well organized! The AI presentations were cutting-edge and she facilitated great discussions between attendees. The networking portion was structured perfectly - not awkward at all. As someone new to the tech scene, I felt welcomed and learned a ton. Maya clearly put a lot of thought into every detail.',
-    timestamp: '2025-06-16T20:15:00Z',
+    timestamp: '2025-06-13T20:15:00Z',
     upvotes: 25,
     downvotes: 0,
     hasVoted: false,
@@ -445,6 +839,50 @@ export const sampleReviews: Review[] = [
     eventId: 'past-3',
     trustScore: 85,
     communityValidation: 96,
+  },
+  {
+    id: '4',
+    reviewerId: '5',
+    reviewedId: '4',
+    category: 'Social',
+    rating: 4,
+    content: 'Alex organized an amazing hiking trip to Rocky Mountain National Park. Great photographer too - got some incredible shots of our group. Definitely joining his next adventure!',
+    timestamp: '2025-06-12T16:45:00Z',
+    upvotes: 12,
+    downvotes: 2,
+    hasVoted: false,
+    trustScore: 76,
+    communityValidation: 78,
+  },
+  {
+    id: '9',
+    reviewerId: '4',
+    reviewedId: '1',
+    category: 'Creative',
+    rating: 5,
+    content: 'Sarah\'s Wine Tasting & Design Talk was absolutely brilliant! The way she paired different design principles with wine characteristics was so creative and insightful. I learned more about design trends in one evening than I have in months. The venue was perfect, the wine selection was excellent, and Sarah\'s presentation style was engaging and professional. This was exactly the kind of sophisticated networking event I was hoping for.',
+    timestamp: '2025-06-11T19:45:00Z',
+    upvotes: 15,
+    downvotes: 0,
+    hasVoted: false,
+    isEventReview: true,
+    eventId: 'past-5',
+    trustScore: 76,
+    communityValidation: 91,
+  },
+  {
+    id: '5',
+    reviewerId: '3',
+    reviewedId: '5',
+    category: 'Professional',
+    rating: 5,
+    content: 'Maya built our restaurant\'s online ordering system and it\'s been flawless. She\'s responsive, professional, and delivered exactly what we needed on time and under budget.',
+    timestamp: '2025-06-10T11:30:00Z',
+    upvotes: 22,
+    downvotes: 0,
+    hasVoted: false,
+    trustScore: 85,
+    communityValidation: 89,
   }
 ]
 

@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Layout from '@/components/Layout'
-import { sampleUsers } from '@/lib/sampleData'
+import { sampleUsers, createNewEvent } from '@/lib/sampleData'
 import { 
   CalendarIcon,
   MapPinIcon,
@@ -35,14 +35,35 @@ export default function CreateEventPage() {
   })
 
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [categoryPage, setCategoryPage] = useState(0)
+  const [startX, setStartX] = useState(0)
 
-  // Categories from ASCII design
-  const categories = [
-    { id: 'tech', label: '💻 Tech', selected: false },
-    { id: 'social', label: '🎉 Social', selected: false },
-    { id: 'professional', label: '💼 Professional', selected: false },
-    { id: 'sports', label: '🏃 Sports', selected: false }
+  // 12 Better Categories in 3 groups of 4
+  const allCategories = [
+    // Page 1: Most General
+    [
+      { id: 'social', label: '🎉 Social', selected: false },
+      { id: 'food', label: '🍕 Food & Dining', selected: false },
+      { id: 'entertainment', label: '🎭 Entertainment', selected: false },
+      { id: 'sports', label: '🏃 Sports & Fitness', selected: false }
+    ],
+    // Page 2: More Specific
+    [
+      { id: 'tech', label: '💻 Tech & Innovation', selected: false },
+      { id: 'professional', label: '💼 Professional', selected: false },
+      { id: 'arts', label: '🎨 Arts & Crafts', selected: false },
+      { id: 'education', label: '📚 Education & Learning', selected: false }
+    ],
+    // Page 3: Most Specialized
+    [
+      { id: 'wellness', label: '🧘 Wellness & Health', selected: false },
+      { id: 'community', label: '🤝 Community Service', selected: false },
+      { id: 'adventure', label: '🏔️ Adventure & Outdoors', selected: false },
+      { id: 'hobby', label: '🎯 Hobbies & Interests', selected: false }
+    ]
   ]
+
+  const categories = allCategories[categoryPage]
 
   // Quick date options from ASCII design
   const quickDates = [
@@ -160,11 +181,54 @@ export default function CreateEventPage() {
     e.preventDefault()
     setIsSubmitting(true)
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000))
+    try {
+      // Create the event
+      const newEvent = createNewEvent({
+        title: formData.title,
+        category: formData.category,
+        description: formData.description,
+        date: formData.date,
+        startTime: formData.startTime,
+        endTime: formData.endTime,
+        venueName: formData.venueName,
+        address: formData.address,
+        eventType: formData.eventType as 'public' | 'private' | 'friends',
+        trustRequirement: parseInt(formData.trustRequirement),
+        maxAttendees: parseInt(formData.maxAttendees) || 50,
+        invitedFriends: formData.invitedFriends
+      })
 
-    // Redirect to events page
-    router.push('/events')
+      console.log('Event created:', newEvent)
+
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 1500))
+
+      // Redirect to events page
+      router.push('/events')
+    } catch (error) {
+      console.error('Error creating event:', error)
+      setIsSubmitting(false)
+    }
+  }
+
+  // Category swipe handlers
+  const handleCategoryTouchStart = (e: React.TouchEvent) => {
+    setStartX(e.touches[0].clientX)
+  }
+
+  const handleCategoryTouchEnd = (e: React.TouchEvent) => {
+    const endX = e.changedTouches[0].clientX
+    const diff = startX - endX
+
+    if (Math.abs(diff) > 50) { // Minimum swipe distance
+      if (diff > 0 && categoryPage < allCategories.length - 1) {
+        // Swipe left - next page
+        setCategoryPage(categoryPage + 1)
+      } else if (diff < 0 && categoryPage > 0) {
+        // Swipe right - previous page
+        setCategoryPage(categoryPage - 1)
+      }
+    }
   }
 
   const calculateDuration = () => {
@@ -226,22 +290,72 @@ export default function CreateEventPage() {
               </div>
 
               <div>
-                <p className="text-sm font-medium text-slate-700 mb-3">Category:</p>
-                <div className="flex space-x-2">
-                  {categories.map((category) => (
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-sm font-medium text-slate-700">Category:</p>
+                  <div className="flex space-x-1">
+                    {allCategories.map((_, index) => (
+                      <div
+                        key={index}
+                        className={`w-2 h-2 rounded-full transition-all duration-200 ${
+                          index === categoryPage
+                            ? 'bg-cyan-500'
+                            : 'bg-slate-300'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </div>
+                
+                {/* Swipeable Category Container */}
+                <div 
+                  className="relative overflow-hidden"
+                  onTouchStart={handleCategoryTouchStart}
+                  onTouchEnd={handleCategoryTouchEnd}
+                >
+                  {/* Swipe instruction for mobile */}
+                  <div className="text-center text-xs text-slate-500 mb-2 md:hidden">
+                    ← Swipe to see more categories →
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-2">
+                    {categories.map((category) => (
+                      <button
+                        key={category.id}
+                        type="button"
+                        onClick={() => setFormData(prev => ({ ...prev, category: category.id }))}
+                        className={`px-3 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
+                          formData.category === category.id
+                            ? 'bg-gradient-to-r from-cyan-500 to-teal-600 text-white shadow-lg'
+                            : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                        }`}
+                      >
+                        {category.label}
+                      </button>
+                    ))}
+                  </div>
+                  
+                  {/* Navigation buttons for desktop */}
+                  <div className="hidden md:flex justify-between items-center mt-3">
                     <button
-                      key={category.id}
                       type="button"
-                      onClick={() => setFormData(prev => ({ ...prev, category: category.id }))}
-                      className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-                        formData.category === category.id
-                          ? 'bg-gradient-to-r from-cyan-500 to-teal-600 text-white shadow-lg'
-                          : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-                      }`}
+                      onClick={() => categoryPage > 0 && setCategoryPage(categoryPage - 1)}
+                      disabled={categoryPage === 0}
+                      className="px-3 py-1 rounded-lg text-sm text-slate-600 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {category.label}
+                      ← Previous
                     </button>
-                  ))}
+                    <span className="text-xs text-slate-500">
+                      Page {categoryPage + 1} of {allCategories.length}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => categoryPage < allCategories.length - 1 && setCategoryPage(categoryPage + 1)}
+                      disabled={categoryPage === allCategories.length - 1}
+                      className="px-3 py-1 rounded-lg text-sm text-slate-600 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Next →
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

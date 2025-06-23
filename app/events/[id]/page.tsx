@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useParams } from 'next/navigation'
 import Layout from '../../../components/Layout'
-import { sampleEvents, sampleUsers } from '../../../lib/sampleData'
+import { sampleEvents, sampleUsers, attendEvent, getCurrentUser } from '../../../lib/sampleData'
 import TrustBadge from '../../../components/TrustBadge'
 import { 
   CalendarIcon,
@@ -43,6 +43,15 @@ export default function EventDetailPage() {
 
   const handleRSVP = (status: 'going' | 'interested' | 'not-going') => {
     setRsvpStatus(status)
+    
+    // If user selects "going", mark them as attending the event
+    if (status === 'going') {
+      const success = attendEvent(eventId)
+      if (success) {
+        // You could show a success message here
+        console.log('Successfully RSVP\'d to event!')
+      }
+    }
   }
 
   const handleLike = () => {

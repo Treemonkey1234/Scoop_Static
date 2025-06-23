@@ -1,9 +1,9 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Layout from '@/components/Layout'
 import TrustBadge from '@/components/TrustBadge'
-import { sampleUsers } from '@/lib/sampleData'
+import { sampleUsers, getCurrentUser, getAllReviews, getAllEvents, getUserActivities } from '@/lib/sampleData'
 import { 
   ChartBarIcon,
   ArrowTrendingUpIcon,
@@ -19,35 +19,61 @@ import {
 } from '@heroicons/react/24/outline'
 
 export default function AnalyticsPage() {
-  const currentUser = sampleUsers[0]
+  const [currentUser, setCurrentUser] = useState(getCurrentUser())
   const [timeRange, setTimeRange] = useState('7d')
 
-  // Mock analytics data
+  // Refresh data when component mounts or becomes visible
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        setCurrentUser(getCurrentUser())
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
+  }, [])
+
+  // Get dynamic data
+  const userReviews = getAllReviews().filter(review => review.reviewerId === currentUser.id)
+  const userEvents = getAllEvents().filter(event => event.hostId === currentUser.id)
+  const userActivities = getUserActivities().filter(activity => activity.userId === currentUser.id)
+  
+  // Calculate dynamic metrics
+  const totalUpvotes = userReviews.reduce((sum, review) => sum + review.upvotes, 0)
+  const recentActivities = userActivities.filter(activity => {
+    const activityDate = new Date(activity.timestamp)
+    const weekAgo = new Date()
+    weekAgo.setDate(weekAgo.getDate() - 7)
+    return activityDate >= weekAgo
+  })
+
+  // Dynamic analytics data
   const analytics = {
     trustScoreTrend: {
       current: currentUser.trustScore,
-      change: +5,
+      change: +5, // This could be calculated from activity history
       trend: 'up',
-      data: [85, 87, 86, 89, 90, 88, 92]
+      data: [85, 87, 86, 89, 90, 88, currentUser.trustScore] // Last value is current
     },
     engagement: {
-      postsCreated: 12,
-      commentsReceived: 89,
-      reactions: 234,
-      profileViews: 156,
-      friendRequests: 8
+      postsCreated: currentUser.reviewsCount,
+      commentsReceived: totalUpvotes, // Using upvotes as engagement proxy
+      reactions: totalUpvotes * 2, // Estimated reactions
+      profileViews: Math.min(500, currentUser.trustScore * 5), // Estimated based on trust score
+      friendRequests: Math.max(0, currentUser.friendsCount - 50) // Estimated pending requests
     },
     social: {
-      connectedAccounts: 8,
-      verifiedAccounts: 6,
-      totalFollowers: 1249,
-      crossPlatformEngagement: 78
+      connectedAccounts: currentUser.socialAccounts.length,
+      verifiedAccounts: currentUser.socialAccounts.filter(account => account.verified).length,
+      totalFollowers: Math.min(5000, currentUser.trustScore * 25), // Estimated followers
+      crossPlatformEngagement: Math.min(100, currentUser.trustScore - 10) // Engagement percentage
     },
     community: {
-      eventsAttended: 3,
-      eventsHosted: 1,
-      helpfulFlags: 23,
-      communityContributions: 45
+      eventsAttended: currentUser.eventsAttended,
+      eventsHosted: userEvents.length,
+      helpfulFlags: Math.floor(currentUser.trustScore / 4), // Estimated helpful flags
+      communityContributions: userReviews.length + userEvents.length + Math.floor(currentUser.friendsCount / 5)
     }
   }
 
@@ -96,17 +122,17 @@ export default function AnalyticsPage() {
   const socialMetrics = [
     {
       title: 'Connected Accounts',
-      value: `${analytics.social.connectedAccounts}/8`,
+      value: `${analytics.social.connectedAccounts}`,
       description: 'Social platforms linked',
       icon: '🌐',
-      progress: (analytics.social.connectedAccounts / 8) * 100
+      progress: Math.min((analytics.social.connectedAccounts / 10) * 100, 100)
     },
     {
       title: 'Verified Accounts',
-      value: `${analytics.social.verifiedAccounts}/8`,
+      value: `${analytics.social.verifiedAccounts}`,
       description: 'Verified social accounts',
       icon: '✅',
-      progress: (analytics.social.verifiedAccounts / 8) * 100
+      progress: Math.min((analytics.social.verifiedAccounts / 10) * 100, 100)
     },
     {
       title: 'Total Followers',
@@ -342,6 +368,79 @@ export default function AnalyticsPage() {
           </div>
         </div>
 
+        {/* Recent Activity */}
+        <div className="card-premium">
+          <div className="flex items-center space-x-3 mb-6">
+            <span className="text-2xl">📊</span>
+            <h2 className="text-xl font-bold text-slate-800">Recent Activity</h2>
+            <span className="text-sm text-slate-500 bg-slate-100 px-2 py-1 rounded-full">
+              Last 7 days
+            </span>
+          </div>
+
+          {recentActivities.length > 0 ? (
+            <div className="space-y-3">
+              {recentActivities.slice(0, 5).map((activity, index) => {
+                const getActivityIcon = (activityType: string) => {
+                  switch (activityType) {
+                    case 'review_created': return '✍️'
+                    case 'event_created': return '🎉'
+                    case 'event_attended': return '🎪'
+                    case 'friend_added': return '👥'
+                    case 'profile_completed': return '✅'
+                    case 'phone_verified': return '📱'
+                    case 'social_connected': return '🔗'
+                    case 'account_created': return '🎊'
+                    default: return '📝'
+                  }
+                }
+
+                const getActivityText = (activity: any) => {
+                  switch (activity.activity) {
+                    case 'review_created': return `Created a review in ${activity.metadata?.category || 'General'}`
+                    case 'event_created': return `Created event "${activity.metadata?.eventTitle || 'Untitled'}"`
+                    case 'event_attended': return `Attended event "${activity.metadata?.eventTitle || 'Event'}"`
+                    case 'friend_added': return 'Added a new friend'
+                    case 'profile_completed': return 'Completed profile setup'
+                    case 'phone_verified': return 'Verified phone number'
+                    case 'social_connected': return `Connected ${activity.metadata?.platform || 'social'} account`
+                    case 'account_created': return 'Joined ScoopSocials'
+                    default: return activity.activity.replace(/_/g, ' ')
+                  }
+                }
+
+                const getTimeAgo = (timestamp: string) => {
+                  const now = new Date()
+                  const activityTime = new Date(timestamp)
+                  const diffMs = now.getTime() - activityTime.getTime()
+                  const diffMins = Math.floor(diffMs / (1000 * 60))
+                  const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
+                  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+
+                  if (diffMins < 60) return `${diffMins}m ago`
+                  if (diffHours < 24) return `${diffHours}h ago`
+                  return `${diffDays}d ago`
+                }
+
+                return (
+                  <div key={activity.id} className="flex items-start space-x-3 p-3 bg-slate-50 rounded-xl">
+                    <div className="text-lg">{getActivityIcon(activity.activity)}</div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-slate-800">{getActivityText(activity)}</p>
+                      <p className="text-xs text-slate-500">{getTimeAgo(activity.timestamp)}</p>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-slate-500">
+              <p className="text-sm">No recent activity to show</p>
+              <p className="text-xs mt-1">Start creating reviews or attending events to see your activity here!</p>
+            </div>
+          )}
+        </div>
+
         {/* Trust Score Improvement Tips */}
         <div className="card-premium bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200">
           <div className="flex items-center space-x-3 mb-4">
@@ -352,7 +451,7 @@ export default function AnalyticsPage() {
           <div className="space-y-3">
             <div className="flex items-center space-x-3 p-3 bg-white/80 rounded-xl">
               <div className="w-2 h-2 bg-cyan-500 rounded-full"></div>
-              <span className="text-sm text-slate-700">Connect more social accounts (Currently {analytics.social.connectedAccounts}/8)</span>
+              <span className="text-sm text-slate-700">Connect more social accounts (Currently {analytics.social.connectedAccounts})</span>
             </div>
             <div className="flex items-center space-x-3 p-3 bg-white/80 rounded-xl">
               <div className="w-2 h-2 bg-teal-500 rounded-full"></div>

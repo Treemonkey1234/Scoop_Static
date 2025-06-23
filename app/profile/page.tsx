@@ -6,7 +6,7 @@ import Link from 'next/link'
 import Layout from '@/components/Layout'
 import TrustBadge from '@/components/TrustBadge'
 import FlagModal from '@/components/FlagModal'
-import { getCurrentUser, sampleReviews, sampleUsers, User } from '@/lib/sampleData'
+import { getCurrentUser, sampleReviews, sampleUsers, User, getUserActivities } from '@/lib/sampleData'
 import { 
   Cog6ToothIcon,
   BellIcon,
@@ -172,6 +172,75 @@ export default function ProfilePage() {
   }
 
   const visibleSocials = showAllSocials ? currentUser.socialAccounts : currentUser.socialAccounts.slice(0, 6)
+
+  // Recent Activity Component
+  const RecentActivitySection = ({ userId }: { userId: string }) => {
+    const activities = getUserActivities().filter(activity => activity.userId === userId).slice(0, 5)
+    
+    if (activities.length === 0) {
+      return (
+        <div className="text-center py-6 text-slate-500">
+          <p className="text-sm">No recent activity to show</p>
+          <p className="text-xs mt-1">Start creating reviews or attending events to see your activity here!</p>
+        </div>
+      )
+    }
+
+    const getActivityIcon = (activity: string) => {
+      switch (activity) {
+        case 'review_created': return '✍️'
+        case 'event_created': return '🎉'
+        case 'event_attended': return '🎪'
+        case 'friend_added': return '👥'
+        case 'profile_completed': return '✅'
+        case 'phone_verified': return '📱'
+        case 'social_connected': return '🔗'
+        case 'account_created': return '🎊'
+        default: return '📝'
+      }
+    }
+
+    const getActivityText = (activity: any) => {
+      switch (activity.activity) {
+        case 'review_created': return `Created a review in ${activity.metadata?.category || 'General'}`
+        case 'event_created': return `Created event "${activity.metadata?.eventTitle || 'Untitled'}"`
+        case 'event_attended': return `Attended event "${activity.metadata?.eventTitle || 'Event'}"`
+        case 'friend_added': return 'Added a new friend'
+        case 'profile_completed': return 'Completed profile setup'
+        case 'phone_verified': return 'Verified phone number'
+        case 'social_connected': return `Connected ${activity.metadata?.platform || 'social'} account`
+        case 'account_created': return 'Joined ScoopSocials'
+        default: return activity.activity.replace(/_/g, ' ')
+      }
+    }
+
+    const getTimeAgo = (timestamp: string) => {
+      const now = new Date()
+      const activityTime = new Date(timestamp)
+      const diffMs = now.getTime() - activityTime.getTime()
+      const diffMins = Math.floor(diffMs / (1000 * 60))
+      const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
+      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+
+      if (diffMins < 60) return `${diffMins}m ago`
+      if (diffHours < 24) return `${diffHours}h ago`
+      return `${diffDays}d ago`
+    }
+
+    return (
+      <div className="space-y-3">
+        {activities.map((activity, index) => (
+          <div key={activity.id} className="flex items-start space-x-3 p-3 bg-slate-50 rounded-xl">
+            <div className="text-lg">{getActivityIcon(activity.activity)}</div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm text-slate-800">{getActivityText(activity)}</p>
+              <p className="text-xs text-slate-500">{getTimeAgo(activity.timestamp)}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    )
+  }
 
   return (
     <Layout>
@@ -382,6 +451,18 @@ export default function ProfilePage() {
               )
             })}
           </div>
+        </div>
+
+        {/* Recent Activity */}
+        <div className="card-soft">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-slate-800 flex items-center">
+              <DocumentTextIcon className="w-5 h-5 mr-2 text-cyan-500" />
+              Recent Activity
+            </h3>
+            <span className="text-sm text-slate-500">Last 7 days</span>
+          </div>
+          <RecentActivitySection userId={currentUser.id} />
         </div>
 
         {/* Settings Link */}

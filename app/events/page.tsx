@@ -6,7 +6,7 @@ import Link from 'next/link'
 import Layout from '@/components/Layout'
 import TrustBadge from '@/components/TrustBadge'
 import FlagModal from '@/components/FlagModal'
-import { sampleUsers, sampleEvents, sampleReviews } from '@/lib/sampleData'
+import { sampleUsers, getAllEvents, sampleReviews } from '@/lib/sampleData'
 import { 
   CalendarIcon,
   MapPinIcon,
@@ -24,6 +24,7 @@ export default function EventsPage() {
   const [activeTab, setActiveTab] = useState<'upcoming' | 'past' | 'discover'>('upcoming')
   const [likedEvents, setLikedEvents] = useState<{[key: string]: boolean}>({})
   const [startX, setStartX] = useState(0)
+  const [events, setEvents] = useState<any[]>([])
   const [flagModal, setFlagModal] = useState<{
     isOpen: boolean
     contentType: 'post' | 'event' | 'social'
@@ -76,8 +77,14 @@ export default function EventsPage() {
     }
   }
 
-  const upcomingEvents = sampleEvents.filter(event => event.isPast === false)
-  const pastEvents = sampleEvents.filter(event => event.isPast === true)
+  // Load events on component mount
+  React.useEffect(() => {
+    const allEvents = getAllEvents()
+    setEvents(allEvents)
+  }, [])
+
+  const upcomingEvents = events.filter(event => event.isPast === false)
+  const pastEvents = events.filter(event => event.isPast === true)
 
   // Tab order for swipe navigation
   const tabOrder: ('upcoming' | 'past' | 'discover')[] = ['upcoming', 'past', 'discover']
@@ -366,7 +373,7 @@ export default function EventsPage() {
               </div>
               
               {/* All Events for Discovery */}
-              {sampleEvents.map(event => renderEventCard(event))}
+              {events.map(event => renderEventCard(event))}
             </div>
           )}
         </div>

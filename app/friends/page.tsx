@@ -5,7 +5,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import Layout from '@/components/Layout'
 import TrustBadge from '@/components/TrustBadge'
-import { sampleUsers } from '@/lib/sampleData'
+import { sampleUsers, addFriend, getCurrentUser } from '@/lib/sampleData'
 import { 
   UserGroupIcon,
   UserPlusIcon,
@@ -28,11 +28,22 @@ export default function FriendsPage() {
   const suggestions = [sampleUsers[4]] // Maya as suggestion
 
   const handleAcceptRequest = (userId: string) => {
-    setFriendRequests(prev => prev.filter(user => user.id !== userId))
+    const success = addFriend(userId)
+    if (success) {
+      setFriendRequests(prev => prev.filter(user => user.id !== userId))
+      // Show success message or update UI
+    }
   }
 
   const handleDeclineRequest = (userId: string) => {
     setFriendRequests(prev => prev.filter(user => user.id !== userId))
+  }
+
+  const handleAddFriend = (userId: string) => {
+    const success = addFriend(userId)
+    if (success) {
+      // Move from suggestions to friends or show success message
+    }
   }
 
   // Tab order for swipe navigation
@@ -138,7 +149,10 @@ export default function FriendsPage() {
           )}
           
           {type === 'suggestion' && (
-            <button className="btn-secondary text-xs px-3 py-2">
+            <button 
+              onClick={() => handleAddFriend(user.id)}
+              className="btn-secondary text-xs px-3 py-2"
+            >
               Add Friend
             </button>
           )}
