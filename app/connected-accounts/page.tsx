@@ -273,7 +273,7 @@ export default function ConnectedAccounts() {
 
           {/* Swipeable platform grid */}
           <div
-            className="grid grid-cols-2 sm:grid-cols-3 gap-4"
+            className="grid grid-cols-2 sm:grid-cols-3 gap-3"
             onTouchStart={handleTouchStart}
             onTouchEnd={handleTouchEnd}
           >
@@ -284,27 +284,27 @@ export default function ConnectedAccounts() {
               return (
                 <div
                   key={platform}
-                  className={`relative p-4 rounded-xl border-2 transition-all ${
+                  className={`relative p-3 rounded-xl border-2 transition-all hover:shadow-md ${
                     isConnected
                       ? 'border-green-200 bg-green-50'
-                      : 'border-white bg-white/80 hover:border-cyan-200'
+                      : 'border-white bg-white/80 hover:border-cyan-200 hover:bg-white'
                   }`}
                 >
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 flex items-center justify-center bg-white rounded-full shadow-soft">
+                  <div className="flex items-start space-x-3">
+                    <div className="w-10 h-10 flex items-center justify-center bg-white rounded-full shadow-sm border border-gray-100">
                       <SocialIcon platform={platform} />
                     </div>
-                    <div>
-                      <h3 className="font-medium text-slate-800">{platform}</h3>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-medium text-slate-800 text-sm truncate">{platform}</h3>
                       {isConnected ? (
-                        <span className="text-xs text-green-600 flex items-center">
-                          <CheckBadgeIcon className="w-3 h-3 mr-1" />
+                        <span className="text-xs text-green-600 flex items-center mt-1">
+                          <CheckBadgeIcon className="w-3 h-3 mr-1 flex-shrink-0" />
                           Connected
                         </span>
                       ) : (
                         <button
                           onClick={() => setSelectedPlatform(platform)}
-                          className="text-xs text-cyan-600 hover:text-cyan-700"
+                          className="text-xs text-cyan-600 hover:text-cyan-700 mt-1 flex items-center hover:underline"
                         >
                           Connect →
                         </button>
@@ -385,7 +385,7 @@ export default function ConnectedAccounts() {
               </p>
               <div className="mt-3 text-sm">
                 <span className="text-cyan-600 font-medium">Pro Tip:</span>
-                <span className="text-slate-600"> Add at least 5 accounts to unlock special features!</span>
+                <span className="text-slate-600"> Connect 3+ verified accounts to unlock premium trust benefits and enhanced community features!</span>
               </div>
             </div>
           </div>

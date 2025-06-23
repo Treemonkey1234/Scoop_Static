@@ -5,7 +5,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import Layout from '@/components/Layout'
 import TrustBadge from '@/components/TrustBadge'
-import { sampleUsers, addFriend, getCurrentUser } from '@/lib/sampleData'
+import { sampleUsers, addFriend, getCurrentUser, getUserFriends, getMutualFriends, areUsersFriends } from '@/lib/sampleData'
 import { 
   UserGroupIcon,
   UserPlusIcon,
@@ -16,6 +16,26 @@ import {
 } from '@heroicons/react/24/outline'
 
 export default function FriendsPage() {
+  const currentUser = getCurrentUser()
+  const userFriends = getUserFriends(currentUser.id)
+  const potentialFriends = sampleUsers.filter(user => 
+    user.id !== currentUser.id && !areUsersFriends(currentUser.id, user.id)
+  )
+
+  const [isAddingFriend, setIsAddingFriend] = useState<string | null>(null)
+
+  const handleAddFriend = async (friendId: string) => {
+    setIsAddingFriend(friendId)
+    await new Promise(resolve => setTimeout(resolve, 1000)) // Simulate API call
+    
+    const success = addFriend(friendId)
+    if (success) {
+      // Trigger a re-render by updating state
+      window.location.reload()
+    }
+    setIsAddingFriend(null)
+  }
+
   const [activeTab, setActiveTab] = useState<'friends' | 'requests' | 'suggestions'>('friends')
   const [friendRequests, setFriendRequests] = useState([
     { ...sampleUsers[3], mutualFriends: 3 },
@@ -23,7 +43,6 @@ export default function FriendsPage() {
   ])
   const [startX, setStartX] = useState(0)
 
-  const currentUser = sampleUsers[0] // Using Sarah as current user
   const friends = sampleUsers.slice(1, 4) // Marcus, Elena, Alex as friends
   const suggestions = [sampleUsers[4]] // Maya as suggestion
 
@@ -37,13 +56,6 @@ export default function FriendsPage() {
 
   const handleDeclineRequest = (userId: string) => {
     setFriendRequests(prev => prev.filter(user => user.id !== userId))
-  }
-
-  const handleAddFriend = (userId: string) => {
-    const success = addFriend(userId)
-    if (success) {
-      // Move from suggestions to friends or show success message
-    }
   }
 
   // Tab order for swipe navigation
@@ -231,29 +243,57 @@ export default function FriendsPage() {
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
         >
+          {/* Friends Tab */}
           {activeTab === 'friends' && (
-            <>
-              {friends.length > 0 ? (
-                <>
-                  <div className="text-sm text-slate-600 mb-4">
-                    🔒 <strong>Friends-only reviews:</strong> You can only review people who are your friends, ensuring authentic feedback within your trusted network.
-                  </div>
-                  {friends.map(friend => renderUserCard(friend, 'friend'))}
-                </>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold text-slate-800">Your Friends ({userFriends.length})</h3>
+                <UserGroupIcon className="w-5 h-5 text-slate-400" />
+              </div>
+              
+              {userFriends.length === 0 ? (
+                <div className="text-center py-8">
+                  <UserGroupIcon className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                  <p className="text-slate-500 mb-2">No friends yet</p>
+                  <p className="text-sm text-slate-400">Add some friends to start connecting!</p>
+                </div>
               ) : (
-                <div className="card-soft text-center py-12">
-                  <UserGroupIcon className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-slate-600 mb-2">No friends yet</h3>
-                  <p className="text-slate-500 mb-6">Start building your trusted network by adding friends</p>
-                  <button
-                    onClick={() => setActiveTab('suggestions')}
-                    className="btn-primary"
-                  >
-                    Find Friends
-                  </button>
+                <div className="space-y-3">
+                  {userFriends.map(friend => {
+                    const mutualFriends = getMutualFriends(currentUser.id, friend.id)
+                    return (
+                      <div key={friend.id} className="card-soft flex items-center space-x-4">
+                        <Image
+                          src={friend.avatar}
+                          alt={friend.name}
+                          width={48}
+                          height={48}
+                          className="rounded-xl"
+                        />
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-2 mb-1">
+                            <h4 className="font-semibold text-slate-800">{friend.name}</h4>
+                            <TrustBadge score={friend.trustScore} />
+                          </div>
+                          <p className="text-sm text-slate-500 mb-1">{friend.location}</p>
+                          {mutualFriends.length > 0 && (
+                            <p className="text-xs text-slate-400">
+                              {mutualFriends.length} mutual friend{mutualFriends.length > 1 ? 's' : ''}
+                            </p>
+                          )}
+                        </div>
+                        <Link
+                          href={`/user/${friend.id}`}
+                          className="btn-secondary text-sm"
+                        >
+                          View Profile
+                        </Link>
+                      </div>
+                    )
+                  })}
                 </div>
               )}
-            </>
+            </div>
           )}
 
           {activeTab === 'requests' && (
@@ -275,49 +315,66 @@ export default function FriendsPage() {
             </>
           )}
 
+          {/* Suggestions Tab */}
           {activeTab === 'suggestions' && (
-            <>
-              {suggestions.length > 0 ? (
-                <>
-                  <div className="text-sm text-slate-600 mb-4">
-                    ✨ <strong>Friend suggestions:</strong> People you might know based on mutual connections and shared interests.
-                  </div>
-                  {suggestions.map(suggestion => renderUserCard(suggestion, 'suggestion'))}
-                  
-                  {/* Why these suggestions */}
-                  <div className="card-soft">
-                    <h3 className="font-semibold text-slate-800 mb-3">Why these suggestions?</h3>
-                    <div className="space-y-2 text-sm text-slate-600">
-                      <div className="flex items-center space-x-2">
-                        <span className="w-2 h-2 bg-primary-500 rounded-full"></span>
-                        <span>Mutual friends with people in your network</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <span className="w-2 h-2 bg-primary-500 rounded-full"></span>
-                        <span>Similar professional background or interests</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <span className="w-2 h-2 bg-primary-500 rounded-full"></span>
-                        <span>Located in your area</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <span className="w-2 h-2 bg-primary-500 rounded-full"></span>
-                        <span>High trust score members</span>
-                      </div>
-                    </div>
-                  </div>
-                </>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold text-slate-800">Friend Suggestions ({potentialFriends.length})</h3>
+                <span className="text-xs bg-cyan-100 text-cyan-700 px-2 py-1 rounded-full">New</span>
+              </div>
+              
+              {potentialFriends.length === 0 ? (
+                <div className="text-center py-8">
+                  <UserGroupIcon className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                  <p className="text-slate-500 mb-2">No suggestions available</p>
+                  <p className="text-sm text-slate-400">You're already friends with everyone!</p>
+                </div>
               ) : (
-                <div className="card-soft text-center py-12">
-                  <StarIcon className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-slate-600 mb-2">No suggestions available</h3>
-                  <p className="text-slate-500 mb-6">Check back later for new friend suggestions</p>
-                  <Link href="/search" className="btn-primary">
-                    Search for People
-                  </Link>
+                <div className="space-y-3">
+                  {potentialFriends.map(suggestion => {
+                    const mutualFriends = getMutualFriends(currentUser.id, suggestion.id)
+                    return (
+                      <div key={suggestion.id} className="card-soft flex items-center space-x-4">
+                        <Image
+                          src={suggestion.avatar}
+                          alt={suggestion.name}
+                          width={48}
+                          height={48}
+                          className="rounded-xl"
+                        />
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-2 mb-1">
+                            <h4 className="font-semibold text-slate-800">{suggestion.name}</h4>
+                            <TrustBadge score={suggestion.trustScore} />
+                          </div>
+                          <p className="text-sm text-slate-500 mb-1">{suggestion.location}</p>
+                          {mutualFriends.length > 0 && (
+                            <p className="text-xs text-slate-400">
+                              {mutualFriends.length} mutual friend{mutualFriends.length > 1 ? 's' : ''}
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex space-x-2">
+                          <Link
+                            href={`/user/${suggestion.id}`}
+                            className="btn-secondary text-sm"
+                          >
+                            View
+                          </Link>
+                          <button
+                            onClick={() => handleAddFriend(suggestion.id)}
+                            disabled={isAddingFriend === suggestion.id}
+                            className="btn-primary text-sm disabled:opacity-50"
+                          >
+                            {isAddingFriend === suggestion.id ? 'Adding...' : 'Add Friend'}
+                          </button>
+                        </div>
+                      </div>
+                    )
+                  })}
                 </div>
               )}
-            </>
+            </div>
           )}
         </div>
 

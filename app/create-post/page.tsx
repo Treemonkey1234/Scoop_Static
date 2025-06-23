@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import Layout from '@/components/Layout'
 import TrustBadge from '@/components/TrustBadge'
-import { sampleUsers, createNewReview } from '@/lib/sampleData'
+import { sampleUsers, createNewReview, getCurrentUser, areUsersFriends, getUserFriends } from '@/lib/sampleData'
 import { 
   MagnifyingGlassIcon,
   MapPinIcon,
@@ -25,9 +25,15 @@ export default function CreatePostPage() {
   const reviewForId = searchParams?.get('reviewFor')
   const reviewForUser = reviewForId ? sampleUsers.find(u => u.id === reviewForId) : null
   const eventId = searchParams.get('event')
+  
+  const currentUser = getCurrentUser()
+  const userFriends = getUserFriends(currentUser.id)
+
+  // Validate that reviewForUser is a friend if specified
+  const canReviewUser = reviewForUser ? areUsersFriends(currentUser.id, reviewForUser.id) : true
 
   const [formData, setFormData] = useState({
-    reviewFor: reviewForUser?.id ? [reviewForUser.id] : [] as string[],
+    reviewFor: reviewForUser?.id && canReviewUser ? [reviewForUser.id] : [] as string[],
     category: '',
     content: '',
     location: '',
@@ -38,6 +44,7 @@ export default function CreatePostPage() {
 
   const [friendSearch, setFriendSearch] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showFriendWarning, setShowFriendWarning] = useState(reviewForUser && !canReviewUser)
 
   // Categories from ASCII design - Consolidated to 6 essential categories
   const categories = [
@@ -55,13 +62,12 @@ export default function CreatePostPage() {
     '#punctual', '#creative', '#helpful', '#trustworthy', '#experienced'
   ]
 
-  // Recent friends from ASCII design
-  const recentFriends = [
-    { id: '2', name: 'Jessica Wong', trustScore: 95 },
-    { id: '3', name: 'David Kim', trustScore: 95 },
-    { id: '1', name: 'Sarah Chen', trustScore: 89 },
-    { id: '4', name: 'Emma Davis', trustScore: 92 }
-  ]
+  // Recent friends from user's actual friends
+  const recentFriends = userFriends.map(friend => ({
+    id: friend.id,
+    name: friend.name,
+    trustScore: friend.trustScore
+  }))
 
   const filteredFriends = recentFriends.filter(friend =>
     friend.name.toLowerCase().includes(friendSearch.toLowerCase())
@@ -126,6 +132,35 @@ export default function CreatePostPage() {
           <h1 className="text-2xl font-bold text-slate-800 mb-2">Create Post</h1>
           <p className="text-slate-600">Share your thoughts, experiences, or ask a question</p>
         </div>
+
+        {/* Friend Warning */}
+        {showFriendWarning && reviewForUser && (
+          <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+            <div className="flex items-start space-x-3">
+              <ShieldCheckIcon className="w-5 h-5 text-amber-600 mt-0.5" />
+              <div>
+                <h3 className="font-semibold text-amber-800 mb-1">Friend-Only Reviews</h3>
+                <p className="text-amber-700 mb-3">
+                  You can only write reviews for people who are your friends. This ensures authentic feedback within trusted networks.
+                </p>
+                <div className="flex space-x-3">
+                  <button
+                    onClick={() => router.push(`/user/${reviewForUser.id}`)}
+                    className="btn-primary text-sm"
+                  >
+                    Add {reviewForUser.name} as Friend
+                  </button>
+                  <button
+                    onClick={() => setShowFriendWarning(false)}
+                    className="btn-secondary text-sm"
+                  >
+                    Continue Without Review
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Post Preview */}

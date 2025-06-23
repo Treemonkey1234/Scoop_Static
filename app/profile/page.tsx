@@ -172,7 +172,12 @@ export default function ProfilePage() {
     return <div className="w-4 h-4">{getIcon()}</div>
   }
 
-  const visibleSocials = showAllSocials ? currentUser.socialAccounts : currentUser.socialAccounts.slice(0, 6)
+  // Convert socialLinks to array format for display
+  const socialAccountsArray = Object.entries(currentUser.socialLinks || {})
+    .filter(([platform, handle]) => handle && handle.trim() !== '')
+    .map(([platform, handle]) => ({ platform, handle, verified: false, icon: '' }))
+  
+  const visibleSocials = showAllSocials ? socialAccountsArray : socialAccountsArray.slice(0, 6)
 
   const getSocialMediaUrl = (platform: string, handle: string): string => {
     switch (platform) {
@@ -305,7 +310,7 @@ export default function ProfilePage() {
                 <h2 className="text-xl font-bold text-slate-800">{currentUser.name}</h2>
                 <TrustBadge score={currentUser.trustScore} size="sm" />
               </div>
-              <p className="text-slate-600 mb-2">@{currentUser.username}</p>
+              <p className="text-slate-600 mb-2">@{currentUser.name.toLowerCase().replace(/\s+/g, '_')}</p>
               <p className="text-slate-700 mb-3">{currentUser.bio}</p>
               <div className="flex items-center space-x-2 text-sm text-slate-500">
                 <MapPinIcon className="w-4 h-4" />
@@ -320,15 +325,15 @@ export default function ProfilePage() {
           {/* Account Type Badge */}
           <div className="mb-4">
             <div className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold ${
-              currentUser.accountType === 'pro' 
+              currentUser.trustScore >= 80 
                 ? 'bg-gradient-to-r from-amber-400 to-amber-500 text-white shadow-lg'
-                : currentUser.accountType === 'venue'
-                ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg'
+                : currentUser.trustScore >= 60
+                ? 'bg-gradient-to-r from-cyan-500 to-cyan-600 text-white shadow-lg'
                 : 'bg-slate-100 text-slate-700'
             }`}>
-              {currentUser.accountType === 'pro' && '👑 Pro Account'}
-              {currentUser.accountType === 'venue' && '🏢 Venue Account'}
-              {currentUser.accountType === 'free' && '🆓 Free Account'}
+              {currentUser.trustScore >= 80 && '👑 Premium Member'}
+              {currentUser.trustScore >= 60 && currentUser.trustScore < 80 && '⭐ Trusted Member'}
+              {currentUser.trustScore < 60 && '🆓 Standard Member'}
             </div>
           </div>
 
@@ -419,7 +424,7 @@ export default function ProfilePage() {
               Connected Accounts
             </h3>
             <span className="text-sm text-cyan-600 bg-cyan-100 px-2 py-1 rounded-full">
-              {currentUser.socialAccounts.length} connected
+                              {socialAccountsArray.length} connected
             </span>
           </div>
           
@@ -448,12 +453,12 @@ export default function ProfilePage() {
           </div>
 
           {/* View More / View Less Button */}
-          {currentUser.socialAccounts.length > 6 && (
+          {socialAccountsArray.length > 6 && (
             <button
               onClick={() => setShowAllSocials(!showAllSocials)}
               className="text-sm text-cyan-600 hover:text-cyan-700 font-medium"
             >
-              {showAllSocials ? 'View Less' : `View More (${currentUser.socialAccounts.length - 6} more)`}
+              {showAllSocials ? 'View Less' : `View More (${socialAccountsArray.length - 6} more)`}
             </button>
           )}
 

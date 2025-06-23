@@ -220,12 +220,13 @@ export default function HomePage() {
               <div key={review.id} className="card-premium hover:shadow-xl transition-all duration-300 border-cyan-200/50 overflow-hidden">
                 {/* Vote System */}
                 <div className="flex">
-                  <div className="w-20 bg-gradient-to-b from-slate-50 to-white border-r border-slate-100">
+                  <div className="w-20 border-r border-slate-100">
                     <ClassicVoteSystem
                       reviewId={review.id}
                       initialVotes={review.votes}
                       onVote={handleVote(review.id)}
                       className="h-full"
+                      showGradient={true}
                     />
                   </div>
 

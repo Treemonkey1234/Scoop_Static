@@ -147,13 +147,11 @@ export function createNewUser(userData: {
     id: Date.now().toString(),
     name: userData.fullName,
     email: userData.email,
-    avatar: userData.avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
+    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
     bio: 'New to ScoopSocials! Looking forward to connecting with the community.',
     trustScore: 50, // Starting trust score for new users
     joinDate: new Date().toISOString().split('T')[0],
     location: 'Location not set',
-    accountType: 'free',
-    socialAccounts: [],
     friendsCount: 0,
     reviewsCount: 0,
     eventsAttended: 0,
@@ -696,6 +694,35 @@ export function connectSocialAccount(platform: string, userId?: string): void {
   recordUserActivity(targetUserId, 'social_connected', { platform })
 }
 
+// Friend relationships - who is friends with whom
+export const friendRelationships: { [userId: string]: string[] } = {
+  '0': ['1', '2', '3'], // Test User is friends with Jake, Sarah, Emily
+  '1': ['0', '2', '4', '5'], // Jake is friends with Test User, Sarah, David, Lisa
+  '2': ['0', '1', '3', '4'], // Sarah is friends with Test User, Jake, Emily, David
+  '3': ['0', '2', '5'], // Emily is friends with Test User, Sarah, Lisa
+  '4': ['1', '2', '5'], // David is friends with Jake, Sarah, Lisa
+  '5': ['1', '3', '4'], // Lisa is friends with Jake, Emily, David
+}
+
+// Check if two users are friends
+export function areUsersFriends(userId1: string, userId2: string): boolean {
+  return friendRelationships[userId1]?.includes(userId2) || false
+}
+
+// Get user's friends
+export function getUserFriends(userId: string): User[] {
+  const friendIds = friendRelationships[userId] || []
+  return sampleUsers.filter(user => friendIds.includes(user.id))
+}
+
+// Get mutual friends between two users
+export function getMutualFriends(userId1: string, userId2: string): User[] {
+  const user1Friends = friendRelationships[userId1] || []
+  const user2Friends = friendRelationships[userId2] || []
+  const mutualIds = user1Friends.filter(id => user2Friends.includes(id))
+  return sampleUsers.filter(user => mutualIds.includes(user.id))
+}
+
 // Sample Users
 export const sampleUsers: User[] = [
   {
@@ -998,7 +1025,7 @@ export const sampleEvents: Event[] = [
     location: 'Jake\'s Loft',
     address: '123 Downtown Ave, Phoenix, AZ 85004',
     category: 'Technology',
-    imageUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600',
+    imageUrl: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=600',
     maxAttendees: 100,
     attendeeCount: 85,
     price: 0,
@@ -1018,7 +1045,7 @@ export const sampleEvents: Event[] = [
     location: 'Jake\'s Loft - Main Hall',
     address: '123 Downtown Ave, Phoenix, AZ 85004',
     category: 'Technology',
-    imageUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600',
+    imageUrl: 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=600',
     maxAttendees: 200,
     attendeeCount: 180,
     price: 25,
@@ -1038,7 +1065,7 @@ export const sampleEvents: Event[] = [
     location: 'Jake\'s Loft - Garden Space',
     address: '123 Downtown Ave, Phoenix, AZ 85004',
     category: 'Arts & Culture',
-    imageUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600',
+    imageUrl: 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=600',
     maxAttendees: 300,
     attendeeCount: 250,
     price: 0,
@@ -1058,7 +1085,7 @@ export const sampleEvents: Event[] = [
     location: 'Jake\'s Loft - Mezzanine',
     address: '123 Downtown Ave, Phoenix, AZ 85004',
     category: 'Business',
-    imageUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600',
+    imageUrl: 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=600',
     maxAttendees: 150,
     attendeeCount: 130,
     price: 15,
@@ -1079,7 +1106,7 @@ export const sampleEvents: Event[] = [
     location: 'Jake\'s Loft - Main Floor',
     address: '123 Downtown Ave, Phoenix, AZ 85004',
     category: 'Networking',
-    imageUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600',
+    imageUrl: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=600',
     maxAttendees: 100,
     attendeeCount: 85,
     price: 15,
@@ -1099,7 +1126,7 @@ export const sampleEvents: Event[] = [
     location: 'Phoenix Convention Center',
     address: '100 N 3rd St, Phoenix, AZ 85004',
     category: 'Professional',
-    imageUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600',
+    imageUrl: 'https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=600',
     maxAttendees: 200,
     attendeeCount: 150,
     price: 25,
@@ -1119,7 +1146,7 @@ export const sampleEvents: Event[] = [
     location: 'ASU Main Campus - Memorial Union',
     address: '1200 S Forest Ave, Tempe, AZ 85281',
     category: 'Education',
-    imageUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600',
+    imageUrl: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=600',
     maxAttendees: 350,
     attendeeCount: 300,
     price: 0,
@@ -1139,7 +1166,7 @@ export const sampleEvents: Event[] = [
     location: 'State Farm Stadium - Conference Center',
     address: '1 Cardinals Dr, Glendale, AZ 85305',
     category: 'Technology',
-    imageUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600',
+    imageUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600',
     maxAttendees: 100,
     attendeeCount: 75,
     price: 20,
@@ -1159,7 +1186,7 @@ export const sampleEvents: Event[] = [
     location: 'Phoenix Marketplace - Event Center',
     address: '9617 N Metro Pkwy W, Phoenix, AZ 85051',
     category: 'Business',
-    imageUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600',
+    imageUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600',
     maxAttendees: 150,
     attendeeCount: 120,
     price: 30,
@@ -1180,7 +1207,7 @@ export const sampleEvents: Event[] = [
     location: 'WeWork Central Phoenix',
     address: '1 E Washington St, Phoenix, AZ 85004',
     category: 'Technology',
-    imageUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600',
+    imageUrl: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=600',
     maxAttendees: 60,
     attendeeCount: 23,
     price: 0,
@@ -1200,7 +1227,7 @@ export const sampleEvents: Event[] = [
     location: 'Starbucks Reserve - Downtown',
     address: '300 W Washington St, Phoenix, AZ 85003',
     category: 'Social',
-    imageUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600',
+    imageUrl: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=600',
     maxAttendees: 15,
     attendeeCount: 8,
     price: 0,
@@ -1220,7 +1247,7 @@ export const sampleEvents: Event[] = [
     location: 'Jake\'s Loft - Rooftop',
     address: '123 Downtown Ave, Phoenix, AZ 85004',
     category: 'Networking',
-    imageUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600',
+    imageUrl: 'https://images.unsplash.com/photo-1556761175-4b46a572b786?w=600',
     maxAttendees: 100,
     attendeeCount: 45,
     price: 25,
@@ -1240,7 +1267,7 @@ export const sampleEvents: Event[] = [
     location: 'Camelback Mountain Trailhead',
     address: '5700 N Echo Canyon Pkwy, Phoenix, AZ 85018',
     category: 'Outdoors',
-    imageUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600',
+    imageUrl: 'https://images.unsplash.com/photo-1551632811-561732d1e306?w=600',
     maxAttendees: 25,
     attendeeCount: 12,
     price: 0,
@@ -1260,7 +1287,7 @@ export const sampleEvents: Event[] = [
     location: 'Phoenix Innovation District',
     address: '515 E Grant St, Phoenix, AZ 85004',
     category: 'Business',
-    imageUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600',
+    imageUrl: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=600',
     maxAttendees: 80,
     attendeeCount: 34,
     price: 15,
@@ -1343,7 +1370,7 @@ export function createUserProfile(userData: any): User {
     id: Date.now().toString(),
     name: userData.fullName,
     email: userData.email,
-    avatar: userData.avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
+    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
     bio: 'New to ScoopSocials! Looking forward to connecting with the community.',
     trustScore: 50, // Starting trust score for new users
     joinDate: new Date().toISOString().split('T')[0],

@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Layout from '@/components/Layout'
 import TrustBadge from '@/components/TrustBadge'
-import { sampleUsers, sampleReviews } from '@/lib/sampleData'
+import { sampleUsers, sampleReviews, areUsersFriends, getUserFriends, getMutualFriends } from '@/lib/sampleData'
 import { 
   MapPinIcon,
   CalendarIcon,
@@ -20,7 +20,13 @@ import Link from 'next/link'
 export default function UserProfilePage() {
   const params = useParams()
   const router = useRouter()
-  const userId = params?.id as string
+  const userId = params.id as string
+  
+  const user = sampleUsers.find(u => u.id === userId)
+  const currentUser = sampleUsers[0] // Test User
+  const isFriend = areUsersFriends(currentUser.id, userId)
+  const userFriends = getUserFriends(userId)
+  const mutualFriends = getMutualFriends(currentUser.id, userId)
 
   // Ensure userId is a string and exists
   if (!userId) {
@@ -40,7 +46,6 @@ export default function UserProfilePage() {
     )
   }
 
-  const user = sampleUsers.find(u => u.id === userId)
   const userReviews = sampleReviews.filter(r => r.reviewedId === userId)
 
   const getSocialMediaUrl = (platform: string, handle: string): string => {
@@ -166,17 +171,32 @@ export default function UserProfilePage() {
 
             {/* Action Buttons */}
             <div className="flex space-x-3">
-              <button className="flex-1 btn-primary">
-                <UserPlusIcon className="w-4 h-4 mr-2" />
-                Add Friend
-              </button>
-              <Link
-                href={`/create-post?reviewFor=${user.id}`}
-                className="flex-1 btn-secondary flex items-center justify-center"
-              >
-                <PencilIcon className="w-4 h-4 mr-2" />
-                Write Review
-              </Link>
+              {!isFriend ? (
+                <button className="flex-1 btn-primary">
+                  <UserPlusIcon className="w-4 h-4 mr-2" />
+                  Add Friend
+                </button>
+              ) : (
+                <button className="flex-1 btn-secondary">
+                  <UserGroupIcon className="w-4 h-4 mr-2" />
+                  Friends
+                </button>
+              )}
+              {isFriend && (
+                <Link
+                  href={`/create-post?reviewFor=${user.id}`}
+                  className="flex-1 btn-primary flex items-center justify-center"
+                >
+                  <PencilIcon className="w-4 h-4 mr-2" />
+                  Write Review
+                </Link>
+              )}
+              {!isFriend && (
+                <button className="flex-1 btn-secondary">
+                  <PencilIcon className="w-4 h-4 mr-2" />
+                  Reviews Only for Friends
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -227,6 +247,82 @@ export default function UserProfilePage() {
             )
           ))}
         </div>
+
+        {/* Friends Section */}
+        {isFriend && (
+          <div className="space-y-4">
+            <h4 className="font-semibold text-slate-800">Friends ({userFriends.length})</h4>
+            
+            {mutualFriends.length > 0 && (
+              <div className="mb-4">
+                <h5 className="text-sm font-medium text-slate-600 mb-2">
+                  Mutual Friends ({mutualFriends.length})
+                </h5>
+                <div className="flex flex-wrap gap-2">
+                  {mutualFriends.slice(0, 5).map(friend => (
+                    <Link
+                      key={friend.id}
+                      href={`/user/${friend.id}`}
+                      className="flex items-center space-x-2 bg-cyan-50 hover:bg-cyan-100 rounded-lg px-3 py-2 transition-colors"
+                    >
+                      <Image
+                        src={friend.avatar}
+                        alt={friend.name}
+                        width={24}
+                        height={24}
+                        className="rounded-full"
+                      />
+                      <span className="text-sm font-medium text-cyan-700">{friend.name}</span>
+                    </Link>
+                  ))}
+                  {mutualFriends.length > 5 && (
+                    <span className="text-sm text-slate-500 px-3 py-2">
+                      +{mutualFriends.length - 5} more
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {userFriends.slice(0, 6).map(friend => (
+                <Link
+                  key={friend.id}
+                  href={`/user/${friend.id}`}
+                  className="flex items-center space-x-2 p-3 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors"
+                >
+                  <Image
+                    src={friend.avatar}
+                    alt={friend.name}
+                    width={32}
+                    height={32}
+                    className="rounded-full"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-slate-800 truncate">{friend.name}</p>
+                    <p className="text-xs text-slate-500">Trust: {friend.trustScore}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+            
+            {userFriends.length > 6 && (
+              <button className="w-full text-center text-sm text-cyan-600 hover:text-cyan-700 py-2">
+                View All {userFriends.length} Friends
+              </button>
+            )}
+          </div>
+        )}
+
+        {!isFriend && (
+          <div className="text-center py-8 bg-slate-50 rounded-lg">
+            <UserGroupIcon className="w-12 h-12 text-slate-400 mx-auto mb-3" />
+            <p className="text-slate-600 mb-2">Friends List Private</p>
+            <p className="text-sm text-slate-500">
+              Add {user.name} as a friend to see their friends list
+            </p>
+          </div>
+        )}
 
         {/* Recent Reviews */}
         <div className="card-soft">

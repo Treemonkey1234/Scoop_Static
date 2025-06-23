@@ -22,10 +22,10 @@ export default function SearchPage() {
   const [startX, setStartX] = useState(0)
 
   const filteredUsers = sampleUsers.filter(user => {
-    const matchesQuery = searchQuery === '' || 
+        const matchesQuery = searchQuery === '' ||
       user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.location.toLowerCase().includes(searchQuery.toLowerCase())
+      user.name.toLowerCase().replace(/\s+/g, '_').includes(searchQuery.toLowerCase()) ||
+      (user.location || '').toLowerCase().includes(searchQuery.toLowerCase())
     
     const matchesTrust = trustFilter === 0 || user.trustScore >= trustFilter
     
@@ -223,7 +223,7 @@ export default function SearchPage() {
                           href={`/user/${user.id}`}
                           className="block hover:text-cyan-600 transition-colors duration-200"
                         >
-                          <p className="text-sm text-slate-600 mb-1">@{user.username}</p>
+                          <p className="text-sm text-slate-600 mb-1">@{user.name.toLowerCase().replace(/\s+/g, '_')}</p>
                         </Link>
                         <p className="text-sm text-slate-500 line-clamp-1">{user.bio}</p>
                         <div className="flex items-center space-x-1 mt-2 text-xs text-slate-500">
@@ -236,15 +236,15 @@ export default function SearchPage() {
                       
                       <div className="text-right">
                         <div className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                          user.accountType === 'pro' 
+                          user.trustScore >= 80 
                             ? 'bg-amber-100 text-amber-700'
-                            : user.accountType === 'venue'
-                            ? 'bg-purple-100 text-purple-700'
+                            : user.trustScore >= 60
+                            ? 'bg-cyan-100 text-cyan-700'
                             : 'bg-slate-100 text-slate-600'
                         }`}>
-                          {user.accountType === 'pro' && '👑 Pro'}
-                          {user.accountType === 'venue' && '🏢 Venue'}
-                          {user.accountType === 'free' && '🆓 Free'}
+                          {user.trustScore >= 80 && '👑 Premium'}
+                          {user.trustScore >= 60 && user.trustScore < 80 && '⭐ Trusted'}
+                          {user.trustScore < 60 && '🆓 Standard'}
                         </div>
                       </div>
                     </div>

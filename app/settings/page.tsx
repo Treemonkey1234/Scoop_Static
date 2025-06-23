@@ -31,9 +31,12 @@ export default function SettingsPage() {
     const user = getCurrentUser()
     setCurrentUser(user)
     if (user) {
+      // Determine account type based on trust score
+      const accountType = user.trustScore >= 80 ? 'pro' : 
+                         user.trustScore >= 60 ? 'venue' : 'free'
       setSettings(prev => ({
         ...prev,
-        accountType: user.accountType
+        accountType
       }))
     }
   }, [])

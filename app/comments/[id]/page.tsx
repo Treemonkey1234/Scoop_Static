@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useParams } from 'next/navigation'
 import Layout from '../../../components/Layout'
-import { sampleReviews, sampleUsers } from '../../../lib/sampleData'
+import { sampleReviews, sampleUsers, sampleEvents } from '../../../lib/sampleData'
 import TrustBadge from '../../../components/TrustBadge'
 import { 
   HeartIcon, 
@@ -41,6 +41,10 @@ export default function CommentThreadPage() {
 
   const reviewer = sampleUsers.find(u => u.id === review.reviewerId)
   const reviewed = sampleUsers.find(u => u.id === review.reviewedId)
+  
+  // Get event details if this is an event review
+  const event = review.isEventReview && review.eventId ? 
+    sampleEvents.find(e => e.id === review.eventId) : null
 
   // Sample comments for this review
   const comments = [
@@ -392,6 +396,43 @@ export default function CommentThreadPage() {
             </span>
           </div>
         </div>
+
+        {/* Event Details - Only show for event reviews */}
+        {event && (
+          <div className="card-soft mb-6">
+            <div className="flex items-center space-x-2 mb-4">
+              <div className="w-3 h-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"></div>
+              <h3 className="font-semibold text-slate-800">Event Details</h3>
+            </div>
+            
+            <div className="flex items-start space-x-4">
+              <Image
+                src={event.imageUrl}
+                alt={event.title}
+                width={80}
+                height={80}
+                className="rounded-xl object-cover"
+              />
+              <div className="flex-1">
+                <Link 
+                  href={`/events/${event.id}`}
+                  className="block hover:text-cyan-600 transition-colors"
+                >
+                  <h4 className="font-semibold text-slate-800 mb-1">{event.title}</h4>
+                </Link>
+                <p className="text-sm text-slate-600 mb-2">{event.description}</p>
+                <div className="flex flex-wrap gap-4 text-xs text-slate-500">
+                  <span>📅 {event.date}</span>
+                  <span>🕐 {event.time}</span>
+                  <span>📍 {event.location}</span>
+                  <span className="px-2 py-1 bg-slate-100 rounded-full">
+                    {event.category}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Comments */}
         <div className="space-y-4 mb-6">
