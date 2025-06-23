@@ -449,7 +449,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
       {/* Enhanced Floating Ice Cream Background */}
       <div className="floating-ice-cream">
-        {/* SVG Ice Cream Cones with Scoops */}
+        {/* Original SVG Ice Cream Cones with Scoops */}
         <svg className="floating-ice-cream-1" width="40" height="60" viewBox="0 0 40 60" xmlns="http://www.w3.org/2000/svg">
           {/* Cone */}
           <path d="M15 35 L20 55 L25 35 Z" fill="url(#coneGradient1)" stroke="#8B4513" strokeWidth="0.5"/>
@@ -550,7 +550,153 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           </defs>
         </svg>
 
-        {/* Individual floating scoops for variety */}
+        {/* NEW: Additional ice cream cones for tripled amount */}
+        <svg className="floating-ice-cream-5" width="42" height="62" viewBox="0 0 42 62" xmlns="http://www.w3.org/2000/svg">
+          <path d="M16 36 L21 56 L26 36 Z" fill="url(#coneGradient5)" stroke="#8B4513" strokeWidth="0.5"/>
+          <circle cx="21" cy="33" r="6.2" fill="url(#pistachioGradient)"/>
+          <circle cx="21" cy="25" r="5.7" fill="url(#coconutGradient)"/>
+          <circle cx="21" cy="18" r="5.2" fill="url(#caramelGradient)"/>
+          <circle cx="21" cy="15" r="1.4" fill="#FF6347"/>
+          <path d="M21 13 Q19 11 20 10" stroke="#228B22" strokeWidth="0.8" fill="none"/>
+          <defs>
+            <linearGradient id="coneGradient5" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#CD853F"/>
+              <stop offset="100%" stopColor="#A0522D"/>
+            </linearGradient>
+            <linearGradient id="pistachioGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#C7E9B4"/>
+              <stop offset="100%" stopColor="#93D3AE"/>
+            </linearGradient>
+            <linearGradient id="coconutGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#FFFEF7"/>
+              <stop offset="100%" stopColor="#F5F5DC"/>
+            </linearGradient>
+            <linearGradient id="caramelGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#DDBF94"/>
+              <stop offset="100%" stopColor="#C19A6B"/>
+            </linearGradient>
+          </defs>
+        </svg>
+
+        <svg className="floating-ice-cream-6" width="33" height="53" viewBox="0 0 33 53" xmlns="http://www.w3.org/2000/svg">
+          <path d="M11 30 L16.5 48 L22 30 Z" fill="url(#coneGradient6)" stroke="#8B4513" strokeWidth="0.5"/>
+          <circle cx="16.5" cy="27" r="5.3" fill="url(#rockyRoadGradient)"/>
+          <circle cx="16.5" cy="20" r="4.8" fill="url(#neapolitanGradient)"/>
+          <circle cx="16.5" cy="17" r="1" fill="#DC143C"/>
+          <defs>
+            <linearGradient id="coneGradient6" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#E5B887"/>
+              <stop offset="100%" stopColor="#D2B48C"/>
+            </linearGradient>
+            <linearGradient id="rockyRoadGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#8B7355"/>
+              <stop offset="50%" stopColor="#A0522D"/>
+              <stop offset="100%" stopColor="#654321"/>
+            </linearGradient>
+            <linearGradient id="neapolitanGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#FFB6C1"/>
+              <stop offset="33%" stopColor="#FFF8DC"/>
+              <stop offset="66%" stopColor="#8B4513"/>
+              <stop offset="100%" stopColor="#FFB6C1"/>
+            </linearGradient>
+          </defs>
+        </svg>
+
+        <svg className="floating-ice-cream-7" width="39" height="59" viewBox="0 0 39 59" xmlns="http://www.w3.org/2000/svg">
+          <path d="M15 35 L19.5 53 L24 35 Z" fill="url(#coneGradient7)" stroke="#8B4513" strokeWidth="0.5"/>
+          <circle cx="19.5" cy="32" r="5.9" fill="url(#cottonCandyGradient)"/>
+          <circle cx="19.5" cy="24" r="5.4" fill="url(#blueMoonGradient)"/>
+          <circle cx="19.5" cy="21" r="1.3" fill="#FF1493"/>
+          <path d="M19.5 19 Q18 17 19 16" stroke="#32CD32" strokeWidth="0.7" fill="none"/>
+          <defs>
+            <linearGradient id="coneGradient7" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#F4A460"/>
+              <stop offset="100%" stopColor="#DAA520"/>
+            </linearGradient>
+            <linearGradient id="cottonCandyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#FFB6C1"/>
+              <stop offset="50%" stopColor="#E6E6FA"/>
+              <stop offset="100%" stopColor="#DDA0DD"/>
+            </linearGradient>
+            <linearGradient id="blueMoonGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#B0E0E6"/>
+              <stop offset="100%" stopColor="#4169E1"/>
+            </linearGradient>
+          </defs>
+        </svg>
+
+        <svg className="floating-ice-cream-8" width="37" height="57" viewBox="0 0 37 57" xmlns="http://www.w3.org/2000/svg">
+          <path d="M14 34 L18.5 52 L23 34 Z" fill="url(#coneGradient8)" stroke="#8B4513" strokeWidth="0.5"/>
+          <circle cx="18.5" cy="31" r="5.6" fill="url(#rainbowGradient)"/>
+          <circle cx="18.5" cy="23.5" r="5.1" fill="url(#tiramisu)"/>
+          <circle cx="18.5" cy="20.5" r="1.2" fill="#FF4500"/>
+          <defs>
+            <linearGradient id="coneGradient8" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#DEB887"/>
+              <stop offset="100%" stopColor="#BC9A6A"/>
+            </linearGradient>
+            <linearGradient id="rainbowGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#FF69B4"/>
+              <stop offset="25%" stopColor="#FFD700"/>
+              <stop offset="50%" stopColor="#32CD32"/>
+              <stop offset="75%" stopColor="#1E90FF"/>
+              <stop offset="100%" stopColor="#9370DB"/>
+            </linearGradient>
+            <linearGradient id="tiramisu" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#F5E6D3"/>
+              <stop offset="100%" stopColor="#D2B48C"/>
+            </linearGradient>
+          </defs>
+        </svg>
+
+        <svg className="floating-ice-cream-9" width="41" height="61" viewBox="0 0 41 61" xmlns="http://www.w3.org/2000/svg">
+          <path d="M15.5 36 L20.5 56 L25.5 36 Z" fill="url(#coneGradient9)" stroke="#8B4513" strokeWidth="0.5"/>
+          <circle cx="20.5" cy="33" r="6.1" fill="url(#cookieDoughGradient)"/>
+          <circle cx="20.5" cy="25" r="5.6" fill="url(#matchaGradient)"/>
+          <circle cx="20.5" cy="18.5" r="5.1" fill="url(#lavenderGradient)"/>
+          <circle cx="20.5" cy="15.5" r="1.3" fill="#FF6B6B"/>
+          <defs>
+            <linearGradient id="coneGradient9" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#F5DEB3"/>
+              <stop offset="100%" stopColor="#CD853F"/>
+            </linearGradient>
+            <linearGradient id="cookieDoughGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#F5E6B8"/>
+              <stop offset="100%" stopColor="#D2B48C"/>
+            </linearGradient>
+            <linearGradient id="matchaGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#C5D8A4"/>
+              <stop offset="100%" stopColor="#9ACD32"/>
+            </linearGradient>
+            <linearGradient id="lavenderGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#E6E6FA"/>
+              <stop offset="100%" stopColor="#DDA0DD"/>
+            </linearGradient>
+          </defs>
+        </svg>
+
+        <svg className="floating-ice-cream-10" width="34" height="54" viewBox="0 0 34 54" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 31 L17 49 L22 31 Z" fill="url(#coneGradient10)" stroke="#8B4513" strokeWidth="0.5"/>
+          <circle cx="17" cy="28" r="5.4" fill="url(#blackberryGradient)"/>
+          <circle cx="17" cy="21" r="4.9" fill="url(#honeycombGradient)"/>
+          <circle cx="17" cy="18" r="1.1" fill="#B22222"/>
+          <defs>
+            <linearGradient id="coneGradient10" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#DDD6C7"/>
+              <stop offset="100%" stopColor="#B8860B"/>
+            </linearGradient>
+            <linearGradient id="blackberryGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#8B008B"/>
+              <stop offset="100%" stopColor="#4B0082"/>
+            </linearGradient>
+            <linearGradient id="honeycombGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#FFD700"/>
+              <stop offset="100%" stopColor="#FFA500"/>
+            </linearGradient>
+          </defs>
+        </svg>
+
+        {/* Original Individual floating scoops */}
         <svg className="floating-scoop-solo-1" width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
           <circle cx="10" cy="10" r="8" fill="url(#soloStrawberry)"/>
           <defs>
@@ -577,6 +723,87 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <radialGradient id="soloChocolate">
               <stop offset="0%" stopColor="#DEB887"/>
               <stop offset="100%" stopColor="#8B4513"/>
+            </radialGradient>
+          </defs>
+        </svg>
+
+        {/* NEW: Additional floating scoops for tripled amount */}
+        <svg className="floating-scoop-solo-4" width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="10" fill="url(#soloBlueberry)"/>
+          <defs>
+            <radialGradient id="soloBlueberry">
+              <stop offset="0%" stopColor="#B3C6F2"/>
+              <stop offset="100%" stopColor="#4169E1"/>
+            </radialGradient>
+          </defs>
+        </svg>
+
+        <svg className="floating-scoop-solo-5" width="19" height="19" viewBox="0 0 19 19" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="9.5" cy="9.5" r="7.5" fill="url(#soloMango)"/>
+          <defs>
+            <radialGradient id="soloMango">
+              <stop offset="0%" stopColor="#FFE4B5"/>
+              <stop offset="100%" stopColor="#FFA500"/>
+            </radialGradient>
+          </defs>
+        </svg>
+
+        <svg className="floating-scoop-solo-6" width="21" height="21" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="10.5" cy="10.5" r="8.5" fill="url(#soloRaspberry)"/>
+          <defs>
+            <radialGradient id="soloRaspberry">
+              <stop offset="0%" stopColor="#FFB6C1"/>
+              <stop offset="100%" stopColor="#DC143C"/>
+            </radialGradient>
+          </defs>
+        </svg>
+
+        <svg className="floating-scoop-solo-7" width="17" height="17" viewBox="0 0 17 17" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="8.5" cy="8.5" r="6.5" fill="url(#soloLime)"/>
+          <defs>
+            <radialGradient id="soloLime">
+              <stop offset="0%" stopColor="#CCFF99"/>
+              <stop offset="100%" stopColor="#32CD32"/>
+            </radialGradient>
+          </defs>
+        </svg>
+
+        <svg className="floating-scoop-solo-8" width="23" height="23" viewBox="0 0 23 23" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="11.5" cy="11.5" r="9.5" fill="url(#soloLavender)"/>
+          <defs>
+            <radialGradient id="soloLavender">
+              <stop offset="0%" stopColor="#E6E6FA"/>
+              <stop offset="100%" stopColor="#9370DB"/>
+            </radialGradient>
+          </defs>
+        </svg>
+
+        <svg className="floating-scoop-solo-9" width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="10" cy="10" r="8" fill="url(#soloCaramel)"/>
+          <defs>
+            <radialGradient id="soloCaramel">
+              <stop offset="0%" stopColor="#DEB887"/>
+              <stop offset="100%" stopColor="#CD853F"/>
+            </radialGradient>
+          </defs>
+        </svg>
+
+        <svg className="floating-scoop-solo-10" width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="9" cy="9" r="7" fill="url(#soloRose)"/>
+          <defs>
+            <radialGradient id="soloRose">
+              <stop offset="0%" stopColor="#FFB6C1"/>
+              <stop offset="100%" stopColor="#FF69B4"/>
+            </radialGradient>
+          </defs>
+        </svg>
+
+        <svg className="floating-scoop-solo-11" width="25" height="25" viewBox="0 0 25 25" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12.5" cy="12.5" r="10.5" fill="url(#soloButterscotch)"/>
+          <defs>
+            <radialGradient id="soloButterscotch">
+              <stop offset="0%" stopColor="#F0E68C"/>
+              <stop offset="100%" stopColor="#DAA520"/>
             </radialGradient>
           </defs>
         </svg>

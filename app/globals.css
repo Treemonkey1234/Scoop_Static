@@ -506,6 +506,120 @@
   animation-delay: 12s;
 }
 
+/* NEW: Additional Ice Cream Cones for tripled amount */
+.floating-ice-cream-5 {
+  @apply absolute opacity-18;
+  left: 35%;
+  top: -11%;
+  animation: float-ice-cream 26s infinite linear;
+  animation-delay: 2s;
+}
+
+.floating-ice-cream-6 {
+  @apply absolute opacity-12;
+  left: 60%;
+  top: -9%;
+  animation: float-ice-cream 33s infinite linear;
+  animation-delay: 7s;
+}
+
+.floating-ice-cream-7 {
+  @apply absolute opacity-16;
+  left: 18%;
+  top: -13%;
+  animation: float-ice-cream 29s infinite linear;
+  animation-delay: 12s;
+}
+
+.floating-ice-cream-8 {
+  @apply absolute opacity-14;
+  left: 78%;
+  top: -10%;
+  animation: float-ice-cream 31s infinite linear;
+  animation-delay: 18s;
+}
+
+.floating-ice-cream-9 {
+  @apply absolute opacity-17;
+  left: 5%;
+  top: -8%;
+  animation: float-ice-cream 27s infinite linear;
+  animation-delay: 22s;
+}
+
+.floating-ice-cream-10 {
+  @apply absolute opacity-13;
+  left: 90%;
+  top: -12%;
+  animation: float-ice-cream 34s infinite linear;
+  animation-delay: 25s;
+}
+
+/* NEW: Additional Individual Floating Scoops for tripled amount */
+.floating-scoop-solo-4 {
+  @apply absolute opacity-12;
+  left: 30%;
+  top: -4%;
+  animation: float-scoop-gentle 21s infinite linear;
+  animation-delay: 1s;
+}
+
+.floating-scoop-solo-5 {
+  @apply absolute opacity-8;
+  left: 70%;
+  top: -8%;
+  animation: float-scoop-gentle 19s infinite linear;
+  animation-delay: 4s;
+}
+
+.floating-scoop-solo-6 {
+  @apply absolute opacity-14;
+  left: 50%;
+  top: -6%;
+  animation: float-scoop-gentle 25s infinite linear;
+  animation-delay: 9s;
+}
+
+.floating-scoop-solo-7 {
+  @apply absolute opacity-9;
+  left: 10%;
+  top: -5%;
+  animation: float-scoop-gentle 23s infinite linear;
+  animation-delay: 14s;
+}
+
+.floating-scoop-solo-8 {
+  @apply absolute opacity-16;
+  left: 80%;
+  top: -7%;
+  animation: float-scoop-gentle 18s infinite linear;
+  animation-delay: 17s;
+}
+
+.floating-scoop-solo-9 {
+  @apply absolute opacity-11;
+  left: 40%;
+  top: -9%;
+  animation: float-scoop-gentle 26s infinite linear;
+  animation-delay: 20s;
+}
+
+.floating-scoop-solo-10 {
+  @apply absolute opacity-13;
+  left: 95%;
+  top: -4%;
+  animation: float-scoop-gentle 22s infinite linear;
+  animation-delay: 24s;
+}
+
+.floating-scoop-solo-11 {
+  @apply absolute opacity-15;
+  left: 55%;
+  top: -11%;
+  animation: float-scoop-gentle 27s infinite linear;
+  animation-delay: 28s;
+}
+
 /* Floating Label Enhancement */
 .floating-label {
   @apply absolute left-4 top-3 text-slate-400 pointer-events-none transition-all duration-200;
