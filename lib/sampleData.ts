@@ -146,6 +146,74 @@ export function updateUserProfile(updates: Partial<User>): User {
   return updatedUser
 }
 
+// Post Management Functions
+export function getAllReviews(): Review[] {
+  if (typeof window === 'undefined') {
+    return sampleReviews
+  }
+
+  try {
+    const storedReviews = localStorage.getItem('scoopReviews')
+    if (storedReviews) {
+      const reviews = JSON.parse(storedReviews)
+      // Sort by timestamp (newest first)
+      return reviews.sort((a: Review, b: Review) => 
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+      )
+    }
+  } catch (error) {
+    console.error('Error parsing stored reviews:', error)
+  }
+  
+  // Initialize with sample data and sort by timestamp
+  const sortedReviews = [...sampleReviews].sort((a, b) => 
+    new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+  )
+  saveAllReviews(sortedReviews)
+  return sortedReviews
+}
+
+export function saveAllReviews(reviews: Review[]): void {
+  if (typeof window === 'undefined') return
+  
+  try {
+    localStorage.setItem('scoopReviews', JSON.stringify(reviews))
+  } catch (error) {
+    console.error('Error saving reviews:', error)
+  }
+}
+
+export function createNewReview(reviewData: {
+  reviewedId: string
+  category: string
+  content: string
+  location?: string
+  tags: string[]
+}): Review {
+  const currentUser = getCurrentUser()
+  const newReview: Review = {
+    id: Date.now().toString(),
+    reviewerId: currentUser.id,
+    reviewedId: reviewData.reviewedId,
+    category: reviewData.category,
+    rating: 5, // Default rating
+    content: reviewData.content,
+    timestamp: new Date().toISOString(),
+    upvotes: 0,
+    downvotes: 0,
+    hasVoted: false,
+    trustScore: currentUser.trustScore,
+    communityValidation: 0
+  }
+  
+  // Add to existing reviews
+  const allReviews = getAllReviews()
+  allReviews.unshift(newReview) // Add to beginning (newest first)
+  saveAllReviews(allReviews)
+  
+  return newReview
+}
+
 // Sample Users
 export const sampleUsers: User[] = [
   {

@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import Layout from '@/components/Layout'
 import TrustBadge from '@/components/TrustBadge'
-import { sampleUsers } from '@/lib/sampleData'
+import { sampleUsers, createNewReview } from '@/lib/sampleData'
 import { 
   MagnifyingGlassIcon,
   MapPinIcon,
@@ -90,11 +90,27 @@ export default function CreatePostPage() {
     e.preventDefault()
     setIsSubmitting(true)
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000))
+    try {
+      // Create new review for each selected friend
+      for (const reviewedId of formData.reviewFor) {
+        createNewReview({
+          reviewedId,
+          category: formData.category,
+          content: formData.content,
+          location: formData.location,
+          tags: formData.tags
+        })
+      }
 
-    // Redirect back to home
-    router.push('/')
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 2000))
+
+      // Redirect back to home
+      router.push('/')
+    } catch (error) {
+      console.error('Error creating review:', error)
+      setIsSubmitting(false)
+    }
   }
 
   return (

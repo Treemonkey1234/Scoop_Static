@@ -9,7 +9,7 @@ import FlagModal from '@/components/FlagModal'
 import LoadingSpinner from '@/components/LoadingSpinner'
 import DragVoteSystem from '@/components/DragVoteSystem'
 
-import { getCurrentUser, sampleUsers, sampleReviews, sampleEvents, User } from '@/lib/sampleData'
+import { getCurrentUser, sampleUsers, getAllReviews, sampleEvents, User } from '@/lib/sampleData'
 import { 
   ChevronUpIcon, 
   ChevronDownIcon, 
@@ -28,6 +28,7 @@ export default function HomePage() {
   const [votedPosts, setVotedPosts] = useState<{[key: string]: 'up' | 'down' | null}>({})
   const [isLoading, setIsLoading] = useState(true)
   const [currentUser, setCurrentUser] = useState<User | null>(null)
+  const [reviews, setReviews] = useState<any[]>([])
 
   const [refreshing, setRefreshing] = useState(false)
 
@@ -43,10 +44,25 @@ export default function HomePage() {
     contentTitle: ''
   })
 
-  // Load current user on component mount
+  // Load current user and reviews on component mount
   React.useEffect(() => {
     const user = getCurrentUser()
     setCurrentUser(user)
+    const allReviews = getAllReviews()
+    setReviews(allReviews)
+  }, [])
+
+  // Refresh reviews when page becomes visible (returning from create post)
+  React.useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        const allReviews = getAllReviews()
+        setReviews(allReviews)
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
   }, [])
 
 
@@ -99,6 +115,9 @@ export default function HomePage() {
 
   const handleRefresh = () => {
     setRefreshing(true)
+    // Reload reviews from storage
+    const allReviews = getAllReviews()
+    setReviews(allReviews)
     setTimeout(() => {
       setRefreshing(false)
     }, 1000)
@@ -182,7 +201,7 @@ export default function HomePage() {
             <h3 className="text-xl font-bold text-slate-800">Latest Scoops</h3>
           </div>
 
-          {sampleReviews.map((review, index) => {
+          {reviews.map((review, index) => {
             const reviewer = sampleUsers.find(u => u.id === review.reviewerId)
             const reviewee = sampleUsers.find(u => u.id === review.reviewedId)
             const currentVote = votedPosts[review.id]
