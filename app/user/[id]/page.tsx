@@ -129,25 +129,24 @@ export default function UserProfilePage() {
               )}
             </div>
             
+            {/* Header Info */}
+            <div>
+              <h1 className="text-2xl font-bold text-slate-800 mb-1">{user.name}</h1>
+              <p className="text-slate-600 mb-2">@{user.name.toLowerCase().replace(/\s+/g, '_')}</p>
+              <div className="flex items-center space-x-4 mb-4">
+                <span className="text-sm px-3 py-1 bg-cyan-100 text-cyan-700 rounded-full font-medium">
+                  {user.isVerified ? 'Verified User' : 'Standard User'}
+                </span>
+                <span className="text-sm px-3 py-1 bg-teal-100 text-teal-700 rounded-full font-medium">
+                  {user.trustScore >= 80 ? 'Premium' : 'Free'}
+                </span>
+              </div>
+            </div>
+            
             <div className="flex items-center justify-center space-x-3 mb-2">
-              <h2 className="text-2xl font-bold text-slate-800">{user.name}</h2>
               <TrustBadge score={user.trustScore} />
             </div>
             
-            <p className="text-slate-600 mb-1">@{user.username}</p>
-            
-            <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium mb-4 ${
-              user.accountType === 'pro' 
-                ? 'bg-amber-100 text-amber-700'
-                : user.accountType === 'venue'
-                ? 'bg-purple-100 text-purple-700'
-                : 'bg-slate-100 text-slate-600'
-            }`}>
-              {user.accountType === 'pro' && '👑 Pro Account'}
-              {user.accountType === 'venue' && '🏢 Venue Account'}
-              {user.accountType === 'free' && '🆓 Free Account'}
-            </div>
-
             <p className="text-slate-700 mb-4">{user.bio}</p>
 
             <div className="flex items-center justify-center space-x-6 text-sm text-slate-500 mb-6">
@@ -188,7 +187,9 @@ export default function UserProfilePage() {
           <div className="space-y-3">
             <div className="flex justify-between items-center">
               <span className="text-sm text-slate-600">Trust Level</span>
-              <span className="text-sm font-medium text-slate-800 capitalize">{user.trustLevel}</span>
+              <span className="text-sm font-medium text-slate-800 capitalize">
+                {user.trustScore >= 90 ? 'excellent' : user.trustScore >= 70 ? 'good' : user.trustScore >= 50 ? 'fair' : user.trustScore >= 30 ? 'poor' : 'new'}
+              </span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm text-slate-600">Reviews Given</span>
@@ -202,33 +203,30 @@ export default function UserProfilePage() {
         </div>
 
         {/* Social Accounts */}
-        {user.socialAccounts && user.socialAccounts.length > 0 && (
-          <div className="card-soft">
-            <h3 className="text-lg font-semibold text-slate-800 mb-4">Connected Accounts</h3>
-            <div className="grid grid-cols-2 gap-3">
-              {user.socialAccounts.map((account, index) => (
-                <a
-                  key={index}
-                  href={getSocialMediaUrl(account.platform, account.handle)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center space-x-3 p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors duration-200"
-                >
-                  <span className="text-2xl">{account.icon}</span>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center space-x-1">
-                      <span className="text-sm font-medium text-slate-800">{account.platform}</span>
-                      {account.verified && (
-                        <span className="text-green-500 text-xs">✓</span>
-                      )}
-                    </div>
-                    <p className="text-xs text-slate-500 truncate">@{account.handle}</p>
+        <div className="space-y-3">
+          <h4 className="font-semibold text-slate-800 mb-3">Connected Accounts</h4>
+          {Object.entries(user.socialLinks).map(([platform, handle], index) => (
+            handle && (
+              <div key={index} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 bg-gradient-to-r from-cyan-500 to-teal-600 rounded-lg flex items-center justify-center">
+                    <span className="text-white text-sm font-bold">
+                      {platform === 'instagram' ? '📸' : platform === 'twitter' ? '🐦' : platform === 'linkedin' ? '💼' : '🔗'}
+                    </span>
                   </div>
-                </a>
-              ))}
-            </div>
-          </div>
-        )}
+                  <div>
+                    <div className="font-medium text-slate-800 capitalize">{platform}</div>
+                    <div className="text-sm text-slate-600">{handle}</div>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className="w-2 h-2 bg-green-400 rounded-full"></span>
+                  <span className="text-xs text-green-600 font-medium">Connected</span>
+                </div>
+              </div>
+            )
+          ))}
+        </div>
 
         {/* Recent Reviews */}
         <div className="card-soft">

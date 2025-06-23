@@ -3,22 +3,26 @@
 export interface User {
   id: string
   name: string
-  username: string
   email: string
   avatar: string
-  bio: string
-  trustScore: number
-  trustLevel: 'excellent' | 'good' | 'fair' | 'poor' | 'new'
+  bio?: string
+  location?: string
   joinDate: string
-  location: string
-  accountType: 'free' | 'pro' | 'venue'
-  socialAccounts: SocialAccount[]
+  trustScore: number
+  isVerified: boolean
   friendsCount: number
   reviewsCount: number
   eventsAttended: number
-  isVerified: boolean
-  mutualFriends?: number
-  phone?: string
+  eventsHosted: number
+  badges: string[]
+  interests: string[]
+  socialLinks: {
+    instagram: string
+    twitter: string
+    linkedin?: string
+  }
+  phoneVerified: boolean
+  emailVerified: boolean
 }
 
 export interface SocialAccount {
@@ -76,20 +80,51 @@ export interface Comment {
 // User Management Functions
 export function getCurrentUser(): User {
   if (typeof window === 'undefined') {
-    // Server-side rendering fallback
-    return sampleUsers[0]
+    return {
+      id: '0',
+      name: 'Test User',
+      email: 'test@scoop.social',
+      avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
+      bio: 'Beta tester exploring Scoop Social. Create your own profile to get started!',
+      location: 'Phoenix, AZ',
+      joinDate: '2024-03-01',
+      trustScore: 75,
+      isVerified: true,
+      friendsCount: 8,
+      reviewsCount: 12,
+      eventsAttended: 15,
+      eventsHosted: 2,
+      badges: ['Early Adopter', 'Beta Tester'],
+      interests: ['Technology', 'Networking', 'Testing'],
+      socialLinks: {
+        instagram: '@testuser',
+        twitter: '@testuser'
+      },
+      phoneVerified: true,
+      emailVerified: true
+    }
   }
 
   try {
-    const storedUser = localStorage.getItem('currentUser')
-    if (storedUser) {
-      return JSON.parse(storedUser)
+    const userData = localStorage.getItem('currentUser')
+    if (userData) {
+      const user = JSON.parse(userData)
+      // Ensure all required properties exist with defaults
+      return {
+        ...user,
+        eventsHosted: user.eventsHosted || 0,
+        badges: user.badges || [],
+        interests: user.interests || [],
+        socialLinks: user.socialLinks || { instagram: '', twitter: '' },
+        phoneVerified: user.phoneVerified || false,
+        emailVerified: user.emailVerified || false
+      }
     }
   } catch (error) {
-    console.error('Error parsing stored user data:', error)
+    console.error('Error parsing user data:', error)
   }
-  
-  // Fallback to first sample user
+
+  // Return Test User as default
   return sampleUsers[0]
 }
 
@@ -111,13 +146,10 @@ export function createNewUser(userData: {
   const newUser: User = {
     id: Date.now().toString(),
     name: userData.fullName,
-    username: userData.fullName.toLowerCase().replace(/\s+/g, '_'),
     email: userData.email,
-    phone: userData.phone,
-    avatar: `/scoop-logo.png`, // Default avatar - ScoopSocials logo
+    avatar: userData.avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
     bio: 'New to ScoopSocials! Looking forward to connecting with the community.',
     trustScore: 50, // Starting trust score for new users
-    trustLevel: 'new',
     joinDate: new Date().toISOString().split('T')[0],
     location: 'Location not set',
     accountType: 'free',
@@ -125,7 +157,16 @@ export function createNewUser(userData: {
     friendsCount: 0,
     reviewsCount: 0,
     eventsAttended: 0,
-    isVerified: false
+    isVerified: false,
+    eventsHosted: 0,
+    badges: [],
+    interests: [],
+    socialLinks: {
+      instagram: '',
+      twitter: ''
+    },
+    phoneVerified: false,
+    emailVerified: false
   }
   
   // Set up initial user in localStorage for metrics tracking
@@ -169,7 +210,6 @@ export function incrementUserReviews(userId: string): void {
         reviewsCount: currentUser.reviewsCount + 1,
         trustScore: calculateNewTrustScore(currentUser.trustScore, 'review_created')
       }
-      updatedUser.trustLevel = getTrustLevel(updatedUser.trustScore)
       saveCurrentUser(updatedUser)
     }
     
@@ -178,7 +218,6 @@ export function incrementUserReviews(userId: string): void {
     if (userIndex !== -1) {
       sampleUsers[userIndex].reviewsCount += 1
       sampleUsers[userIndex].trustScore = calculateNewTrustScore(sampleUsers[userIndex].trustScore, 'review_created')
-      sampleUsers[userIndex].trustLevel = getTrustLevel(sampleUsers[userIndex].trustScore)
     }
   } catch (error) {
     console.error('Error incrementing user reviews:', error)
@@ -197,7 +236,6 @@ export function incrementUserEvents(userId: string): void {
         eventsAttended: currentUser.eventsAttended + 1,
         trustScore: calculateNewTrustScore(currentUser.trustScore, 'event_attended')
       }
-      updatedUser.trustLevel = getTrustLevel(updatedUser.trustScore)
       saveCurrentUser(updatedUser)
     }
     
@@ -206,7 +244,6 @@ export function incrementUserEvents(userId: string): void {
     if (userIndex !== -1) {
       sampleUsers[userIndex].eventsAttended += 1
       sampleUsers[userIndex].trustScore = calculateNewTrustScore(sampleUsers[userIndex].trustScore, 'event_attended')
-      sampleUsers[userIndex].trustLevel = getTrustLevel(sampleUsers[userIndex].trustScore)
     }
   } catch (error) {
     console.error('Error incrementing user events:', error)
@@ -225,7 +262,6 @@ export function incrementUserFriends(userId: string): void {
         friendsCount: currentUser.friendsCount + 1,
         trustScore: calculateNewTrustScore(currentUser.trustScore, 'friend_added')
       }
-      updatedUser.trustLevel = getTrustLevel(updatedUser.trustScore)
       saveCurrentUser(updatedUser)
     }
     
@@ -234,38 +270,46 @@ export function incrementUserFriends(userId: string): void {
     if (userIndex !== -1) {
       sampleUsers[userIndex].friendsCount += 1
       sampleUsers[userIndex].trustScore = calculateNewTrustScore(sampleUsers[userIndex].trustScore, 'friend_added')
-      sampleUsers[userIndex].trustLevel = getTrustLevel(sampleUsers[userIndex].trustScore)
     }
   } catch (error) {
     console.error('Error incrementing user friends:', error)
   }
 }
 
-export function updateTrustScore(userId: string, activity: string, amount?: number): void {
-  if (typeof window === 'undefined') return
+export function updateTrustScore(userId: string, activity: string, amount?: number): boolean {
+  if (typeof window === 'undefined') return false
   
   try {
-    // Update current user if it's them
-    const currentUser = getCurrentUser()
-    if (currentUser.id === userId) {
-      const newScore = amount ? currentUser.trustScore + amount : calculateNewTrustScore(currentUser.trustScore, activity)
-      const updatedUser = {
-        ...currentUser,
-        trustScore: Math.max(0, Math.min(100, newScore)), // Keep between 0-100
-        trustLevel: getTrustLevel(Math.max(0, Math.min(100, newScore)))
-      }
-      saveCurrentUser(updatedUser)
-    }
-    
-    // Update in sample users if exists
-    const userIndex = sampleUsers.findIndex(user => user.id === userId)
+    // Get current stored user data
+    const userData = localStorage.getItem('scoopUsers')
+    const users: User[] = userData ? JSON.parse(userData) : sampleUsers
+
+    const userIndex = users.findIndex(u => u.id === userId)
     if (userIndex !== -1) {
-      const newScore = amount ? sampleUsers[userIndex].trustScore + amount : calculateNewTrustScore(sampleUsers[userIndex].trustScore, activity)
-      sampleUsers[userIndex].trustScore = Math.max(0, Math.min(100, newScore))
-      sampleUsers[userIndex].trustLevel = getTrustLevel(sampleUsers[userIndex].trustScore)
+      const currentUser = getCurrentUser()
+      const newScore = amount ? currentUser.trustScore + amount : calculateNewTrustScore(currentUser.trustScore, activity)
+      users[userIndex].trustScore = newScore
+      localStorage.setItem('scoopUsers', JSON.stringify(users))
+
+      // Also update the current user if it's the same user
+      if (currentUser.id === userId) {
+        const updatedUser = { ...currentUser, trustScore: newScore }
+        saveCurrentUser(updatedUser)
+      }
+
+      // Update the sampleUsers array for consistency
+      const sampleUserIndex = sampleUsers.findIndex(u => u.id === userId)
+      if (sampleUserIndex !== -1) {
+        sampleUsers[sampleUserIndex].trustScore = newScore
+      }
+
+      return true
     }
+
+    return false
   } catch (error) {
     console.error('Error updating trust score:', error)
+    return false
   }
 }
 
@@ -655,114 +699,146 @@ export function connectSocialAccount(platform: string, userId?: string): void {
 // Sample Users
 export const sampleUsers: User[] = [
   {
+    id: '0', // New default user
+    name: 'Test User',
+    email: 'test@scoop.social',
+    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
+    bio: 'Beta tester exploring Scoop Social. Create your own profile to get started!',
+    location: 'Phoenix, AZ',
+    joinDate: '2024-03-01',
+    trustScore: 75,
+    isVerified: true,
+    friendsCount: 8,
+    reviewsCount: 12,
+    eventsHosted: 2,
+    eventsAttended: 15,
+    badges: ['Early Adopter', 'Beta Tester'],
+    interests: ['Technology', 'Networking', 'Testing'],
+    socialLinks: {
+      instagram: '@testuser',
+      twitter: '@testuser'
+    },
+    phoneVerified: true,
+    emailVerified: true
+  },
+  {
     id: '1',
     name: 'Jake Martinez',
-    username: 'jakes_loft',
-    email: 'jake@jakesloft.com',
-    avatar: '/scoop-logo.png',
-    bio: '🏢 Owner of Jake\'s Loft Bar & Grill. Creating the best venue for Phoenix\'s community! 🎵 Live Music • 🍳 Sunday Brunch • 🍻 Happy Hour',
-    trustScore: 94,
-    trustLevel: 'excellent',
-    joinDate: '2023-01-15',
+    email: 'jake@example.com',
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
+    bio: 'Event organizer and community builder. Love bringing people together for meaningful connections and great experiences.',
     location: 'Phoenix, AZ',
-    accountType: 'venue',
-    socialAccounts: [
-      { platform: 'Instagram', handle: '@jakesloftphx', verified: true, icon: '📸' },
-      { platform: 'Facebook', handle: 'Jake\'s Loft Bar & Grill', verified: true, icon: '👥' },
-      { platform: 'Yelp', handle: 'Jake\'s Loft Phoenix', verified: true, icon: '⭐' },
-    ],
-    friendsCount: 450,
-    reviewsCount: 89,
-    eventsAttended: 120,
+    joinDate: '2024-01-15',
+    trustScore: 89,
     isVerified: true,
+    friendsCount: 234,
+    reviewsCount: 89,
+    eventsHosted: 12,
+    eventsAttended: 45,
+    badges: ['Verified Host', 'Community Builder', 'Top Reviewer'],
+    interests: ['Event Planning', 'Networking', 'Community Building', 'Entrepreneurship'],
+    socialLinks: {
+      instagram: '@jake_martinez_phx',
+      twitter: '@jakemartinez',
+      linkedin: 'jake-martinez-phoenix'
+    },
+    phoneVerified: true,
+    emailVerified: true
   },
   {
     id: '2',
     name: 'Sarah Chen',
-    username: 'sarahc_designs',
-    email: 'sarah@designimpact.co',
-    avatar: '/scoop-logo.png',
-    bio: 'UX Designer & Community Builder 🎨 | Hosting tech events @WeWork | Creating meaningful experiences through design ✨',
-    trustScore: 92,
-    trustLevel: 'excellent',
-    joinDate: '2023-02-10',
+    email: 'sarah@example.com',
+    avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b47c?w=150&h=150&fit=crop&crop=face',
+    bio: 'Software engineer passionate about technology and innovation. Always excited to meet fellow developers and share knowledge.',
     location: 'Phoenix, AZ',
-    accountType: 'pro',
-    socialAccounts: [
-      { platform: 'LinkedIn', handle: 'sarah-chen-design', verified: true, icon: '💼' },
-      { platform: 'Instagram', handle: '@sarahc.designs', verified: true, icon: '📸' },
-      { platform: 'Dribbble', handle: 'sarahchen', verified: true, icon: '🎨' },
-    ],
-    friendsCount: 320,
-    reviewsCount: 45,
-    eventsAttended: 78,
+    joinDate: '2024-02-01',
+    trustScore: 85,
     isVerified: true,
+    friendsCount: 156,
+    reviewsCount: 34,
+    eventsAttended: 28,
+    eventsHosted: 3,
+    badges: ['Tech Expert', 'Active Member'],
+    interests: ['Software Development', 'AI/ML', 'Tech Meetups'],
+    socialLinks: {
+      instagram: '@sarahchen_dev',
+      twitter: '@sarahchen',
+      linkedin: 'sarah-chen-dev'
+    },
+    phoneVerified: true,
+    emailVerified: true
   },
   {
     id: '3',
     name: 'Emily Rodriguez',
-    username: 'emily_asu',
-    email: 'emily.r@asu.edu',
-    avatar: '/scoop-logo.png',
-    bio: '🎓 ASU Student Government | Creating safer campus connections | Organizing student events & mixers 📚',
-    trustScore: 88,
-    trustLevel: 'excellent',
-    joinDate: '2023-03-15',
-    location: 'Tempe, AZ',
-    accountType: 'pro',
-    socialAccounts: [
-      { platform: 'LinkedIn', handle: 'emily-rodriguez-asu', verified: true, icon: '💼' },
-      { platform: 'Instagram', handle: '@emilyasu', verified: true, icon: '📸' },
-      { platform: 'Twitter', handle: '@emily_asu', verified: true, icon: '🐦' },
-    ],
-    friendsCount: 250,
-    reviewsCount: 28,
-    eventsAttended: 45,
+    email: 'emily@example.com',
+    avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face',
+    bio: 'Creative professional and art enthusiast. Love exploring Phoenix\'s vibrant arts scene and connecting with fellow creatives.',
+    location: 'Phoenix, AZ',
+    joinDate: '2024-02-15',
+    trustScore: 82,
     isVerified: true,
+    friendsCount: 98,
+    reviewsCount: 27,
+    eventsAttended: 22,
+    eventsHosted: 5,
+    badges: ['Art Lover', 'Creative Professional'],
+    interests: ['Art', 'Photography', 'Design', 'Cultural Events'],
+    socialLinks: {
+      instagram: '@emily_creates',
+      twitter: '@emilyrodriguez'
+    },
+    phoneVerified: true,
+    emailVerified: true
   },
   {
     id: '4',
     name: 'David Kim',
-    username: 'david_trustguard',
-    email: 'david.kim@trustguard.com',
-    avatar: '/scoop-logo.png',
-    bio: '🛡️ TrustGuard Insurance | Helping high-trust users save on insurance | Building safer communities through trust verification',
-    trustScore: 95,
-    trustLevel: 'excellent',
-    joinDate: '2023-01-28',
+    email: 'david@example.com',
+    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
+    bio: 'Freelance consultant helping businesses grow. Passionate about entrepreneurship and building meaningful professional relationships.',
     location: 'Phoenix, AZ',
-    accountType: 'pro',
-    socialAccounts: [
-      { platform: 'LinkedIn', handle: 'david-kim-insurance', verified: true, icon: '💼' },
-      { platform: 'Twitter', handle: '@davidkim_trust', verified: true, icon: '🐦' },
-      { platform: 'Facebook', handle: 'David Kim - TrustGuard', verified: true, icon: '👥' },
-    ],
-    friendsCount: 280,
-    reviewsCount: 42,
-    eventsAttended: 56,
+    joinDate: '2024-01-20',
+    trustScore: 88,
     isVerified: true,
+    friendsCount: 203,
+    reviewsCount: 56,
+    eventsAttended: 35,
+    eventsHosted: 8,
+    badges: ['Business Pro', 'Verified Consultant', 'Networking Expert'],
+    interests: ['Business', 'Consulting', 'Entrepreneurship', 'Networking'],
+    socialLinks: {
+      instagram: '@davidkim_biz',
+      twitter: '@davidkimconsult',
+      linkedin: 'david-kim-consultant'
+    },
+    phoneVerified: true,
+    emailVerified: true
   },
   {
     id: '5',
     name: 'Lisa Thompson',
-    username: 'lisa_events',
-    email: 'lisa@connectevents.co',
-    avatar: '/scoop-logo.png',
-    bio: '💝 Professional Event Planner | Specializing in social mixers & dating events | Creating meaningful connections in Phoenix',
-    trustScore: 91,
-    trustLevel: 'excellent',
-    joinDate: '2023-02-15',
+    email: 'lisa@example.com',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&crop=face',
+    bio: 'Insurance professional with a passion for helping others. Active in the Phoenix business community and love supporting local entrepreneurs.',
     location: 'Phoenix, AZ',
-    accountType: 'pro',
-    socialAccounts: [
-      { platform: 'Instagram', handle: '@lisaeventsphx', verified: true, icon: '📸' },
-      { platform: 'LinkedIn', handle: 'lisa-thompson-events', verified: true, icon: '💼' },
-      { platform: 'Tinder', handle: 'Verified Event Host', verified: true, icon: '💕' },
-    ],
-    friendsCount: 380,
-    reviewsCount: 65,
-    eventsAttended: 92,
+    joinDate: '2024-01-10',
+    trustScore: 91,
     isVerified: true,
+    friendsCount: 167,
+    reviewsCount: 43,
+    eventsAttended: 31,
+    eventsHosted: 4,
+    badges: ['Insurance Expert', 'Community Supporter', 'Trusted Professional'],
+    interests: ['Insurance', 'Risk Management', 'Business Development', 'Community Service'],
+    socialLinks: {
+      instagram: '@lisa_thompson_ins',
+      twitter: '@lisathompson',
+      linkedin: 'lisa-thompson-insurance'
+    },
+    phoneVerified: true,
+    emailVerified: true
   }
 ]
 
@@ -1260,4 +1336,32 @@ export const socialPlatforms = {
   'Twitch': '🎬',
   'Pinterest': '📌',
   'GitHub': '💻',
+}
+
+export function createUserProfile(userData: any): User {
+  const newUser: User = {
+    id: Date.now().toString(),
+    name: userData.fullName,
+    email: userData.email,
+    avatar: userData.avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
+    bio: 'New to ScoopSocials! Looking forward to connecting with the community.',
+    trustScore: 50, // Starting trust score for new users
+    joinDate: new Date().toISOString().split('T')[0],
+    location: 'Location not set',
+    friendsCount: 0,
+    reviewsCount: 0,
+    eventsAttended: 0,
+    isVerified: false,
+    eventsHosted: 0,
+    badges: [],
+    interests: [],
+    socialLinks: {
+      instagram: '',
+      twitter: ''
+    },
+    phoneVerified: false,
+    emailVerified: false
+  }
+
+  return newUser
 } 

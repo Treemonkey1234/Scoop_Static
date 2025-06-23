@@ -64,8 +64,8 @@ export default function AnalyticsPage() {
       friendRequests: Math.max(0, currentUser.friendsCount - 50) // Estimated pending requests
     },
     social: {
-      connectedAccounts: currentUser.socialAccounts.length,
-      verifiedAccounts: currentUser.socialAccounts.filter(account => account.verified).length,
+      connectedAccounts: Object.keys(currentUser.socialLinks).filter(key => currentUser.socialLinks[key as keyof typeof currentUser.socialLinks]).length,
+      verifiedAccounts: currentUser.phoneVerified && currentUser.emailVerified ? 2 : (currentUser.phoneVerified || currentUser.emailVerified ? 1 : 0),
       totalFollowers: Math.min(5000, currentUser.trustScore * 25), // Estimated followers
       crossPlatformEngagement: Math.min(100, currentUser.trustScore - 10) // Engagement percentage
     },

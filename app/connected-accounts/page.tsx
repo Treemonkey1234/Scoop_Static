@@ -213,36 +213,35 @@ export default function ConnectedAccounts() {
             <h1 className="text-2xl font-bold text-slate-800">Connected Accounts</h1>
           </div>
           <div className="text-sm text-cyan-600 bg-cyan-50 px-3 py-1 rounded-full">
-            {currentUser?.socialAccounts.length || 0} connected
+            {Object.values(currentUser?.socialLinks || {}).filter(Boolean).length || 0} connected
           </div>
         </div>
 
-        {/* Connected Accounts */}
-        <div className="card-soft mb-8">
-          <h2 className="text-lg font-semibold text-slate-800 mb-4">Your Connected Accounts</h2>
-          <div className="space-y-3">
-            {currentUser?.socialAccounts.map((account, index) => (
-              <div key={index} className="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
-                <div className="flex items-center space-x-4">
-                  <div className="w-10 h-10 flex items-center justify-center bg-white rounded-full shadow-soft">
-                    <SocialIcon platform={account.platform} />
+        {/* Connected Social Accounts */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+          {Object.entries(currentUser?.socialLinks || {}).map(([platform, handle], index) => (
+            handle && (
+              <div key={index} className="card-soft border-l-4 border-green-400">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                      <span className="text-lg">
+                        {platform === 'instagram' ? '📸' : platform === 'twitter' ? '🐦' : platform === 'linkedin' ? '💼' : '🔗'}
+                      </span>
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-slate-800 capitalize">{platform}</h3>
+                      <p className="text-sm text-slate-600">{handle}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-medium text-slate-800">{account.platform}</h3>
-                    <p className="text-sm text-slate-500">@{account.handle}</p>
+                  <div className="flex items-center space-x-2">
+                    <span className="w-2 h-2 bg-green-400 rounded-full"></span>
+                    <span className="text-xs text-green-600 font-medium">Connected</span>
                   </div>
-                </div>
-                <div className="flex items-center space-x-3">
-                  {account.verified && (
-                    <span className="text-green-600 bg-green-50 px-2 py-1 rounded-full text-sm flex items-center">
-                      <CheckBadgeIcon className="w-4 h-4 mr-1" />
-                      Verified
-                    </span>
-                  )}
                 </div>
               </div>
-            ))}
-          </div>
+            )
+          ))}
         </div>
 
         {/* Available Platforms - Swipeable */}
@@ -279,9 +278,8 @@ export default function ConnectedAccounts() {
             onTouchEnd={handleTouchEnd}
           >
             {currentPlatforms.map(([platform, icon]) => {
-              const isConnected = currentUser?.socialAccounts.some(
-                account => account.platform === platform
-              )
+              const isConnected = platform.toLowerCase() in (currentUser?.socialLinks || {}) && 
+                                currentUser?.socialLinks[platform.toLowerCase() as keyof typeof currentUser.socialLinks]
 
               return (
                 <div

@@ -38,6 +38,21 @@ export default function ProfilePage() {
     contentId: '',
     contentTitle: ''
   })
+  const [activeTab, setActiveTab] = useState<'overview' | 'events' | 'reviews'>('overview')
+
+  // Calculate profile completeness
+  const calculateProfileCompleteness = (user: User) => {
+    let score = 0
+    if (user.name) score += 10
+    if (user.bio) score += 10
+    if (user.location) score += 10
+    if (user.email) score += 10
+    if (user.phoneVerified) score += 15
+    if (Object.values(user.socialLinks).filter(Boolean).length > 0) score += 15
+    if (Object.values(user.socialLinks).filter(Boolean).length >= 2) score += 15
+    if (user.avatar !== 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face') score += 15
+    return score
+  }
 
   // Load current user on component mount
   useEffect(() => {
@@ -85,25 +100,11 @@ export default function ProfilePage() {
     { category: 'Community Engagement', score: currentUser.trustScore > 80 ? 92 : 40, count: currentUser.trustScore > 80 ? '234 interactions' : '15 interactions' },
     { category: 'Friends Network', score: Math.min(95, 40 + (currentUser.friendsCount * 2)), count: `${currentUser.friendsCount} connections` },
     { category: 'Events Attended', score: Math.min(95, 40 + (currentUser.eventsAttended * 3)), count: `${currentUser.eventsAttended} events` },
-    { category: 'Social Media Connected', score: Math.min(98, 30 + (currentUser.socialAccounts.length * 10)), count: `${currentUser.socialAccounts.length} accounts` },
+    { category: 'Social Media Connected', score: Math.min(98, 30 + (Object.values(currentUser.socialLinks).filter(Boolean).length * 10)), count: `${Object.values(currentUser.socialLinks).filter(Boolean).length} accounts` },
     { category: 'Flagging Accuracy', score: currentUser.trustScore > 80 ? 91 : 60, count: currentUser.trustScore > 80 ? '23/25 accurate' : 'No flags yet' },
     { category: 'Positive Reactions', score: currentUser.trustScore > 80 ? 93 : 55, count: currentUser.trustScore > 80 ? '89% positive' : '65% positive' },
     { category: 'Profile Completeness', score: calculateProfileCompleteness(currentUser), count: `${calculateProfileCompleteness(currentUser)}% complete` }
   ]
-
-  function calculateProfileCompleteness(user: User): number {
-    let completeness = 0
-    if (user.name) completeness += 15
-    if (user.bio && user.bio !== 'New to ScoopSocials! Looking forward to connecting with the community.') completeness += 15
-    if (user.location && user.location !== 'Location not set') completeness += 10
-    if (user.avatar) completeness += 10
-    if (user.email) completeness += 10
-    if (user.phone) completeness += 10
-    if (user.socialAccounts.length > 0) completeness += 15
-    if (user.socialAccounts.length >= 3) completeness += 10
-    if (user.isVerified) completeness += 5
-    return completeness
-  }
 
   // Social media platform SVG components
   const SocialIcon = ({ platform }: { platform: string }) => {
