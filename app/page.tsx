@@ -228,40 +228,70 @@ export default function HomePage() {
 
             return (
               <div key={review.id} className="card-premium hover:shadow-xl transition-all duration-300 border-cyan-200/50 overflow-hidden">
+                {/* Vote System */}
                 <div className="flex">
-                  {/* Left Voting Section */}
-                  <div className="mr-4 self-stretch w-12">
-                    <ClassicVoteSystem
-                      initialVotes={review.upvotes - review.downvotes}
-                      userVote={currentVote}
-                      onVote={handleVote(review.id)}
-                    />
+                  <div className="flex flex-col items-center justify-between py-4 px-3 bg-gradient-to-b from-slate-50 to-white border-r border-slate-100">
+                    <button
+                      onClick={() => handleVote(review.id)('up')}
+                      className={`p-1 rounded-lg transition-all duration-200 ${
+                        currentVote === 'up'
+                          ? 'text-cyan-600 bg-cyan-50'
+                          : 'text-slate-400 hover:text-cyan-600 hover:bg-slate-100'
+                      }`}
+                    >
+                      <ChevronUpIcon className="w-6 h-6" />
+                    </button>
+                    <span className={`font-medium ${
+                      currentVote === 'up'
+                        ? 'text-cyan-600'
+                        : currentVote === 'down'
+                        ? 'text-orange-600'
+                        : 'text-slate-600'
+                    }`}>
+                      {review.votes}
+                    </span>
+                    <button
+                      onClick={() => handleVote(review.id)('down')}
+                      className={`p-1 rounded-lg transition-all duration-200 ${
+                        currentVote === 'down'
+                          ? 'text-orange-600 bg-orange-50'
+                          : 'text-slate-400 hover:text-orange-600 hover:bg-slate-100'
+                      }`}
+                    >
+                      <ChevronDownIcon className="w-6 h-6" />
+                    </button>
                   </div>
 
-                  {/* Main Content - Option 2: Vertical Stack with Sidebar */}
-                  <div className="flex-1 min-w-0 overflow-hidden">
-                    {/* Header Section */}
-                    <div className="bg-slate-50 rounded-lg p-3 mb-3 border-l-4 border-cyan-400">
+                  {/* Content */}
+                  <div className="flex-1 p-4">
+                    {/* Header */}
+                    <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center space-x-3">
-                        <Image
-                          src={reviewer.avatar}
-                          alt={reviewer.name}
-                          width={40}
-                          height={40}
-                          className="rounded-lg shadow-sm flex-shrink-0"
-                        />
-                        <div className="flex items-center space-x-2">
-                          <h4 className="font-semibold text-slate-800 text-base">{reviewer.name}</h4>
-                          <span className="text-slate-400 text-sm">→</span>
-                          <span className="font-medium text-slate-700 text-base">{reviewee.name}</span>
-                          <div className="bg-white/80 rounded-full">
-                            <TrustBadge score={reviewer.trustScore} size="sm" />
+                        <Link href={`/user/${reviewer.id}`}>
+                          <Image
+                            src={reviewer.avatar}
+                            alt={reviewer.name}
+                            width={40}
+                            height={40}
+                            className="rounded-full"
+                          />
+                        </Link>
+                        <div>
+                          <div className="flex items-center space-x-2">
+                            <Link href={`/user/${reviewer.id}`} className="font-medium text-slate-800 hover:text-cyan-600">
+                              {reviewer.name}
+                            </Link>
+                            <span className="text-slate-400">→</span>
+                            <Link href={`/user/${reviewee.id}`} className="font-medium text-slate-800 hover:text-cyan-600">
+                              {reviewee.name}
+                            </Link>
                           </div>
+                          <TrustBadge score={reviewer.trustScore} size="sm" />
                         </div>
                       </div>
                     </div>
 
-                    {/* Tags Section */}
+                    {/* Metadata */}
                     <div className="bg-white rounded-lg p-3 mb-3 border border-slate-200">
                       <div className="flex flex-wrap gap-2 mb-3">
                         <span className="px-3 py-1 bg-cyan-100 text-cyan-700 rounded-full font-medium text-sm">
@@ -312,36 +342,28 @@ export default function HomePage() {
                       </blockquote>
                     </div>
 
-                    {/* Actions Section */}
-                    <div className="bg-white rounded-lg p-3 border border-slate-200">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-4">
-                          <button
-                            onClick={() => handleComment(review.id)}
-                            className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-slate-100 text-slate-600 transition-all duration-200"
-                          >
-                            <ChatBubbleLeftIcon className="w-4 h-4" />
-                            <span className="text-sm font-medium">Comment</span>
-                          </button>
-                        </div>
-
-                        <div className="flex items-center space-x-2">
-                          <button className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-slate-100 text-slate-600 transition-all duration-200">
-                            <ShareIcon className="w-4 h-4" />
-                            <span className="text-sm font-medium">Share</span>
-                          </button>
-                          
-                          {/* Flag Button - Bottom Right */}
-                          <button 
-                            onClick={() => handleFlag('post', review.id, `Review by ${reviewer.name}`)}
-                            className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-red-50 text-red-500 transition-all duration-200"
-                            title="Flag this content"
-                          >
-                            <FlagIcon className="w-4 h-4" />
-                            <span className="text-sm font-medium">Flag</span>
-                          </button>
-                        </div>
+                    {/* Actions */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-4">
+                        <button
+                          onClick={() => handleComment(review.id)}
+                          className="flex items-center space-x-2 text-slate-600 hover:text-cyan-600 transition-colors duration-200"
+                        >
+                          <ChatBubbleLeftIcon className="w-5 h-5" />
+                          <span className="text-sm">Comment</span>
+                        </button>
+                        <button className="flex items-center space-x-2 text-slate-600 hover:text-cyan-600 transition-colors duration-200">
+                          <ShareIcon className="w-5 h-5" />
+                          <span className="text-sm">Share</span>
+                        </button>
                       </div>
+                      <button
+                        onClick={() => handleFlag('post', review.id, `Review by ${reviewer.name}`)}
+                        className="flex items-center space-x-2 text-slate-500 hover:text-orange-500 transition-colors duration-200"
+                      >
+                        <FlagIcon className="w-5 h-5" />
+                        <span className="text-sm">Flag</span>
+                      </button>
                     </div>
                   </div>
                 </div>

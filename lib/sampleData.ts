@@ -32,18 +32,12 @@ export interface Review {
   id: string
   reviewerId: string
   reviewedId: string
-  category: string
-  rating: number
   content: string
+  category: string
   timestamp: string
-  upvotes: number
-  downvotes: number
-  hasVoted: boolean
-  voteType?: 'up' | 'down'
-  isEventReview?: boolean
+  votes: number
+  isEventReview: boolean
   eventId?: string
-  trustScore: number
-  communityValidation: number
 }
 
 export interface Event {
@@ -55,18 +49,15 @@ export interface Event {
   time: string
   location: string
   address: string
-  coordinates: [number, number]
-  attendeeCount: number
-  maxAttendees: number
-  trustRequirement: number
-  isPrivate: boolean
   category: string
-  price: number
   imageUrl: string
+  maxAttendees: number
+  attendeeCount: number
+  price: number
+  isPrivate: boolean
+  isPast: boolean
+  trustRequirement: number
   tags: string[]
-  rsvpStatus?: 'going' | 'interested' | 'not-going'
-  userAttended?: boolean
-  isPast?: boolean
 }
 
 export interface Comment {
@@ -378,45 +369,26 @@ export function saveAllReviews(reviews: Review[]): void {
   }
 }
 
-export function createNewReview(reviewData: {
-  reviewedId: string
-  category: string
-  content: string
-  location?: string
-  tags: string[]
-}): Review {
+export function createNewReview(reviewData: any) {
   const currentUser = getCurrentUser()
+  if (!currentUser) return null
+
   const newReview: Review = {
-    id: Date.now().toString(),
+    id: Math.random().toString(36).substr(2, 9),
     reviewerId: currentUser.id,
     reviewedId: reviewData.reviewedId,
-    category: reviewData.category,
-    rating: 5, // Default rating
     content: reviewData.content,
+    category: reviewData.category,
     timestamp: new Date().toISOString(),
-    upvotes: 0,
-    downvotes: 0,
-    hasVoted: false,
-    trustScore: currentUser.trustScore,
-    communityValidation: 0
+    votes: 0,
+    isEventReview: false
   }
-  
-  // Add to existing reviews
+
+  // Add review to storage
   const allReviews = getAllReviews()
-  allReviews.unshift(newReview) // Add to beginning (newest first)
+  allReviews.push(newReview)
   saveAllReviews(allReviews)
-  
-  // Update user metrics
-  incrementUserReviews(currentUser.id)
-  recordUserActivity(currentUser.id, 'review_created', {
-    reviewId: newReview.id,
-    reviewedId: reviewData.reviewedId,
-    category: reviewData.category
-  })
-  
-  // Give trust score boost to person being reviewed
-  updateTrustScore(reviewData.reviewedId, 'review_received')
-  
+
   return newReview
 }
 
@@ -481,16 +453,15 @@ export function createNewEvent(eventData: {
     time: eventData.startTime,
     location: eventData.venueName,
     address: eventData.address,
-    coordinates: [-74.006, 40.7128], // Default coordinates
-    attendeeCount: 1, // Host is automatically attending
-    maxAttendees: eventData.maxAttendees,
-    trustRequirement: eventData.trustRequirement,
-    isPrivate: eventData.eventType === 'private',
     category: eventData.category,
-    price: 0, // Default free
     imageUrl: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=600', // Default event image
-    tags: [],
-    isPast: false
+    maxAttendees: eventData.maxAttendees,
+    attendeeCount: 1, // Host is automatically attending
+    price: 0, // Default free
+    isPrivate: eventData.eventType === 'private',
+    isPast: false,
+    trustRequirement: eventData.trustRequirement,
+    tags: []
   }
   
   // Add to existing events
@@ -523,7 +494,7 @@ export function attendEvent(eventId: string, userId?: string): boolean {
     
     if (eventIndex !== -1) {
       allEvents[eventIndex].attendeeCount += 1
-      allEvents[eventIndex].rsvpStatus = 'going'
+      allEvents[eventIndex].isPast = false
       saveAllEvents(allEvents)
       
       // Update user metrics
@@ -580,38 +551,32 @@ export function voteOnReview(reviewId: string, voteType: 'up' | 'down'): boolean
       const review = allReviews[reviewIndex]
       
       // Check if user has already voted
-      if (review.hasVoted) {
+      if (review.votes > 0) {
         // If trying to vote the same way again, remove the vote
-        if (review.voteType === voteType) {
-          if (voteType === 'up') {
-            allReviews[reviewIndex].upvotes -= 1
-            // Remove trust score boost from review author
-            updateTrustScore(review.reviewerId, 'upvote_removed')
-          } else {
-            allReviews[reviewIndex].downvotes -= 1
-            // Remove trust score penalty from review author
-            updateTrustScore(review.reviewerId, 'downvote_removed')
-          }
-          allReviews[reviewIndex].hasVoted = false
-          allReviews[reviewIndex].voteType = undefined
+        if (review.votes === 1 && voteType === 'up') {
+          allReviews[reviewIndex].votes -= 1
+          // Remove trust score boost from review author
+          updateTrustScore(review.reviewerId, 'upvote_removed')
+        } else if (review.votes === -1 && voteType === 'down') {
+          allReviews[reviewIndex].votes += 1
+          // Remove trust score penalty from review author
+          updateTrustScore(review.reviewerId, 'downvote_removed')
         }
-        // If trying to vote differently, don't allow it
-        return false
+        allReviews[reviewIndex].votes = 0
       }
       
       // Update vote counts for new vote
       if (voteType === 'up') {
-        allReviews[reviewIndex].upvotes += 1
+        allReviews[reviewIndex].votes += 1
         // Give trust score boost to review author
         updateTrustScore(review.reviewerId, 'upvote_received')
       } else {
-        allReviews[reviewIndex].downvotes += 1
+        allReviews[reviewIndex].votes -= 1
         // Slight trust score penalty to review author
         updateTrustScore(review.reviewerId, 'downvote_received')
       }
       
-      allReviews[reviewIndex].hasVoted = true
-      allReviews[reviewIndex].voteType = voteType
+      allReviews[reviewIndex].votes = Math.max(-1, Math.min(1, allReviews[reviewIndex].votes))
       saveAllReviews(allReviews)
       
       // Record activity
@@ -776,91 +741,85 @@ export const sampleReviews: Review[] = [
     id: '1',
     reviewerId: '2', // Sarah Chen
     reviewedId: '1', // Jake Martinez
+    content: 'Jake is an amazing venue owner! His space is always clean and well-maintained. He\'s very professional and accommodating.',
     category: 'Professional',
-    rating: 5,
-    content: "Jake's Loft is an incredible venue! The atmosphere is perfect for both casual dining and professional events. The Sunday brunch was exceptional, and Jake's attention to community building really shows. The live music setup is perfect, and their happy hour deals are the best in Phoenix!",
-    timestamp: '2025-06-18T10:30:00Z',
-    upvotes: 24,
-    downvotes: 2,
-    hasVoted: false,
-    trustScore: 92,
-    communityValidation: 94,
-  },
-  {
-    id: '6',
-    reviewerId: '1', // Jake Martinez
-    reviewedId: '3', // Emily Rodriguez
-    category: 'Event Review',
-    rating: 5,
-    content: 'Emily\'s ASU Student Mixer was incredibly well organized! The venue setup was perfect for networking, and she created such a welcoming atmosphere for both students and local business owners. Great job bridging the campus-community gap. Will definitely attend more of her events!',
-    timestamp: '2025-06-17T14:30:00Z',
-    upvotes: 18,
-    downvotes: 1,
-    hasVoted: false,
-    isEventReview: true,
-    eventId: 'past-1',
-    trustScore: 94,
-    communityValidation: 94,
+    timestamp: '2024-03-10T15:30:00Z',
+    votes: 45,
+    isEventReview: false
   },
   {
     id: '2',
     reviewerId: '3', // Emily Rodriguez
-    reviewedId: '2', // Sarah Chen
-    category: 'Professional',
-    rating: 5,
-    content: "Sarah's UX workshop was fantastic! Her approach to design thinking is so practical and insightful. The interactive exercises really helped solidify the concepts, and I've already started applying her methods in my student government work. Highly recommend her expertise!",
-    timestamp: '2025-06-16T14:45:00Z',
-    upvotes: 31,
-    downvotes: 1,
-    hasVoted: false,
-    trustScore: 88,
-    communityValidation: 96,
+    reviewedId: '4', // David Kim
+    content: 'David was a great study partner for our coding bootcamp. Very knowledgeable and patient.',
+    category: 'Academic',
+    timestamp: '2024-03-09T18:45:00Z',
+    votes: 32,
+    isEventReview: false
   },
   {
     id: '3',
+    reviewerId: '5', // Lisa Thompson
+    reviewedId: '2', // Sarah Chen
+    content: 'Sarah is a fantastic roommate. Always clean, respectful, and pays rent on time.',
+    category: 'Roommate',
+    timestamp: '2024-03-08T12:15:00Z',
+    votes: 28,
+    isEventReview: false
+  },
+  {
+    id: '4',
+    reviewerId: '1', // Jake Martinez
+    reviewedId: '3', // Emily Rodriguez
+    content: 'Emily did an amazing job catering for our tech meetup. The food was delicious and presentation was perfect.',
+    category: 'Services',
+    timestamp: '2024-03-07T20:00:00Z',
+    votes: 39,
+    isEventReview: true,
+    eventId: 'event1'
+  },
+  {
+    id: '5',
     reviewerId: '4', // David Kim
     reviewedId: '5', // Lisa Thompson
-    category: 'Event Review',
-    rating: 5,
-    content: "Lisa's Singles Mixer event was exceptionally well organized! Her attention to creating a comfortable atmosphere really showed. The ice-breaker activities were clever and not forced. The venue choice was perfect, and the crowd was exactly as advertised - professional and engaging.",
-    timestamp: '2025-06-15T18:20:00Z',
-    upvotes: 18,
-    downvotes: 0,
-    hasVoted: false,
+    content: 'Lisa is a skilled graphic designer. She created a beautiful logo for my business.',
+    category: 'Professional',
+    timestamp: '2024-03-06T14:20:00Z',
+    votes: 35,
+    isEventReview: false
+  },
+  {
+    id: '6',
+    reviewerId: '2', // Sarah Chen
+    reviewedId: '1', // Jake Martinez
+    content: 'The Phoenix Tech Summit was incredibly well-organized! Great speakers, perfect venue setup, and amazing networking opportunities.',
+    category: 'Professional',
+    timestamp: '2024-03-05T16:45:00Z',
+    votes: 52,
     isEventReview: true,
-    eventId: 'past-4',
-    trustScore: 95,
-    communityValidation: 98,
+    eventId: 'event2'
   },
   {
     id: '7',
-    reviewerId: '5', // Lisa Thompson
+    reviewerId: '3', // Emily Rodriguez
     reviewedId: '1', // Jake Martinez
-    category: 'Event Review',
-    rating: 4,
-    content: 'Hosted my Singles Mixer at Jake\'s Loft and it was perfect! The space layout worked great for our activities, and Jake\'s team was super accommodating with the custom menu and drink options. The sound system and lighting created just the right atmosphere. Minor hiccup with the AC but they fixed it quickly.',
-    timestamp: '2025-06-14T16:45:00Z',
-    upvotes: 12,
-    downvotes: 0,
-    hasVoted: false,
+    content: 'The Community Art Fair was a blast! So many talented local artists and great atmosphere. Looking forward to the next one!',
+    category: 'Social',
+    timestamp: '2024-03-04T19:30:00Z',
+    votes: 43,
     isEventReview: true,
-    eventId: 'past-5',
-    trustScore: 91,
-    communityValidation: 87,
+    eventId: 'event3'
   },
   {
     id: '8',
-    reviewerId: '2', // Sarah Chen
-    reviewedId: '5', // Lisa Thompson
+    reviewerId: '5', // Lisa Thompson
+    reviewedId: '1', // Jake Martinez
+    content: 'The Startup Networking Night exceeded expectations. Met some amazing entrepreneurs and potential investors.',
     category: 'Professional',
-    rating: 5,
-    content: 'Lisa is an incredible event planner! She helped organize our tech meetup series and thought of every detail. Her experience with social dynamics really showed in how she structured the networking portions. The events have consistently high attendance and great feedback.',
-    timestamp: '2025-06-13T20:15:00Z',
-    upvotes: 25,
-    downvotes: 0,
-    hasVoted: false,
-    trustScore: 92,
-    communityValidation: 96,
+    timestamp: '2024-03-03T21:15:00Z',
+    votes: 47,
+    isEventReview: true,
+    eventId: 'event4'
   }
 ]
 
@@ -934,109 +893,80 @@ export const pastEvents = [
 // Sample Events
 export const sampleEvents: Event[] = [
   {
-    id: '1',
-    title: 'Tech Meetup Phoenix',
-    description: 'Join us for an evening of tech talks, networking, and collaboration! This month\'s focus: UX Design in AI Applications. Featuring guest speakers and interactive workshops.',
-    hostId: '2', // Sarah Chen
-    date: '2025-06-21',
-    time: '6:30 PM',
-    location: 'WeWork Central',
-    address: '100 E Washington St, Phoenix, AZ 85004',
-    coordinates: [-112.0740, 33.4484],
-    attendeeCount: 45,
-    maxAttendees: 60,
-    trustRequirement: 75,
-    isPrivate: false,
+    id: 'event1',
+    title: 'Phoenix Tech Meetup',
+    description: 'Monthly gathering of tech enthusiasts in Phoenix. This month featuring talks on AI and Machine Learning.',
+    hostId: '1', // Jake Martinez
+    date: '2024-03-15',
+    time: '18:30',
+    location: 'The Hub Phoenix',
+    address: '123 Tech Ave, Phoenix, AZ',
     category: 'Technology',
+    imageUrl: '/images/events/tech-meetup.jpg',
+    maxAttendees: 60,
+    attendeeCount: 45,
     price: 0,
-    imageUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600',
-    tags: ['tech', 'networking', 'UX design', 'AI'],
-    rsvpStatus: 'going',
+    isPrivate: false,
     isPast: false,
+    trustRequirement: 50,
+    tags: ['tech', 'networking', 'ai', 'machine-learning']
   },
   {
-    id: '2',
-    title: 'Sunday Brunch & Networking',
-    description: 'Start your Sunday right with amazing food, live music, and great company! Special brunch menu and networking opportunities for young professionals.',
-    hostId: '1', // Jake's Loft
-    date: '2025-06-22',
-    time: '11:00 AM',
-    location: 'Jake\'s Loft Bar & Grill',
-    address: '250 E Downtown Blvd, Phoenix, AZ 85004',
-    coordinates: [-112.0740, 33.4484],
-    attendeeCount: 35,
-    maxAttendees: 50,
+    id: 'event2',
+    title: 'Phoenix Tech Summit',
+    description: 'Annual technology conference featuring industry leaders, workshops, and networking opportunities.',
+    hostId: '1', // Jake Martinez
+    date: '2024-02-20',
+    time: '09:00',
+    location: 'Phoenix Convention Center',
+    address: '100 N 3rd St, Phoenix, AZ',
+    category: 'Conference',
+    imageUrl: '/images/events/tech-summit.jpg',
+    maxAttendees: 500,
+    attendeeCount: 478,
+    price: 199,
+    isPrivate: false,
+    isPast: true,
     trustRequirement: 70,
+    tags: ['conference', 'tech', 'professional', 'networking']
+  },
+  {
+    id: 'event3',
+    title: 'Community Art Fair',
+    description: 'Showcase of local artists featuring paintings, sculptures, and interactive installations.',
+    hostId: '1', // Jake Martinez
+    date: '2024-02-15',
+    time: '11:00',
+    location: 'The Hub Phoenix',
+    address: '123 Tech Ave, Phoenix, AZ',
+    category: 'Art & Culture',
+    imageUrl: '/images/events/art-fair.jpg',
+    maxAttendees: 200,
+    attendeeCount: 185,
+    price: 10,
     isPrivate: false,
-    category: 'Social',
+    isPast: true,
+    trustRequirement: 0,
+    tags: ['art', 'community', 'culture', 'local']
+  },
+  {
+    id: 'event4',
+    title: 'Startup Networking Night',
+    description: 'Connect with fellow entrepreneurs, investors, and startup enthusiasts.',
+    hostId: '1', // Jake Martinez
+    date: '2024-02-10',
+    time: '19:00',
+    location: 'The Hub Phoenix',
+    address: '123 Tech Ave, Phoenix, AZ',
+    category: 'Networking',
+    imageUrl: '/images/events/startup-night.jpg',
+    maxAttendees: 100,
+    attendeeCount: 98,
     price: 25,
-    imageUrl: 'https://images.unsplash.com/photo-1525351484163-7529414344d8?w=600',
-    tags: ['brunch', 'networking', 'live music', 'food'],
-    rsvpStatus: 'interested',
-    isPast: false,
-  },
-  {
-    id: '3',
-    title: 'Campus Safety Mixer',
-    description: 'Join ASU Student Government for an important discussion on campus safety. Meet fellow students, campus security, and insurance representatives. Refreshments provided!',
-    hostId: '3', // Emily Rodriguez
-    date: '2025-06-23',
-    time: '4:00 PM',
-    location: 'ASU Memorial Union',
-    address: '301 E Orange St, Tempe, AZ 85281',
-    coordinates: [-111.9379, 33.4172],
-    attendeeCount: 28,
-    maxAttendees: 40,
-    trustRequirement: 65,
     isPrivate: false,
-    category: 'Education',
-    price: 0,
-    imageUrl: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=600',
-    tags: ['campus', 'safety', 'education', 'networking'],
-    rsvpStatus: 'going',
-    isPast: false,
-  },
-  {
-    id: '4',
-    title: 'TrustGuard Community Workshop',
-    description: 'Learn how your trust score can save you money on insurance! Special rates for users with 85+ trust scores. One-on-one consultations available.',
-    hostId: '4', // David Kim
-    date: '2025-06-24',
-    time: '5:30 PM',
-    location: 'WeWork Central',
-    address: '100 E Washington St, Phoenix, AZ 85004',
-    coordinates: [-112.0740, 33.4484],
-    attendeeCount: 25,
-    maxAttendees: 30,
-    trustRequirement: 80,
-    isPrivate: false,
-    category: 'Business',
-    price: 0,
-    imageUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=600',
-    tags: ['insurance', 'finance', 'trust score', 'workshop'],
-    rsvpStatus: 'interested',
-    isPast: false
-  },
-  {
-    id: '5',
-    title: 'Summer Singles Mixer',
-    description: 'Meet new people in a fun, relaxed atmosphere! Enjoy craft cocktails, ice-breaker games, and great conversation. All verified profiles welcome!',
-    hostId: '5', // Lisa Thompson
-    date: '2025-06-25',
-    time: '7:00 PM',
-    location: 'Jake\'s Loft Bar & Grill',
-    address: '250 E Downtown Blvd, Phoenix, AZ 85004',
-    coordinates: [-112.0740, 33.4484],
-    attendeeCount: 40,
-    maxAttendees: 50,
-    trustRequirement: 85,
-    isPrivate: false,
-    category: 'Social',
-    price: 30,
-    imageUrl: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=600',
-    tags: ['singles', 'social', 'dating', 'mixer'],
-    rsvpStatus: 'going',
-    isPast: false
+    isPast: true,
+    trustRequirement: 60,
+    tags: ['startup', 'networking', 'business', 'entrepreneurship']
   }
 ]
 

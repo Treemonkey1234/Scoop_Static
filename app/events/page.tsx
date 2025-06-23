@@ -6,7 +6,7 @@ import Link from 'next/link'
 import Layout from '@/components/Layout'
 import TrustBadge from '@/components/TrustBadge'
 import FlagModal from '@/components/FlagModal'
-import { sampleUsers, getAllEvents } from '@/lib/sampleData'
+import { sampleUsers, getAllEvents, sampleReviews } from '@/lib/sampleData'
 import { 
   CalendarIcon,
   MapPinIcon,
@@ -25,6 +25,7 @@ export default function EventsPage() {
   const [likedEvents, setLikedEvents] = useState<{[key: string]: boolean}>({})
   const [startX, setStartX] = useState(0)
   const [events, setEvents] = useState<any[]>([])
+  const [reviews, setReviews] = useState<any[]>([])
   const [flagModal, setFlagModal] = useState<{
     isOpen: boolean
     contentType: 'post' | 'event' | 'social'
@@ -77,14 +78,21 @@ export default function EventsPage() {
     }
   }
 
-  // Load events on component mount
+  // Load events and reviews on component mount
   React.useEffect(() => {
     const allEvents = getAllEvents()
+    const allReviews = sampleReviews.filter(review => review.isEventReview)
     setEvents(allEvents)
+    setReviews(allReviews)
   }, [])
 
   const upcomingEvents = events.filter(event => event.isPast === false)
   const pastEvents = events.filter(event => event.isPast === true)
+
+  // Get reviews for an event
+  const getEventReviews = (eventId: string) => {
+    return reviews.filter(review => review.eventId === eventId)
+  }
 
   // Tab order for swipe navigation
   const tabOrder: ('upcoming' | 'past' | 'discover')[] = ['upcoming', 'past', 'discover']
@@ -361,7 +369,58 @@ export default function EventsPage() {
           {activeTab === 'past' && (
             <>
               {pastEvents.length > 0 ? (
-                pastEvents.map(event => renderEventCard(event, true))
+                <div className="space-y-8">
+                  {pastEvents.map(event => {
+                    const eventReviews = getEventReviews(event.id)
+                    return (
+                      <div key={event.id} className="space-y-4">
+                        {/* Event Card */}
+                        {renderEventCard(event, true)}
+                        
+                        {/* Event Reviews */}
+                        {eventReviews.length > 0 && (
+                          <div className="ml-4 pl-4 border-l-2 border-cyan-200">
+                            <h4 className="text-sm font-medium text-slate-600 mb-3">
+                              Reviews for this event:
+                            </h4>
+                            <div className="space-y-3">
+                              {eventReviews.map(review => {
+                                const reviewer = sampleUsers.find(u => u.id === review.reviewerId)
+                                if (!reviewer) return null
+                                
+                                return (
+                                  <div key={review.id} className="bg-white rounded-lg p-4 shadow-soft">
+                                    <div className="flex items-center space-x-3 mb-2">
+                                      <Image
+                                        src={reviewer.avatar}
+                                        alt={reviewer.name}
+                                        width={32}
+                                        height={32}
+                                        className="rounded-full"
+                                      />
+                                      <div>
+                                        <h5 className="font-medium text-slate-800">{reviewer.name}</h5>
+                                        <div className="flex items-center space-x-2 text-sm">
+                                          <span className="text-slate-500">
+                                            {new Date(review.timestamp).toLocaleDateString()}
+                                          </span>
+                                          <span className="text-cyan-600">
+                                            {review.rating} ★
+                                          </span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <p className="text-slate-600 text-sm">{review.content}</p>
+                                  </div>
+                                )
+                              })}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
               ) : (
                 <div className="card-soft text-center py-12">
                   <ClockIcon className="w-16 h-16 text-slate-300 mx-auto mb-4" />

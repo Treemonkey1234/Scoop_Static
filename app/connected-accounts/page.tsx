@@ -246,21 +246,21 @@ export default function ConnectedAccounts() {
         </div>
 
         {/* Available Platforms - Swipeable */}
-        <div className="mb-8">
+        <div className="mb-8 bg-gradient-to-br from-slate-50 to-cyan-50 p-6 rounded-2xl">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg font-semibold text-slate-800">Available Platforms</h2>
             <div className="flex space-x-2">
               <button
                 onClick={() => setCurrentPage(prev => prev > 0 ? prev - 1 : prev)}
                 disabled={currentPage === 0}
-                className="p-2 rounded-full hover:bg-slate-100 disabled:opacity-50 disabled:hover:bg-transparent"
+                className="p-2 rounded-full hover:bg-white/50 disabled:opacity-50 disabled:hover:bg-transparent"
               >
                 <ChevronLeftIcon className="w-5 h-5" />
               </button>
               <button
                 onClick={() => setCurrentPage(prev => prev < totalPages - 1 ? prev + 1 : prev)}
                 disabled={currentPage === totalPages - 1}
-                className="p-2 rounded-full hover:bg-slate-100 disabled:opacity-50 disabled:hover:bg-transparent"
+                className="p-2 rounded-full hover:bg-white/50 disabled:opacity-50 disabled:hover:bg-transparent"
               >
                 <ChevronRightIcon className="w-5 h-5" />
               </button>
@@ -273,7 +273,7 @@ export default function ConnectedAccounts() {
           </div>
 
           {/* Swipeable platform grid */}
-          <div 
+          <div
             className="grid grid-cols-2 sm:grid-cols-3 gap-4"
             onTouchStart={handleTouchStart}
             onTouchEnd={handleTouchEnd}
@@ -289,9 +289,7 @@ export default function ConnectedAccounts() {
                   className={`relative p-4 rounded-xl border-2 transition-all ${
                     isConnected
                       ? 'border-green-200 bg-green-50'
-                      : selectedPlatform === platform
-                      ? 'border-cyan-500 bg-cyan-50'
-                      : 'border-slate-200 hover:border-cyan-200'
+                      : 'border-white bg-white/80 hover:border-cyan-200'
                   }`}
                 >
                   <div className="flex items-center space-x-3">
@@ -315,48 +313,69 @@ export default function ConnectedAccounts() {
                       )}
                     </div>
                   </div>
-
-                  {selectedPlatform === platform && (
-                    <div className="mt-4 space-y-3">
-                      <input
-                        type="text"
-                        value={usernameInput}
-                        onChange={(e) => setUsernameInput(e.target.value)}
-                        placeholder={`Your ${platform} username`}
-                        className="w-full px-3 py-2 rounded-lg border border-cyan-200 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
-                      />
-                      <div className="flex space-x-2">
-                        <button
-                          onClick={() => {
-                            handleConnect(platform)
-                            setSelectedPlatform(null)
-                            setUsernameInput('')
-                          }}
-                          disabled={!usernameInput.trim()}
-                          className="flex-1 btn-primary disabled:opacity-50"
-                        >
-                          Connect
-                        </button>
-                        <button
-                          onClick={() => {
-                            setSelectedPlatform(null)
-                            setUsernameInput('')
-                          }}
-                          className="px-3 py-2 text-slate-600 hover:bg-slate-100 rounded-lg"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </div>
-                  )}
                 </div>
               )
             })}
           </div>
         </div>
 
+        {/* Connect Platform Form */}
+        {selectedPlatform && (
+          <div className="card-soft mb-8">
+            <h2 className="text-lg font-semibold text-slate-800 mb-4">
+              Connect {selectedPlatform}
+            </h2>
+            <div className="space-y-4">
+              <input
+                type="text"
+                value={usernameInput}
+                onChange={(e) => setUsernameInput(e.target.value)}
+                placeholder={`Your ${selectedPlatform} username`}
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
+              />
+              <div className="flex space-x-3">
+                <button
+                  onClick={() => {
+                    handleConnect(selectedPlatform)
+                    setSelectedPlatform(null)
+                    setUsernameInput('')
+                  }}
+                  disabled={!usernameInput.trim()}
+                  className="flex-1 btn-primary py-3 disabled:opacity-50"
+                >
+                  Connect Account
+                </button>
+                <button
+                  onClick={() => {
+                    setSelectedPlatform(null)
+                    setUsernameInput('')
+                  }}
+                  className="px-6 py-3 text-slate-600 hover:bg-slate-100 rounded-xl"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Connect More Socials Button */}
+        <div className="card-soft mb-8">
+          <div className="flex items-center space-x-4">
+            <div className="p-3 bg-gradient-to-br from-cyan-500 to-teal-500 text-white rounded-xl">
+              <PlusIcon className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="font-medium text-slate-800 mb-1">Connect More Socials</h3>
+              <p className="text-sm text-slate-600">
+                Add your other social media accounts to increase your trust score
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Trust Score Message */}
-        <div className="card-soft bg-gradient-to-br from-cyan-50 to-teal-50">
+        <div className="card-soft">
           <div className="flex items-start space-x-4">
             <div className="p-2 bg-white rounded-full">
               <BoltIcon className="w-6 h-6 text-cyan-500" />
