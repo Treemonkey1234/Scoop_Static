@@ -26,6 +26,7 @@ import {
   ChartBarIcon as ChartBarIconSolid
 } from '@heroicons/react/24/solid'
 import { sampleUsers, getCurrentUser, User } from '@/lib/sampleData'
+import UserProfile from '@/components/UserProfile'
 
 // Global Walkthrough Modal Component
 const GlobalWalkthroughModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
@@ -213,67 +214,57 @@ const GlobalWalkthroughModal = ({ isOpen, onClose }: { isOpen: boolean; onClose:
   const currentStepData = steps[currentStep]
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-hidden">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+      <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full mx-4 overflow-hidden">
         {/* Header */}
-        <div className="bg-gradient-to-r from-cyan-500 to-teal-600 p-6 text-white">
-          <div className="flex items-center justify-between mb-2">
-            <h2 className="text-xl font-bold">{currentStepData.title}</h2>
+        <div className="bg-gradient-to-r from-cyan-500 to-teal-600 text-white p-6 text-center relative">
+          <div className="text-3xl mb-2">🍦</div>
+          <h2 className="text-xl font-bold mb-1">{currentStepData.title}</h2>
+          <div className="text-cyan-100 text-sm">
+            Step {currentStep + 1} of {steps.length}
+          </div>
+          <div className="absolute top-4 right-4">
             <button
               onClick={skipWalkthrough}
-              className="text-cyan-100 hover:text-white transition-colors duration-200"
+              className="text-cyan-100 hover:text-white text-sm underline"
             >
-              ✕
+              Skip Tour
             </button>
-          </div>
-          <div className="flex items-center space-x-2">
-            <div className="flex-1 bg-cyan-600 rounded-full h-2">
-              <div 
-                className="bg-white h-2 rounded-full transition-all duration-300"
-                style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
-              />
-            </div>
-            <span className="text-sm font-medium">{currentStep + 1}/{steps.length}</span>
           </div>
         </div>
 
         {/* Content */}
         <div className="p-6">
-          <p className="text-slate-700 leading-relaxed mb-6">
+          <p className="text-slate-600 leading-relaxed mb-6">
             {currentStepData.content}
           </p>
 
-          {/* Current Page Indicator */}
-          <div className="mb-4 p-3 bg-cyan-50 rounded-lg border border-cyan-200">
-            <div className="text-sm text-cyan-700">
-              📍 <strong>Current Page:</strong> {currentStepData.page === '/' ? 'Home Feed' : currentStepData.page.slice(1).charAt(0).toUpperCase() + currentStepData.page.slice(2)}
+          {/* Progress Bar */}
+          <div className="mb-6">
+            <div className="w-full bg-slate-200 rounded-full h-2">
+              <div 
+                className="bg-gradient-to-r from-cyan-500 to-teal-600 h-2 rounded-full transition-all duration-300"
+                style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
+              />
             </div>
           </div>
 
-          {/* Navigation */}
-          <div className="flex items-center justify-between">
+          {/* Buttons */}
+          <div className="flex space-x-3">
+            {currentStep > 0 && (
+              <button
+                onClick={prevStep}
+                className="flex-1 px-4 py-3 bg-slate-100 text-slate-700 rounded-xl hover:bg-slate-200 transition-colors duration-200 font-medium"
+              >
+                Previous
+              </button>
+            )}
             <button
-              onClick={prevStep}
-              disabled={currentStep === 0}
-              className="px-4 py-2 text-slate-600 hover:text-slate-800 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={nextStep}
+              className="flex-1 px-4 py-3 bg-gradient-to-r from-cyan-500 to-teal-600 text-white rounded-xl hover:from-cyan-600 hover:to-teal-700 transition-all duration-200 font-medium shadow-sm"
             >
-              ← Previous
+              {currentStep === steps.length - 1 ? 'Finish' : 'Next'}
             </button>
-
-            <div className="flex space-x-2">
-              <button
-                onClick={skipWalkthrough}
-                className="px-4 py-2 text-slate-600 hover:text-slate-800 transition-colors duration-200"
-              >
-                Skip Tour
-              </button>
-              <button
-                onClick={nextStep}
-                className="px-6 py-2 bg-gradient-to-r from-cyan-500 to-teal-600 text-white rounded-xl hover:from-cyan-600 hover:to-teal-700 transition-all duration-200"
-              >
-                {currentStep === steps.length - 1 ? 'Finish Tour' : 'Next →'}
-              </button>
-            </div>
           </div>
         </div>
       </div>
@@ -285,57 +276,35 @@ interface LayoutProps {
   children: React.ReactNode
 }
 
-// Top Loading Bar Component
+// Enhanced Loading Bar Component
 const TopLoadingBar: React.FC<{ isLoading: boolean }> = ({ isLoading }) => {
-  const [progress, setProgress] = useState(0)
-
-  useEffect(() => {
-    if (isLoading) {
-      setProgress(0)
-      const interval = setInterval(() => {
-        setProgress(prev => {
-          if (prev >= 90) return prev
-          return prev + Math.random() * 15
-        })
-      }, 100)
-
-      return () => clearInterval(interval)
-    } else {
-      setProgress(100)
-      setTimeout(() => setProgress(0), 500)
-    }
-  }, [isLoading])
-
-  if (progress === 0) return null
-
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 h-1 bg-cyan-200/30">
-      <div 
-        className="h-full bg-gradient-to-r from-cyan-500 to-teal-600 transition-all duration-200 ease-out shadow-sm"
-        style={{ width: `${progress}%` }}
-      />
+    <div className={`fixed top-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-400 via-blue-400 to-teal-400 z-50 transition-all duration-300 ${
+      isLoading ? 'opacity-100 animate-pulse' : 'opacity-0'
+    }`}>
+      <div className="h-full bg-gradient-to-r from-cyan-600 to-teal-600 animate-pulse" />
     </div>
   )
 }
 
-// Sprinkle celebration component
+// Sprinkle Celebration Component
 const SprinkleCelebration: React.FC<{ show: boolean }> = ({ show }) => {
   if (!show) return null
-  
+
   return (
     <div className="fixed inset-0 pointer-events-none z-50">
-      {Array.from({ length: 20 }).map((_, i) => (
+      {[...Array(20)].map((_, i) => (
         <div
           key={i}
-          className="absolute animate-ping"
+          className="absolute animate-bounce"
           style={{
             left: `${Math.random() * 100}%`,
             top: `${Math.random() * 100}%`,
             animationDelay: `${Math.random() * 2}s`,
-            animationDuration: '1s'
+            animationDuration: `${1 + Math.random()}s`
           }}
         >
-          <div className="w-2 h-2 bg-cyan-400 rounded-full"></div>
+          {['🌟', '✨', '🎉', '🍦', '🎊'][Math.floor(Math.random() * 5)]}
         </div>
       ))}
     </div>
@@ -349,6 +318,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [showToast, setShowToast] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [currentUser, setCurrentUser] = useState<User | null>(null)
+  const [authUser, setAuthUser] = useState<any>(null) // Auth0 user
   const [globalWalkthrough, setGlobalWalkthrough] = useState(false)
 
   // Simulate loading for navigation
@@ -408,7 +378,27 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     return pathname.startsWith(href)
   }
 
+  // Fetch user session data
+  const fetchUserSession = async () => {
+    try {
+      const response = await fetch('/api/user')
+      if (response.ok) {
+        const data = await response.json()
+        setAuthUser(data.session)
+      } else {
+        setAuthUser(null)
+      }
+    } catch (error) {
+      console.error('Error fetching user session:', error)
+      setAuthUser(null)
+    }
+  }
+
   useEffect(() => {
+    // Fetch Auth0 user session
+    fetchUserSession()
+    
+    // Get current platform user (for backwards compatibility)
     const user = getCurrentUser()
     setCurrentUser(user)
     
@@ -1201,24 +1191,42 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               </div>
             </div>
             
-            {/* Action Buttons */}
+            {/* Action Buttons and User Profile */}
             <div className="flex items-center space-x-2">
-              {/* Analytics Button */}
-              <Link
-                href="/analytics"
-                onClick={handleNavigation}
-                className="relative p-2 rounded-xl bg-cyan-100 hover:bg-cyan-200 transition-all duration-200 group"
-              >
-                <ChartBarIcon className="w-5 h-5 text-cyan-600 group-hover:text-cyan-800" />
-              </Link>
+              {/* Analytics Button - only show when logged in */}
+              {authUser && (
+                <Link
+                  href="/analytics"
+                  onClick={handleNavigation}
+                  className="relative p-2 rounded-xl bg-cyan-100 hover:bg-cyan-200 transition-all duration-200 group"
+                >
+                  <ChartBarIcon className="w-5 h-5 text-cyan-600 group-hover:text-cyan-800" />
+                </Link>
+              )}
 
-              {/* Create Button */}
-              <button
-                onClick={() => setShowCreateMenu(!showCreateMenu)}
-                className="relative p-2 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-600 hover:from-cyan-600 hover:to-teal-700 text-white transition-all duration-200 shadow-sm"
-              >
-                <PlusIcon className="w-5 h-5" />
-              </button>
+              {/* Create Button - only show when logged in */}
+              {authUser && (
+                <button
+                  onClick={() => setShowCreateMenu(!showCreateMenu)}
+                  className="relative p-2 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-600 hover:from-cyan-600 hover:to-teal-700 text-white transition-all duration-200 shadow-sm"
+                >
+                  <PlusIcon className="w-5 h-5" />
+                </button>
+              )}
+
+              {/* Auth0 User Profile Component */}
+              <UserProfile 
+                user={authUser ? {
+                  id: authUser.sub,
+                  name: authUser.name,
+                  email: authUser.email,
+                  avatar: authUser.picture,
+                  isVerified: authUser.email_verified,
+                  trustScore: 75, // Default for Auth0 users
+                  connectedAccounts: authUser.identities?.filter((identity: any) => identity.isSocial) || []
+                } : null}
+                className="ml-2"
+              />
             </div>
           </div>
         </div>

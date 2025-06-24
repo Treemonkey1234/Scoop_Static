@@ -23,8 +23,18 @@ import {
 } from '@heroicons/react/24/outline'
 import { CheckBadgeIcon as CheckBadgeIconSolid } from '@heroicons/react/24/solid'
 
+interface AuthUser {
+  sub: string
+  name: string
+  email: string
+  picture?: string
+  email_verified?: boolean
+  identities?: any[]
+}
+
 export default function ProfilePage() {
   const [currentUser, setCurrentUser] = useState<User | null>(null)
+  const [authUser, setAuthUser] = useState<AuthUser | null>(null)
   const [showAllSocials, setShowAllSocials] = useState(false)
   const [showTrustBreakdown, setShowTrustBreakdown] = useState(false)
   const [flagModal, setFlagModal] = useState<{
@@ -40,7 +50,34 @@ export default function ProfilePage() {
   })
   const [activeTab, setActiveTab] = useState<'overview' | 'events' | 'reviews'>('overview')
 
-  // Calculate profile completeness
+  // Fetch Auth0 user session data
+  const fetchUserSession = async () => {
+    try {
+      const response = await fetch('/api/user')
+      if (response.ok) {
+        const data = await response.json()
+        setAuthUser(data.session)
+      } else {
+        setAuthUser(null)
+      }
+    } catch (error) {
+      console.error('Error fetching user session:', error)
+      setAuthUser(null)
+    }
+  }
+
+  // Calculate profile completeness for Auth0 users
+  const calculateAuth0ProfileCompleteness = (user: AuthUser) => {
+    let score = 0
+    if (user.name) score += 20
+    if (user.email) score += 20
+    if (user.email_verified) score += 20
+    if (user.picture) score += 20
+    if (user.identities && user.identities.length > 1) score += 20 // Multiple connected accounts
+    return score
+  }
+
+  // Calculate profile completeness for sample users
   const calculateProfileCompleteness = (user: User) => {
     let score = 0
     if (user.name) score += 10
@@ -54,13 +91,34 @@ export default function ProfilePage() {
     return score
   }
 
-  // Load current user on component mount
+  // Load user data on component mount
   useEffect(() => {
+    fetchUserSession()
     const user = getCurrentUser()
     setCurrentUser(user)
   }, [])
 
-  if (!currentUser) {
+  // Create display user object combining Auth0 and sample data
+  const displayUser = authUser ? {
+    id: authUser.sub,
+    name: authUser.name || 'Anonymous User',
+    email: authUser.email || '',
+    avatar: authUser.picture || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
+    bio: 'Welcome to ScoopSocials! 🍦',
+    location: 'Connected via Auth0',
+    trustScore: 75, // Default trust score for Auth0 users
+    reviewsCount: 0,
+    friendsCount: authUser.identities?.filter(id => id.isSocial)?.length || 0,
+    eventsAttended: 0,
+    socialLinks: {},
+    phoneVerified: authUser.email_verified || false,
+    joinDate: new Date().toISOString().split('T')[0],
+    lastActive: new Date().toISOString(),
+    connectedAccounts: authUser.identities?.filter(id => id.isSocial) || [],
+    isAuth0User: true
+  } : currentUser
+
+  if (!displayUser) {
     return (
       <Layout>
         <div className="flex items-center justify-center min-h-[60vh]">
@@ -70,7 +128,7 @@ export default function ProfilePage() {
     )
   }
 
-  const userReviews = sampleReviews.filter(r => r.reviewedId === currentUser.id)
+  const userReviews = sampleReviews.filter(r => r.reviewedId === displayUser.id)
   
   const handleFlag = (contentType: 'post' | 'event' | 'social', contentId: string, contentTitle?: string) => {
     console.log('Profile flag clicked:', { contentType, contentId, contentTitle })
@@ -91,8 +149,23 @@ export default function ProfilePage() {
     })
   }
 
-  // Updated Trust Score Breakdown with 11 components (removed weight display)
-  const trustBreakdown = [
+  // Trust Score Breakdown for Auth0 users
+  const authTrustBreakdown = authUser ? [
+    { category: 'Account Verification', score: authUser.email_verified ? 95 : 30, count: authUser.email_verified ? 'Email verified' : 'Pending verification' },
+    { category: 'Profile Completeness', score: calculateAuth0ProfileCompleteness(authUser), count: `${calculateAuth0ProfileCompleteness(authUser)}% complete` },
+    { category: 'Connected Accounts', score: Math.min(95, 30 + ((authUser.identities?.filter(id => id.isSocial)?.length || 0) * 20)), count: `${authUser.identities?.filter(id => id.isSocial)?.length || 0} social accounts` },
+    { category: 'Time on Platform', score: 65, count: 'New member' },
+    { category: 'Community Activity', score: 40, count: 'Getting started' },
+    { category: 'Content Quality', score: 50, count: 'No posts yet' },
+    { category: 'Social Engagement', score: 45, count: 'Building network' },
+    { category: 'Events Participation', score: 40, count: 'No events yet' },
+    { category: 'Positive Interactions', score: 75, count: 'Good standing' },
+    { category: 'Flagging Accuracy', score: 60, count: 'No flags yet' },
+    { category: 'Platform Contribution', score: 50, count: 'Starting journey' }
+  ] : []
+
+  // Trust Score Breakdown for sample users
+  const sampleTrustBreakdown = currentUser ? [
     { category: 'Time Spent on App', score: currentUser.trustScore > 80 ? 94 : 65, count: currentUser.trustScore > 80 ? '120+ hours' : '20+ hours' },
     { category: 'Recent Activity', score: currentUser.trustScore > 80 ? 89 : 70, count: currentUser.trustScore > 80 ? 'Active daily' : 'Active weekly' },
     { category: 'Postings Quality', score: currentUser.trustScore > 80 ? 96 : 45, count: `${currentUser.reviewsCount} posts` },
@@ -104,7 +177,9 @@ export default function ProfilePage() {
     { category: 'Flagging Accuracy', score: currentUser.trustScore > 80 ? 91 : 60, count: currentUser.trustScore > 80 ? '23/25 accurate' : 'No flags yet' },
     { category: 'Positive Reactions', score: currentUser.trustScore > 80 ? 93 : 55, count: currentUser.trustScore > 80 ? '89% positive' : '65% positive' },
     { category: 'Profile Completeness', score: calculateProfileCompleteness(currentUser), count: `${calculateProfileCompleteness(currentUser)}% complete` }
-  ]
+  ] : []
+
+  const trustBreakdown = authUser ? authTrustBreakdown : sampleTrustBreakdown
 
   // Social media platform SVG components
   const SocialIcon = ({ platform }: { platform: string }) => {
@@ -173,9 +248,9 @@ export default function ProfilePage() {
   }
 
   // Convert socialLinks to array format for display
-  const socialAccountsArray = Object.entries(currentUser.socialLinks || {})
-    .filter(([platform, handle]) => handle && handle.trim() !== '')
-    .map(([platform, handle]) => ({ platform, handle, verified: false, icon: '' }))
+  const socialAccountsArray = Object.entries(displayUser.socialLinks || {})
+    .filter(([platform, handle]) => handle && typeof handle === 'string' && handle.trim() !== '')
+    .map(([platform, handle]) => ({ platform, handle: handle as string, verified: false, icon: '' }))
   
   const visibleSocials = showAllSocials ? socialAccountsArray : socialAccountsArray.slice(0, 6)
 
@@ -293,31 +368,31 @@ export default function ProfilePage() {
           <div className="flex items-start space-x-4 mb-6">
             <div className="relative">
               <Image
-                src={currentUser.avatar}
-                alt={currentUser.name}
+                src={displayUser.avatar}
+                alt={displayUser.name}
                 width={80}
                 height={80}
                 className="rounded-2xl"
               />
-              {currentUser.isVerified && (
-                <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-cyan-500 rounded-full flex items-center justify-center">
-                  <CheckBadgeIcon className="w-4 h-4 text-white" />
-                </div>
-              )}
+                              {(displayUser as any).isAuth0User && (
+                  <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-cyan-500 rounded-full flex items-center justify-center">
+                    <CheckBadgeIcon className="w-4 h-4 text-white" />
+                  </div>
+                )}
             </div>
             <div className="flex-1">
               <div className="flex items-center space-x-2 mb-1">
-                <h2 className="text-xl font-bold text-slate-800">{currentUser.name}</h2>
-                <TrustBadge score={currentUser.trustScore} size="sm" />
+                <h2 className="text-xl font-bold text-slate-800">{displayUser.name}</h2>
+                <TrustBadge score={displayUser.trustScore} size="sm" />
               </div>
-              <p className="text-slate-600 mb-2">@{currentUser.name.toLowerCase().replace(/\s+/g, '_')}</p>
-              <p className="text-slate-700 mb-3">{currentUser.bio}</p>
+              <p className="text-slate-600 mb-2">@{displayUser.name.toLowerCase().replace(/\s+/g, '_')}</p>
+              <p className="text-slate-700 mb-3">{displayUser.bio}</p>
               <div className="flex items-center space-x-2 text-sm text-slate-500">
                 <MapPinIcon className="w-4 h-4" />
-                <span>{currentUser.location}</span>
+                <span>{displayUser.location}</span>
                 <span>•</span>
                 <CalendarIcon className="w-4 h-4" />
-                <span>Joined {new Date(currentUser.joinDate).getFullYear()}</span>
+                <span>Joined {new Date(displayUser.joinDate).getFullYear()}</span>
               </div>
             </div>
           </div>
@@ -325,30 +400,30 @@ export default function ProfilePage() {
           {/* Account Type Badge */}
           <div className="mb-4">
             <div className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold ${
-              currentUser.trustScore >= 80 
+              displayUser.trustScore >= 80 
                 ? 'bg-gradient-to-r from-amber-400 to-amber-500 text-white shadow-lg'
-                : currentUser.trustScore >= 60
+                : displayUser.trustScore >= 60
                 ? 'bg-gradient-to-r from-cyan-500 to-cyan-600 text-white shadow-lg'
                 : 'bg-slate-100 text-slate-700'
             }`}>
-              {currentUser.trustScore >= 80 && '👑 Premium Member'}
-              {currentUser.trustScore >= 60 && currentUser.trustScore < 80 && '⭐ Trusted Member'}
-              {currentUser.trustScore < 60 && '🆓 Standard Member'}
+              {displayUser.trustScore >= 80 && '👑 Premium Member'}
+              {displayUser.trustScore >= 60 && displayUser.trustScore < 80 && '⭐ Trusted Member'}
+              {displayUser.trustScore < 60 && '🆓 Standard Member'}
             </div>
           </div>
 
           {/* Stats */}
           <div className="grid grid-cols-3 gap-4">
             <div className="text-center">
-              <div className="text-2xl font-bold text-slate-800">{currentUser.friendsCount}</div>
+              <div className="text-2xl font-bold text-slate-800">{displayUser.friendsCount}</div>
               <div className="text-sm text-slate-500">Friends</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-slate-800">{currentUser.reviewsCount}</div>
+              <div className="text-2xl font-bold text-slate-800">{displayUser.reviewsCount}</div>
               <div className="text-sm text-slate-500">Reviews</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-slate-800">{currentUser.eventsAttended}</div>
+              <div className="text-2xl font-bold text-slate-800">{displayUser.eventsAttended}</div>
               <div className="text-sm text-slate-500">Events</div>
             </div>
           </div>
@@ -363,7 +438,7 @@ export default function ProfilePage() {
             <div className="flex items-center space-x-3">
               <TrophyIcon className="w-5 h-5 text-cyan-500" />
               <div>
-                <div className="text-3xl font-bold text-cyan-700">{currentUser.trustScore}</div>
+                <div className="text-3xl font-bold text-cyan-700">{displayUser.trustScore}</div>
                 <div className="text-sm text-slate-600">Trust Score</div>
               </div>
             </div>
@@ -511,7 +586,7 @@ export default function ProfilePage() {
             </h3>
             <span className="text-sm text-slate-500">Last 7 days</span>
           </div>
-          <RecentActivitySection userId={currentUser.id} />
+          <RecentActivitySection userId={displayUser.id} />
         </div>
 
         {/* Settings Link */}
