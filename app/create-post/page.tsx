@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import Layout from '@/components/Layout'
@@ -19,7 +19,7 @@ import {
   FlagIcon
 } from '@heroicons/react/24/outline'
 
-export default function CreatePostPage() {
+function CreatePostContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const reviewForId = searchParams?.get('reviewFor')
@@ -297,5 +297,25 @@ export default function CreatePostPage() {
         </form>
       </div>
     </Layout>
+  )
+}
+
+export default function CreatePostPage() {
+  return (
+    <Suspense fallback={
+      <Layout>
+        <div className="max-w-4xl mx-auto p-4">
+          <div className="animate-pulse">
+            <div className="h-8 bg-slate-200 rounded w-1/4 mb-4"></div>
+            <div className="h-4 bg-slate-200 rounded w-1/2 mb-8"></div>
+            <div className="bg-white rounded-2xl shadow-soft p-6">
+              <div className="h-20 bg-slate-200 rounded"></div>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    }>
+      <CreatePostContent />
+    </Suspense>
   )
 } 
