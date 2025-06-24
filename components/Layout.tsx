@@ -384,7 +384,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       const response = await fetch('/api/user')
       if (response.ok) {
         const data = await response.json()
-        setAuthUser(data.session)
+        // Only set authUser if we actually have session data
+        if (data.session && data.session.sub) {
+          setAuthUser(data.session)
+        } else {
+          setAuthUser(null)
+        }
       } else {
         setAuthUser(null)
       }
