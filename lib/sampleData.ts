@@ -280,26 +280,24 @@ export function updateTrustScore(userId: string, activity: string, amount?: numb
   try {
     // Get current stored user data
     const userData = localStorage.getItem('scoopUsers')
-    const users: User[] = userData ? JSON.parse(userData) : sampleUsers
+    const users: User[] = userData ? JSON.parse(userData) : [...sampleUsers] // Create a copy
 
     const userIndex = users.findIndex(u => u.id === userId)
     if (userIndex !== -1) {
-      const currentUser = getCurrentUser()
-      const newScore = amount ? currentUser.trustScore + amount : calculateNewTrustScore(currentUser.trustScore, activity)
+      const targetUser = users[userIndex]
+      const newScore = amount ? targetUser.trustScore + amount : calculateNewTrustScore(targetUser.trustScore, activity)
       users[userIndex].trustScore = newScore
       localStorage.setItem('scoopUsers', JSON.stringify(users))
 
-      // Also update the current user if it's the same user
+      // Only update the current user localStorage if it's the same user
+      const currentUser = getCurrentUser()
       if (currentUser.id === userId) {
         const updatedUser = { ...currentUser, trustScore: newScore }
         saveCurrentUser(updatedUser)
       }
 
-      // Update the sampleUsers array for consistency
-      const sampleUserIndex = sampleUsers.findIndex(u => u.id === userId)
-      if (sampleUserIndex !== -1) {
-        sampleUsers[sampleUserIndex].trustScore = newScore
-      }
+      // DO NOT update the sampleUsers array - this keeps post trust scores static
+      // The sampleUsers array should remain unchanged to show original trust scores on posts
 
       return true
     }
@@ -612,7 +610,7 @@ export function voteOnReview(reviewId: string, voteType: 'up' | 'down'): boolean
           updateTrustScore(review.reviewerId, 'downvote_removed')
         }
         localStorage.removeItem(userVoteKey)
-      } else if (currentUserVote) {
+      } else if (currentUserVote !== null) {
         // User is switching vote direction
         if (voteType === 'up') {
           allReviews[reviewIndex].votes += 2 // Remove downvote (-1) and add upvote (+1)

@@ -259,48 +259,10 @@
 }
 
 /* Ice Cream Specific Animations */
-@keyframes scoopDrop {
-  0%, 80% { 
-    transform: translateX(-50%) translateY(-10px) scale(0.9); 
-    opacity: 0.8;
-  }
-  90% { 
-    transform: translateX(-50%) translateY(0px) scale(1.05); 
-    opacity: 1;
-  }
-  100% { 
-    transform: translateX(-50%) translateY(0px) scale(1); 
-    opacity: 1;
-  }
-}
-
-@keyframes coneWiggle {
-  0%, 100% { transform: translateX(-50%) rotate(0deg); }
-  25% { transform: translateX(-50%) rotate(-1deg); }
-  75% { transform: translateX(-50%) rotate(1deg); }
-}
-
 @keyframes floatUp {
   0% {
-    transform: translateY(100vh) rotate(0deg);
     opacity: 0;
-  }
-  10% {
-    opacity: 0.1;
-  }
-  90% {
-    opacity: 0.1;
-  }
-  100% {
-    transform: translateY(-100px) rotate(360deg);
-    opacity: 0;
-  }
-}
-
-@keyframes sprinkleShower {
-  0% {
-    transform: translateY(-100px) rotate(0deg);
-    opacity: 0;
+    transform: translateY(0) rotate(0deg);
   }
   10% {
     opacity: 1;
@@ -309,8 +271,8 @@
     opacity: 1;
   }
   100% {
-    transform: translateY(100vh) rotate(720deg);
     opacity: 0;
+    transform: translateY(-20px) rotate(360deg);
   }
 }
 
@@ -326,6 +288,51 @@
   100% {
     transform: scaleY(1);
     border-radius: 50%;
+  }
+}
+
+/* NEW: Ice Cream Floating Animation Keyframes */
+@keyframes float-ice-cream {
+  0% {
+    transform: translateY(100vh) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.2;
+    transform: translateY(50vh) rotate(180deg);
+  }
+  90% {
+    opacity: 0.1;
+  }
+  100% {
+    transform: translateY(-10vh) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+@keyframes float-scoop-gentle {
+  0% {
+    transform: translateY(100vh) rotate(0deg) scale(0.8);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.2;
+    transform: translateY(85vh) rotate(45deg) scale(1);
+  }
+  50% {
+    opacity: 0.15;
+    transform: translateY(50vh) rotate(180deg) scale(1.1);
+  }
+  85% {
+    opacity: 0.1;
+    transform: translateY(15vh) rotate(315deg) scale(0.9);
+  }
+  100% {
+    transform: translateY(-5vh) rotate(360deg) scale(0.8);
+    opacity: 0;
   }
 }
 
@@ -374,79 +381,23 @@
   @apply outline-none ring-4 ring-cyan-200 ring-opacity-50;
 }
 
-/* Ice Cream Cone Loading Animation */
-.ice-cream-loader {
-  position: relative;
-  width: 60px;
-  height: 120px;
-  margin: 20px auto;
-}
-
-.scoop {
-  position: absolute;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  left: 50%;
-  transform: translateX(-50%);
-  animation: scoopDrop 2s ease-in-out infinite;
-}
-
-.scoop-1 {
-  background: linear-gradient(135deg, #FFB6C1, #FF69B4);
-  top: 10px;
-  animation-delay: 0s;
-}
-
-.scoop-2 {
-  background: linear-gradient(135deg, #98FB98, #32CD32);
-  top: 30px;
-  animation-delay: 0.3s;
-}
-
-.scoop-3 {
-  background: linear-gradient(135deg, #FFF8DC, #F0E68C);
-  top: 50px;
-  animation-delay: 0.6s;
-}
-
-.cone {
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 0;
-  height: 0;
-  border-left: 25px solid transparent;
-  border-right: 25px solid transparent;
-  border-top: 60px solid #D2691E;
-  background: linear-gradient(45deg, #8B4513, #D2691E);
-  border-radius: 0 0 20px 20px;
-  animation: coneWiggle 2s ease-in-out infinite;
-}
-
-.cone::before {
-  content: '';
-  position: absolute;
-  top: -60px;
-  left: -25px;
-  width: 50px;
-  height: 60px;
-  background: 
-    repeating-linear-gradient(
-      45deg,
-      #D2691E,
-      #D2691E 3px,
-      #8B4513 3px,
-      #8B4513 6px
-    );
-  clip-path: polygon(0 100%, 50% 0%, 100% 100%);
-}
-
 /* Floating Ice Cream Background Elements */
 /* Enhanced Floating Ice Cream Background */
 .floating-ice-cream {
-  @apply fixed inset-0 pointer-events-none overflow-hidden z-0;
+  @apply fixed inset-0 pointer-events-none overflow-hidden;
+  z-index: 0;
+}
+
+/* Ensure all floating elements stay in background but visible */
+[class*="floating-ice-cream-"],
+[class*="floating-scoop-solo-"] {
+  z-index: 0;
+}
+
+/* Ensure main content stays above floating background */
+main, .container, .content, .card-soft, .card-premium {
+  position: relative;
+  z-index: 10;
 }
 
 /* Full Ice Cream Cones with Multiple Scoops */
@@ -887,196 +838,6 @@
 }
 
 /* Ice Cream Scoop Voting Buttons */
-.voting-section {
-  @apply flex flex-col items-center justify-center space-y-2 px-4 py-3 rounded-l-2xl min-w-[80px];
-}
-
-.vote-btn {
-  @apply p-2 rounded-xl transition-all duration-200 hover:scale-110 active:scale-95 focus:outline-none focus:ring-2 focus:ring-cyan-200;
-}
-
-.vote-btn:hover {
-  @apply shadow-lg;
-}
-
-.voted-up {
-  @apply bg-green-100 ring-2 ring-green-300 shadow-lg;
-}
-
-.voted-down {
-  @apply bg-red-100 ring-2 ring-red-300 shadow-lg;
-}
-
-.vote-count {
-  @apply text-center px-3 py-1 bg-white/80 rounded-lg border border-cyan-100;
-}
-
-/* Sprinkle Animation for Celebrations */
-.sprinkle {
-  position: absolute;
-  width: 4px;
-  height: 4px;
-  border-radius: 2px;
-  animation: sprinkleShower 2s ease-out forwards;
-}
-
-.sprinkle:nth-child(1) { background: #FF69B4; left: 10%; animation-delay: 0s; }
-.sprinkle:nth-child(2) { background: #32CD32; left: 20%; animation-delay: 0.1s; }
-.sprinkle:nth-child(3) { background: #FFD700; left: 30%; animation-delay: 0.2s; }
-.sprinkle:nth-child(4) { background: #FF4500; left: 40%; animation-delay: 0.3s; }
-.sprinkle:nth-child(5) { background: #9370DB; left: 50%; animation-delay: 0.4s; }
-.sprinkle:nth-child(6) { background: #00CED1; left: 60%; animation-delay: 0.5s; }
-.sprinkle:nth-child(7) { background: #FF1493; left: 70%; animation-delay: 0.6s; }
-.sprinkle:nth-child(8) { background: #32CD32; left: 80%; animation-delay: 0.7s; }
-
-/* Ice Cream Themed Input Fields */
-.input-field {
-  @apply w-full px-4 py-3 rounded-2xl border-2 border-pink-200 bg-gradient-to-r from-white to-pink-50/30;
-  @apply focus:ring-2 focus:ring-pink-400 focus:border-pink-400 transition-all duration-300;
-  @apply placeholder:text-slate-400 hover:border-pink-300;
-  @apply shadow-sm focus:shadow-lg backdrop-blur-sm;
-}
-
-/* Waffle Cone Navigation Items */
-.nav-item {
-  @apply flex flex-col items-center justify-center p-3 rounded-2xl transition-all duration-300;
-  @apply hover:bg-gradient-to-t hover:from-pink-100 hover:to-purple-100 active:scale-95 cursor-pointer;
-  @apply relative overflow-hidden;
-  pointer-events: auto;
-}
-
-.nav-item::before {
-  content: '';
-  @apply absolute inset-0 bg-gradient-to-t from-pink-200/50 to-purple-200/50;
-  @apply scale-y-100 transition-transform duration-300 origin-bottom;
-}
-
-.nav-item.active {
-  @apply bg-gradient-to-t from-pink-200 to-purple-200 text-pink-700;
-  @apply shadow-lg border-2 border-pink-300/50;
-}
-
-
-
-/* Ice Cream SVG Loader Animations */
-.ice-cream-svg-loader {
-  position: relative;
-  margin: 20px auto;
-}
-
-.animate-bounce-gentle {
-  animation: bounceGentle 3s ease-in-out infinite;
-}
-
-.animate-wiggle {
-  animation: wiggle 2s ease-in-out infinite;
-}
-
-.animate-scoop-drop {
-  animation: scoopFloat 2s ease-in-out infinite;
-}
-
-.animate-cherry-bounce {
-  animation: cherryBounce 1.5s ease-in-out infinite;
-}
-
-.animate-stem-sway {
-  animation: stemSway 3s ease-in-out infinite;
-}
-
-@keyframes bounceGentle {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-5px); }
-}
-
-@keyframes wiggle {
-  0%, 100% { transform: rotate(0deg); }
-  25% { transform: rotate(1deg); }
-  75% { transform: rotate(-1deg); }
-}
-
-@keyframes scoopFloat {
-  0%, 100% { transform: scale(1) translateY(0px); }
-  50% { transform: scale(1.02) translateY(-2px); }
-}
-
-@keyframes cherryBounce {
-  0%, 100% { transform: translateY(0px) scale(1); }
-  50% { transform: translateY(-3px) scale(1.1); }
-}
-
-@keyframes stemSway {
-  0%, 100% { transform: rotate(0deg); }
-  25% { transform: rotate(3deg); }
-  75% { transform: rotate(-3deg); }
-}
-
-/* Enhanced Ice Cream Floating Animations */
-@keyframes float-ice-cream {
-  0% { 
-    transform: translateY(120vh) rotate(0deg) scale(0.8); 
-    opacity: 0;
-  }
-  10% { 
-    opacity: 0.2;
-  }
-  50% { 
-    transform: translateY(50vh) rotate(15deg) scale(1.1); 
-    opacity: 0.3;
-  }
-  90% { 
-    opacity: 0.2;
-  }
-  100% { 
-    transform: translateY(-20vh) rotate(30deg) scale(0.9); 
-    opacity: 0;
-  }
-}
-
-@keyframes float-scoop-gentle {
-  0% { 
-    transform: translateY(110vh) rotate(0deg) scale(0.9); 
-    opacity: 0;
-  }
-  15% { 
-    opacity: 0.15;
-  }
-  50% { 
-    transform: translateY(45vh) rotate(180deg) scale(1.2); 
-    opacity: 0.25;
-  }
-  85% { 
-    opacity: 0.15;
-  }
-  100% { 
-    transform: translateY(-15vh) rotate(360deg) scale(0.8); 
-    opacity: 0;
-  }
-}
-
-/* Wobble animation for ice cream cones */
-@keyframes ice-cream-wobble {
-  0%, 100% { transform: rotate(0deg); }
-  25% { transform: rotate(2deg); }
-  75% { transform: rotate(-2deg); }
-}
-
-/* Cherry bounce animation */
-@keyframes cherry-bounce {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-3px); }
-}
-
-/* Top Loading Bar */
-.loading-bar {
-  @apply fixed top-0 left-0 right-0 h-1 bg-cyan-200/30 z-50;
-}
-
-.loading-progress {
-  @apply h-full bg-gradient-to-r from-cyan-500 to-teal-600 transition-all duration-200 ease-out;
-}
-
-/* Enhanced Voting Styles */
 .voting-section {
   @apply flex flex-col items-center justify-center space-y-2 px-4 py-3 rounded-l-2xl min-w-[80px];
 }

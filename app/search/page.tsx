@@ -72,9 +72,9 @@ export default function SearchPage() {
 
   return (
     <Layout>
-      <div className="p-4 space-y-6">
+      <div className="p-4 space-y-8">
         {/* Header */}
-        <div className="text-center">
+        <div className="text-center mb-2">
           <h1 className="text-2xl font-bold text-slate-800 mb-2">Search</h1>
           <p className="text-slate-600">Find trusted people and places in your community</p>
         </div>
@@ -171,8 +171,8 @@ export default function SearchPage() {
           onTouchEnd={handleTouchEnd}
         >
         {searchQuery ? (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
+          <div className="space-y-6">
+            <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-slate-800">
                 Results ({filteredUsers.length})
               </h2>
@@ -184,7 +184,7 @@ export default function SearchPage() {
             </div>
             
             {filteredUsers.length > 0 ? (
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {filteredUsers.map((user) => (
                   <Link
                     key={user.id}
@@ -262,7 +262,7 @@ export default function SearchPage() {
         ) : (
           <>
             {/* Recent Searches */}
-            <div className="card-soft">
+            <div className="card-soft mb-6">
               <h3 className="text-lg font-semibold text-slate-800 mb-4">Recent Searches</h3>
               <div className="space-y-2">
                 {recentSearches.map((search, index) => (
@@ -279,7 +279,7 @@ export default function SearchPage() {
             </div>
 
             {/* Popular Categories */}
-            <div className="card-soft">
+            <div className="card-soft mb-6">
               <h3 className="text-lg font-semibold text-slate-800 mb-4">Popular Categories</h3>
               <div className="grid grid-cols-2 gap-3">
                 {popularCategories.map((category, index) => (
@@ -297,7 +297,7 @@ export default function SearchPage() {
             </div>
 
             {/* Search Tips */}
-            <div className="card-soft">
+            <div className="card-soft mb-6">
               <h3 className="text-lg font-semibold text-slate-800 mb-4">Search Tips</h3>
               <div className="space-y-3 text-sm text-slate-600">
                 <div className="flex items-start space-x-3">

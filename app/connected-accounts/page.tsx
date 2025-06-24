@@ -203,48 +203,48 @@ export default function ConnectedAccounts() {
 
   return (
     <Layout>
-      <div className="max-w-4xl mx-auto p-6 space-y-8">
+      <div className="max-w-4xl mx-auto p-4 md:p-6 space-y-8 md:space-y-10">
         {/* Header */}
-        <div className="mb-8 flex items-center justify-between">
-          <div className="flex items-center space-x-4">
+        <div className="mb-6 md:mb-8 flex items-center justify-between">
+          <div className="flex items-center space-x-3 md:space-x-4">
             <Link href="/profile" className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
-              <ArrowLeftIcon className="w-6 h-6 text-slate-600" />
+              <ArrowLeftIcon className="w-5 h-5 md:w-6 md:h-6 text-slate-600" />
             </Link>
-            <div>
-              <h1 className="text-2xl font-bold text-slate-800">Connected Accounts</h1>
-              <p className="text-sm text-slate-600 mt-1">Manage your social media connections</p>
+            <div className="min-w-0">
+              <h1 className="text-xl md:text-2xl font-bold text-slate-800">Connected Accounts</h1>
+              <p className="text-sm text-slate-600 mt-1 hidden sm:block">Manage your social media connections</p>
             </div>
           </div>
-          <div className="bg-gradient-to-r from-cyan-500 to-teal-500 text-white px-4 py-2 rounded-full text-sm font-medium">
+          <div className="bg-gradient-to-r from-cyan-500 to-teal-500 text-white px-3 md:px-4 py-2 rounded-full text-xs md:text-sm font-medium whitespace-nowrap">
             {Object.values(currentUser?.socialLinks || {}).filter(Boolean).length || 0} connected
           </div>
         </div>
 
         {/* Connected Social Accounts */}
         {Object.values(currentUser?.socialLinks || {}).some(Boolean) && (
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-lg p-6">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-lg p-5 md:p-6">
             <div className="flex items-center space-x-2 mb-6">
               <div className="w-3 h-3 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full"></div>
               <h2 className="text-lg font-semibold text-slate-800">Your Connected Accounts</h2>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-4">
               {Object.entries(currentUser?.socialLinks || {}).map(([platform, handle], index) => (
                 handle && (
                   <div key={index} className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm border border-green-100">
+                      <div className="flex items-center space-x-4 min-w-0 flex-1">
+                        <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm border border-green-100 flex-shrink-0">
                           <span className="text-xl">
                             {platform === 'instagram' ? '📸' : platform === 'twitter' ? '🐦' : platform === 'linkedin' ? '💼' : '🔗'}
                           </span>
                         </div>
-                        <div>
+                        <div className="min-w-0 flex-1">
                           <h3 className="font-medium text-slate-800 capitalize">{platform}</h3>
-                          <p className="text-sm text-slate-600">{handle}</p>
+                          <p className="text-sm text-slate-600 truncate">{handle}</p>
                         </div>
                       </div>
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center space-x-2 flex-shrink-0">
                         <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                         <span className="text-xs text-green-700 font-medium">Connected</span>
                       </div>
@@ -257,13 +257,12 @@ export default function ConnectedAccounts() {
         )}
 
         {/* Available Platforms - Swipeable */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-lg p-6">
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-lg p-5 md:p-6">
           <div className="flex items-center justify-between mb-6">
-            <div>
+            <div className="min-w-0">
               <h2 className="text-lg font-semibold text-slate-800">Available Platforms</h2>
-              <p className="text-sm text-slate-600 mt-1">Connect more accounts to boost your trust score</p>
             </div>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 flex-shrink-0">
               <span className="text-xs text-slate-500">Page {currentPage + 1} of {totalPages}</span>
               <div className="flex space-x-1">
                 <button
@@ -285,13 +284,13 @@ export default function ConnectedAccounts() {
           </div>
 
           {/* Swipe instruction for mobile */}
-          <div className="text-center text-sm text-slate-500 mb-6 md:hidden bg-slate-50 py-2 rounded-lg">
+          <div className="text-center text-sm text-slate-500 mb-6 md:hidden bg-slate-50 py-3 rounded-lg">
             ← Swipe to navigate between platforms →
           </div>
 
           {/* Swipeable platform grid */}
           <div
-            className="grid grid-cols-2 sm:grid-cols-3 gap-4"
+            className="grid grid-cols-2 gap-4"
             onTouchStart={handleTouchStart}
             onTouchEnd={handleTouchEnd}
           >
@@ -308,21 +307,21 @@ export default function ConnectedAccounts() {
                       : 'border-slate-200 bg-white hover:border-cyan-200 hover:bg-gradient-to-br hover:from-cyan-50 hover:to-teal-50'
                   }`}
                 >
-                  <div className="flex items-center space-x-3">
+                  <div className="flex flex-col items-center space-y-3">
                     <div className="w-12 h-12 flex items-center justify-center bg-white rounded-xl shadow-sm border border-gray-100">
                       <SocialIcon platform={platform} />
                     </div>
-                    <div className="flex-1 min-w-0">
+                    <div className="text-center min-w-0 w-full">
                       <h3 className="font-medium text-slate-800 text-sm truncate">{platform}</h3>
                       {isConnected ? (
-                        <span className="text-xs text-green-600 flex items-center mt-1">
+                        <span className="text-xs text-green-600 flex items-center justify-center mt-1">
                           <CheckBadgeIcon className="w-3 h-3 mr-1 flex-shrink-0" />
                           Connected
                         </span>
                       ) : (
                         <button
                           onClick={() => setSelectedPlatform(platform)}
-                          className="text-xs text-cyan-600 hover:text-cyan-700 mt-1 flex items-center hover:underline transition-colors"
+                          className="text-xs text-cyan-600 hover:text-cyan-700 mt-1 hover:underline transition-colors"
                         >
                           Connect →
                         </button>
@@ -337,7 +336,7 @@ export default function ConnectedAccounts() {
 
         {/* Connect Platform Form */}
         {selectedPlatform && (
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-lg p-6">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-lg p-5 md:p-6">
             <div className="flex items-center space-x-3 mb-6">
               <div className="w-3 h-3 bg-gradient-to-r from-cyan-500 to-teal-500 rounded-full"></div>
               <h2 className="text-lg font-semibold text-slate-800">
@@ -385,63 +384,7 @@ export default function ConnectedAccounts() {
           </div>
         )}
 
-        {/* Add More Platforms CTA */}
-        <div className="bg-gradient-to-br from-cyan-50 to-teal-50 border border-cyan-200 rounded-2xl p-6">
-          <div className="flex items-center space-x-4">
-            <div className="p-3 bg-gradient-to-br from-cyan-500 to-teal-500 text-white rounded-xl shadow-lg">
-              <PlusIcon className="w-6 h-6" />
-            </div>
-            <div className="flex-1">
-              <h3 className="font-semibold text-slate-800 mb-1">Connect More Social Accounts</h3>
-              <p className="text-sm text-slate-600">
-                Adding more verified social media accounts increases your trust score and unlocks premium community features.
-              </p>
-            </div>
-            <div className="text-right">
-              <div className="text-lg font-bold text-cyan-600">+5-15</div>
-              <div className="text-xs text-slate-600">Trust Points</div>
-            </div>
-          </div>
-        </div>
 
-        {/* Trust Score Information */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-lg p-6">
-          <div className="flex items-start space-x-4">
-            <div className="p-3 bg-gradient-to-br from-yellow-400 to-orange-500 text-white rounded-xl shadow-lg">
-              <BoltIcon className="w-6 h-6" />
-            </div>
-            <div className="flex-1">
-              <h3 className="font-semibold text-slate-800 mb-2">Boost Your Trust Score</h3>
-              <p className="text-sm text-slate-600 mb-4">
-                Connected and verified social accounts significantly increase your trust score, making you more credible in the community and unlocking exclusive features.
-              </p>
-              
-              <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-xl p-4">
-                <div className="flex items-center space-x-2 mb-2">
-                  <span className="text-yellow-600 font-medium">💡 Pro Tip:</span>
-                </div>
-                <p className="text-sm text-slate-700">
-                  Connect 3+ verified accounts to unlock premium trust benefits, enhanced community features, and priority event access!
-                </p>
-              </div>
-              
-              <div className="mt-4 grid grid-cols-3 gap-4 text-center">
-                <div>
-                  <div className="text-lg font-bold text-green-600">+10</div>
-                  <div className="text-xs text-slate-600">Each Platform</div>
-                </div>
-                <div>
-                  <div className="text-lg font-bold text-blue-600">+25</div>
-                  <div className="text-xs text-slate-600">Verification Bonus</div>
-                </div>
-                <div>
-                  <div className="text-lg font-bold text-purple-600">+50</div>
-                  <div className="text-xs text-slate-600">Premium Unlock</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </Layout>
   )

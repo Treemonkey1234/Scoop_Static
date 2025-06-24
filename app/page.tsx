@@ -7,7 +7,6 @@ import Layout from '@/components/Layout'
 import TrustBadge from '@/components/TrustBadge'
 import FlagModal from '@/components/FlagModal'
 import LoadingSpinner from '@/components/LoadingSpinner'
-import DragVoteSystem from '@/components/DragVoteSystem'
 import ClassicVoteSystem from '@/components/ClassicVoteSystem'
 
 import { getCurrentUser, sampleUsers, getAllReviews, getAllEvents, User, voteOnReview } from '@/lib/sampleData'
@@ -19,7 +18,8 @@ import {
   UsersIcon,
   FlagIcon,
   TagIcon,
-  UserIcon
+  UserIcon,
+  BookmarkIcon
 } from '@heroicons/react/24/outline'
 import { useRouter } from 'next/navigation'
 
@@ -216,123 +216,138 @@ export default function HomePage() {
 
             if (!reviewer || !reviewee) return null
 
-            return (
+            const isReviewOfAnotherUser = reviewer.id !== reviewee.id
+
+            return (  
               <div key={review.id} className="card-premium hover:shadow-xl transition-all duration-300 border-cyan-200/50 overflow-hidden">
-                {/* Vote System */}
-                <div className="flex">
-                  <div className="w-20 border-r border-slate-100">
+                {/* Header - Full Width */}
+                <div className="px-4 py-3 border-b border-slate-100">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center space-x-3">
+                      <div>
+                        <Link href={`/user/${reviewer.id}`} className="font-medium text-slate-800 hover:text-cyan-600">
+                          {reviewer.name}
+                        </Link>
+                        <div className="mt-1">
+                          <TrustBadge score={reviewer.trustScore} size="sm" />
+                        </div>
+                      </div>
+                      {isReviewOfAnotherUser && (
+                        <>
+                          <span className="text-slate-400 mx-2">→</span>
+                          <div>
+                            <Link href={`/user/${reviewee.id}`} className="font-medium text-slate-800 hover:text-cyan-600">
+                              {reviewee.name}
+                            </Link>
+                            <div className="mt-1">
+                              <TrustBadge score={reviewee.trustScore} size="sm" />
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-3 text-sm text-slate-600">
+                    <span className="flex items-center space-x-1">
+                      <span className="w-4 h-4 bg-cyan-100 rounded-full flex items-center justify-center">
+                        <span className="text-xs text-cyan-600">•</span>
+                      </span>
+                      <span>{review.category}</span>
+                    </span>
+                    <span className="flex items-center space-x-1">
+                      <CalendarIcon className="w-4 h-4" />
+                      <span>{getPostDate(review.timestamp)}</span>
+                    </span>
+                    <span className="flex items-center space-x-1">
+                      <MapPinIcon className="w-4 h-4" />
+                      <span>{reviewer.location}</span>
+                    </span>
+                  </div>
+                </div>
+
+                {/* Main Content Area */}
+                <div className="flex min-h-full">
+                  <div className="w-16 flex items-center justify-center border-r border-slate-100 px-1 self-stretch">
                     <ClassicVoteSystem
                       reviewId={review.id}
                       initialVotes={review.votes}
                       onVote={handleVote(review.id)}
-                      className="h-full"
-                      showGradient={true}
+                      className=""
                     />
                   </div>
 
                   {/* Content */}
                   <div className="flex-1 p-4">
-                    {/* Header */}
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center space-x-3">
-                        <Link href={`/user/${reviewer.id}`}>
-                          <Image
-                            src={reviewer.avatar}
-                            alt={reviewer.name}
-                            width={40}
-                            height={40}
-                            className="rounded-full"
-                          />
-                        </Link>
-                        <div>
-                          <div className="flex items-center space-x-2">
-                            <Link href={`/user/${reviewer.id}`} className="font-medium text-slate-800 hover:text-cyan-600">
-                              {reviewer.name}
-                            </Link>
-                            <span className="text-slate-400">→</span>
-                            <Link href={`/user/${reviewee.id}`} className="font-medium text-slate-800 hover:text-cyan-600">
-                              {reviewee.name}
-                            </Link>
-                          </div>
-                          <TrustBadge score={reviewer.trustScore} size="sm" />
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Metadata */}
-                    <div className="bg-white rounded-lg p-3 mb-3 border border-slate-200">
-                      <div className="flex flex-wrap gap-2 mb-3">
-                        <span className="px-3 py-1 bg-cyan-100 text-cyan-700 rounded-full font-medium text-sm">
-                          {review.category}
+                    {/* Review Type Indicator */}
+                    {review.isEventReview && (
+                      <div className="mb-3">
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-700">
+                          <CalendarIcon className="w-4 h-4 mr-1" />
+                          EVENT REVIEW
                         </span>
-                        {review.isEventReview && (
-                          <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full font-medium flex items-center space-x-1 text-sm">
-                            <CalendarIcon className="w-3 h-3" />
-                            <span>Event Review</span>
+                      </div>
+                    )}
+                    
+                    {/* Event Information */}
+                    {review.isEventReview && relatedEvent && (
+                      <div className="mb-4">
+                        <div className="flex items-center space-x-2 mb-2">
+                          <CalendarIcon className="w-5 h-5 text-purple-600" />
+                          <span className="font-medium text-slate-800">{relatedEvent.title}</span>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-3 text-sm text-slate-600">
+                          <span className="flex items-center space-x-1">
+                            <MapPinIcon className="w-4 h-4" />
+                            <span>{relatedEvent.location}</span>
                           </span>
-                        )}
-                        <span className="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-sm">{getPostDate(review.timestamp)}</span>
-                        <span className="px-3 py-1 bg-slate-100 text-slate-600 rounded-full flex items-center space-x-1 text-sm">
-                          <MapPinIcon className="w-3 h-3" />
-                          <span>{reviewer.location}</span>
-                        </span>
-                      </div>
-                      
-                      {/* Event Information - Full Width */}
-                      {review.isEventReview && relatedEvent && (
-                        <div className="bg-purple-50 border border-purple-200 rounded-lg p-3">
-                          <div className="flex items-center space-x-2 mb-2">
-                            <CalendarIcon className="w-4 h-4 text-purple-600 flex-shrink-0" />
-                            <span className="font-medium text-purple-800 text-sm">Event: {relatedEvent.title}</span>
-                          </div>
-                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs text-purple-600">
-                            <div className="flex items-center space-x-1">
-                              <MapPinIcon className="w-3 h-3 flex-shrink-0" />
-                              <span>{relatedEvent.location}</span>
-                            </div>
-                            <div className="flex items-center space-x-1">
-                              <CalendarIcon className="w-3 h-3 flex-shrink-0" />
-                              <span>{new Date(relatedEvent.date).toLocaleDateString()}</span>
-                            </div>
-                            <div className="flex items-center space-x-1">
-                              <UsersIcon className="w-3 h-3 flex-shrink-0" />
-                              <span>{relatedEvent.attendeeCount} attended</span>
-                            </div>
-                          </div>
+                          <span className="flex items-center space-x-1">
+                            <CalendarIcon className="w-4 h-4" />
+                            <span>{new Date(relatedEvent.date).toLocaleDateString()}</span>
+                          </span>
+                          <span className="flex items-center space-x-1">
+                            <UsersIcon className="w-4 h-4" />
+                            <span>{relatedEvent.attendeeCount} people</span>
+                          </span>
                         </div>
-                      )}
-                    </div>
+                      </div>
+                    )}
 
                     {/* Content Section */}
-                    <div className="bg-slate-50 rounded-lg p-4 mb-3 border-l-4 border-cyan-400">
-                      <blockquote className="text-slate-700 leading-relaxed">
-                        "{limitContentPreview(review.content, 150)}"
-                      </blockquote>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-4">
-                        <button
-                          onClick={() => handleComment(review.id)}
-                          className="flex items-center space-x-2 text-slate-600 hover:text-cyan-600 transition-colors duration-200"
-                        >
-                          <ChatBubbleLeftIcon className="w-5 h-5" />
-                          <span className="text-sm">Comment</span>
-                        </button>
-                        <button className="flex items-center space-x-2 text-slate-600 hover:text-cyan-600 transition-colors duration-200">
-                          <ShareIcon className="w-5 h-5" />
-                          <span className="text-sm">Share</span>
-                        </button>
+                    <div className="mb-4">
+                      <div className="bg-slate-50 rounded-lg p-4 border-l-4 border-cyan-400">
+                        <blockquote className="text-slate-700 leading-relaxed">
+                          "{limitContentPreview(review.content, 150)}"
+                        </blockquote>
                       </div>
-                      <button
-                        onClick={() => handleFlag('post', review.id, `Review by ${reviewer.name}`)}
-                        className="flex items-center space-x-2 text-slate-500 hover:text-orange-500 transition-colors duration-200"
-                      >
-                        <FlagIcon className="w-5 h-5" />
-                        <span className="text-sm">Flag</span>
-                      </button>
                     </div>
+                  </div>
+                </div>
+
+                {/* Actions - Full Width Footer */}
+                <div className="px-6 py-3 border-t border-slate-100 bg-slate-50/30">
+                  <div className="flex items-center justify-center space-x-4">
+                    <button
+                      onClick={() => handleComment(review.id)}
+                      className="flex items-center space-x-1 text-slate-600 hover:text-cyan-600 transition-colors duration-200 px-2 py-2 rounded-lg hover:bg-white/50"
+                    >
+                      <ChatBubbleLeftIcon className="w-4 h-4" />
+                      <span className="text-sm font-medium">Comment</span>
+                    </button>
+                    <button className="flex items-center space-x-1 text-slate-600 hover:text-cyan-600 transition-colors duration-200 px-2 py-2 rounded-lg hover:bg-white/50">
+                      <ShareIcon className="w-4 h-4" />
+                      <span className="text-sm font-medium">Share</span>
+                    </button>
+                    <button className="flex items-center space-x-1 text-slate-600 hover:text-cyan-600 transition-colors duration-200 px-2 py-2 rounded-lg hover:bg-white/50">
+                      <BookmarkIcon className="w-4 h-4" />
+                      <span className="text-sm font-medium">Save</span>
+                    </button>
+                    <button
+                      onClick={() => handleFlag('post', review.id, `Review by ${reviewer.name}`)}
+                      className="flex items-center space-x-1 text-slate-500 hover:text-orange-500 transition-colors duration-200 px-2 py-2 rounded-lg hover:bg-white/50"
+                    >
+                      <FlagIcon className="w-4 h-4" />
+                      <span className="text-sm font-medium">Flag</span>
+                    </button>
                   </div>
                 </div>
               </div>
