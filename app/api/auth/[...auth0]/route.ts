@@ -196,8 +196,20 @@ async function handleCallback(request: NextRequest) {
       expiresAt: Date.now() + (tokens.expires_in * 1000),
     };
     
-    // Redirect to success page
-    const response = NextResponse.redirect(auth0Config.baseURL + stateData.returnTo);
+    // Check if this is a new user or existing user
+    // For new users, redirect to onboarding. For existing users adding accounts, go to returnTo
+    let redirectPath = stateData.returnTo;
+    
+    // If coming from connected-accounts page, user is adding an account
+    if (stateData.returnTo === '/connected-accounts') {
+      redirectPath = '/connected-accounts';
+    } else {
+      // This is a new user sign in, redirect to onboarding
+      redirectPath = '/onboarding';
+    }
+    
+    // Redirect to appropriate page
+    const response = NextResponse.redirect(auth0Config.baseURL + redirectPath);
     
     // Set session cookie
     response.cookies.set('appSession', JSON.stringify(sessionData), {
