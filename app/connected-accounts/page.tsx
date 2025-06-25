@@ -160,10 +160,33 @@ export default function ConnectedAccounts() {
   const [startX, setStartX] = useState(0)
   const platformsPerPage = 6
 
+  // Define which platforms have Auth0 integration
+  const auth0Platforms = ['Google', 'Facebook', 'LinkedIn']
+  
   useEffect(() => {
     const user = getCurrentUser()
     setCurrentUser(user)
+    
+    // Check if user just connected a social account via Auth0
+    checkAuth0Connection()
   }, [])
+  
+  const checkAuth0Connection = async () => {
+    try {
+      const response = await fetch('/api/user')
+      const data = await response.json()
+      
+      if (data.user?.connectedPlatform && data.user?.connectedUsername) {
+        // Save the connection to the current user
+        handleConnect(data.user.connectedPlatform, data.user.connectedUsername)
+        
+        // Show success message (optional)
+        console.log(`Connected ${data.user.connectedPlatform} account: ${data.user.connectedUsername}`)
+      }
+    } catch (error) {
+      console.error('Error checking Auth0 connection:', error)
+    }
+  }
 
   const handleConnect = (platform: string, username?: string) => {
     if (currentUser) {
@@ -171,6 +194,21 @@ export default function ConnectedAccounts() {
       // Refresh user data
       const updatedUser = getCurrentUser()
       setCurrentUser(updatedUser)
+    }
+  }
+
+  const handleAuth0Connect = (platform: string) => {
+    // Map platform names to Auth0 connection strings
+    const connectionMap: { [key: string]: string } = {
+      'Google': 'google-oauth2',
+      'Facebook': 'facebook', 
+      'LinkedIn': 'linkedin'
+    }
+    
+    const connection = connectionMap[platform]
+    if (connection) {
+      // Redirect to Auth0 login with the specific social provider
+      window.location.href = `/api/auth/login?connection=${connection}&returnTo=${encodeURIComponent('/connected-accounts')}`
     }
   }
 
@@ -320,7 +358,13 @@ export default function ConnectedAccounts() {
                         </span>
                       ) : (
                         <button
-                          onClick={() => setSelectedPlatform(platform)}
+                          onClick={() => {
+                            if (auth0Platforms.includes(platform)) {
+                              handleAuth0Connect(platform)
+                            } else {
+                              setSelectedPlatform(platform)
+                            }
+                          }}
                           className="text-xs text-cyan-600 hover:text-cyan-700 mt-1 hover:underline transition-colors"
                         >
                           Connect →
@@ -334,8 +378,8 @@ export default function ConnectedAccounts() {
           </div>
         </div>
 
-        {/* Connect Platform Form */}
-        {selectedPlatform && (
+        {/* Connect Platform Form - Only for non-Auth0 platforms */}
+        {selectedPlatform && !auth0Platforms.includes(selectedPlatform) && (
           <div className="bg-white rounded-2xl border border-slate-200 shadow-lg p-5 md:p-6">
             <div className="flex items-center space-x-3 mb-6">
               <div className="w-3 h-3 bg-gradient-to-r from-cyan-500 to-teal-500 rounded-full"></div>

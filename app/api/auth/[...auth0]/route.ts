@@ -27,6 +27,7 @@ export async function GET(request: NextRequest, context: { params: Promise<{ aut
 async function handleLogin(request: NextRequest) {
   const url = new URL(request.url);
   const connection = url.searchParams.get('connection');
+  const returnTo = url.searchParams.get('returnTo');
   
   // Build Auth0 authorization URL
   const authUrl = new URL(`https://${auth0Config.domain}/authorize`);
@@ -34,7 +35,13 @@ async function handleLogin(request: NextRequest) {
   authUrl.searchParams.set('client_id', auth0Config.clientId);
   authUrl.searchParams.set('redirect_uri', `${auth0Config.baseURL}/api/auth/callback`);
   authUrl.searchParams.set('scope', 'openid profile email');
-  authUrl.searchParams.set('state', '/');
+  
+  // Include connection info in state for callback processing
+  const stateData = {
+    returnTo: returnTo || '/',
+    connection: connection
+  };
+  authUrl.searchParams.set('state', btoa(JSON.stringify(stateData)));
   
   if (connection) {
     authUrl.searchParams.set('connection', connection);
@@ -58,10 +65,18 @@ async function handleLogout(request: NextRequest) {
 async function handleCallback(request: NextRequest) {
   const url = new URL(request.url);
   const code = url.searchParams.get('code');
-  const state = url.searchParams.get('state') || '/';
+  const stateParam = url.searchParams.get('state') || '{}';
   
   if (!code) {
     return NextResponse.redirect('/signin?error=no_code');
+  }
+  
+  // Parse state data
+  let stateData;
+  try {
+    stateData = JSON.parse(atob(stateParam));
+  } catch {
+    stateData = { returnTo: '/', connection: null };
   }
   
   try {
@@ -101,6 +116,26 @@ async function handleCallback(request: NextRequest) {
       return NextResponse.redirect('/signin?error=user_info_failed');
     }
     
+    // If this was a social connection from Connected Accounts, save the connection
+    if (stateData.connection && stateData.returnTo === '/connected-accounts') {
+      const platformMap: { [key: string]: string } = {
+        'google-oauth2': 'Google',
+        'facebook': 'Facebook',
+        'linkedin': 'LinkedIn'
+      };
+      
+      const platform = platformMap[stateData.connection];
+      if (platform && user.email) {
+        // Extract username from email or use email
+        const username = user.email.split('@')[0];
+        
+        // Call the connectSocialAccount function (we'll need to import this)
+        // For now, we'll add the connection data to the session
+        user.connectedPlatform = platform;
+        user.connectedUsername = username;
+      }
+    }
+    
     // Create session
     const sessionData = {
       user: user,
@@ -109,7 +144,7 @@ async function handleCallback(request: NextRequest) {
     };
     
     // Redirect to success page
-    const response = NextResponse.redirect(auth0Config.baseURL + state);
+    const response = NextResponse.redirect(auth0Config.baseURL + stateData.returnTo);
     
     // Set session cookie
     response.cookies.set('appSession', JSON.stringify(sessionData), {
