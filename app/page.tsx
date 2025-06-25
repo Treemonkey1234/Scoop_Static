@@ -10,6 +10,7 @@ import LoadingSpinner from '@/components/LoadingSpinner'
 import ClassicVoteSystem from '@/components/ClassicVoteSystem'
 
 import { getCurrentUser, sampleUsers, getAllReviews, getAllEvents, User, voteOnReview } from '@/lib/sampleData'
+import { getCurrentScoopProfile } from '@/lib/scoopProfile'
 import { 
   ChatBubbleLeftIcon,
   ShareIcon,
@@ -28,6 +29,7 @@ import { useRouter } from 'next/navigation'
 export default function HomePage() {
   const [isLoading, setIsLoading] = useState(true)
   const [currentUser, setCurrentUser] = useState<User | null>(null)
+  const [scoopProfile, setScoopProfile] = useState<any>(null)
   const [reviews, setReviews] = useState<any[]>([])
   const [events, setEvents] = useState<any[]>([])
 
@@ -49,6 +51,10 @@ export default function HomePage() {
   useEffect(() => {
     const user = getCurrentUser()
     setCurrentUser(user)
+    
+    // Load Scoop profile if it exists
+    const scoop = getCurrentScoopProfile()
+    setScoopProfile(scoop)
     
     // Clear localStorage to force fresh timeline order
     localStorage.removeItem('scoopReviews')
@@ -126,6 +132,11 @@ export default function HomePage() {
     setReviews(allReviews)
     const allEvents = getAllEvents()
     setEvents(allEvents)
+    
+    // Refresh Scoop profile data
+    const scoop = getCurrentScoopProfile()
+    setScoopProfile(scoop)
+    
     setTimeout(() => {
       setRefreshing(false)
     }, 1000)
@@ -176,13 +187,13 @@ export default function HomePage() {
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h2 className="text-2xl font-bold bg-gradient-to-r from-cyan-700 to-teal-700 bg-clip-text text-transparent mb-2">
-                  Welcome back, {currentUser?.name}! 
+                  Welcome back, {scoopProfile ? `@${scoopProfile.username}` : currentUser?.name}! 
                 </h2>
                                   <div className="flex items-center space-x-4">
-                    <TrustBadge score={currentUser?.trustScore || 50} size="lg" />
+                    <TrustBadge score={scoopProfile?.trustScore || currentUser?.trustScore || 50} size="lg" />
                     <div className="text-sm text-slate-600">
-                      <span className="font-medium">{currentUser?.friendsCount || 0}</span> friends • 
-                      <span className="font-medium ml-1">{currentUser?.reviewsCount || 0}</span> reviews
+                      <span className="font-medium">{scoopProfile?.friendsCount || currentUser?.friendsCount || 0}</span> friends • 
+                      <span className="font-medium ml-1">{scoopProfile?.reviewsCount || currentUser?.reviewsCount || 0}</span> reviews
                     </div>
                   </div>
               </div>

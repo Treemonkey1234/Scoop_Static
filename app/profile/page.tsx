@@ -7,6 +7,7 @@ import Layout from '@/components/Layout'
 import TrustBadge from '@/components/TrustBadge'
 import FlagModal from '@/components/FlagModal'
 import { getCurrentUser, sampleReviews, sampleUsers, User, getUserActivities } from '@/lib/sampleData'
+import { getCurrentScoopProfile } from '@/lib/scoopProfile'
 import { 
   Cog6ToothIcon,
   BellIcon,
@@ -35,6 +36,7 @@ interface AuthUser {
 export default function ProfilePage() {
   const [currentUser, setCurrentUser] = useState<User | null>(null)
   const [authUser, setAuthUser] = useState<AuthUser | null>(null)
+  const [scoopProfile, setScoopProfile] = useState<any>(null)
   const [showAllSocials, setShowAllSocials] = useState(false)
   const [showTrustBreakdown, setShowTrustBreakdown] = useState(false)
   const [flagModal, setFlagModal] = useState<{
@@ -100,10 +102,33 @@ export default function ProfilePage() {
     fetchUserSession()
     const user = getCurrentUser()
     setCurrentUser(user)
+    
+    // Load Scoop profile if it exists
+    const scoop = getCurrentScoopProfile()
+    setScoopProfile(scoop)
   }, [])
 
-  // Create display user object combining Auth0 and sample data
-  const displayUser = authUser ? {
+  // Create display user object prioritizing Scoop profile data
+  const displayUser = scoopProfile ? {
+    id: scoopProfile.id,
+    name: scoopProfile.name,
+    username: scoopProfile.username,
+    email: scoopProfile.email,
+    avatar: scoopProfile.avatar,
+    bio: scoopProfile.bio,
+    location: scoopProfile.location,
+    trustScore: scoopProfile.trustScore,
+    reviewsCount: scoopProfile.reviewsCount,
+    friendsCount: scoopProfile.friendsCount,
+    eventsAttended: scoopProfile.eventsAttended,
+    socialLinks: {},
+    phoneVerified: scoopProfile.phoneVerified,
+    emailVerified: scoopProfile.emailVerified,
+    joinDate: new Date(scoopProfile.joinDate).toISOString().split('T')[0],
+    lastActive: new Date().toISOString(),
+    connectedAccounts: scoopProfile.connectedAccounts,
+    isScoopUser: true
+  } : authUser ? {
     id: authUser.sub,
     name: authUser.name || 'Anonymous User',
     email: authUser.email || '',

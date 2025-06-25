@@ -200,8 +200,10 @@ async function handleCallback(request: NextRequest) {
     // For new users, redirect to onboarding. For existing users adding accounts, go to returnTo
     let redirectPath = stateData.returnTo;
     
-    // If coming from connected-accounts page, user is adding an account
+    // If coming from connected-accounts page, user is adding an account to existing profile
     if (stateData.returnTo === '/connected-accounts') {
+      // Mark this session as an account linking operation
+      user.isAccountLinking = true;
       redirectPath = '/connected-accounts';
     } else {
       // This is a new user sign in, redirect to onboarding

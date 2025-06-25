@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import Layout from '@/components/Layout'
 import { getCurrentUser, User, connectSocialAccount, socialPlatforms } from '@/lib/sampleData'
+import { getCurrentScoopProfile, getConnectedPlatformNames, formatConnectedAccountsForDisplay } from '@/lib/scoopProfile'
 import { 
   ArrowLeftIcon,
   PlusIcon,
@@ -172,20 +173,15 @@ export default function ConnectedAccounts() {
         const data = await response.json()
         setAuthUser(data.session)
         
+        // Check if this is an account linking operation
+        if (data.session?.isAccountLinking) {
+          console.log('Account linking detected, adding account to Scoop profile')
+          await handleAccountLinking(data.session)
+        }
+        
         // Debug logging to understand Auth0 data structure
         if (data.session) {
           console.log('Auth0 User Session:', data.session)
-          console.log('Auth0 Identities:', data.session.identities)
-          if (data.session.identities) {
-            data.session.identities.forEach((identity: any, index: number) => {
-              console.log(`Identity ${index}:`, {
-                provider: identity.provider,
-                connection: identity.connection,
-                isSocial: identity.isSocial,
-                profileData: identity.profileData
-              })
-            })
-          }
         }
       } else {
         setAuthUser(null)
@@ -193,6 +189,26 @@ export default function ConnectedAccounts() {
     } catch (error) {
       console.error('Error fetching user session:', error)
       setAuthUser(null)
+    }
+  }
+
+  // Handle adding a new connected account to existing Scoop profile
+  const handleAccountLinking = async (authSession: any) => {
+    try {
+      // Import the account linking function
+      const { addConnectedAccount } = await import('@/lib/scoopProfile')
+      const success = addConnectedAccount(authSession)
+      
+      if (success) {
+        console.log('Successfully added connected account')
+        // Refresh the page data
+        const updatedUser = getCurrentUser()
+        setCurrentUser(updatedUser)
+      } else {
+        console.error('Failed to add connected account')
+      }
+    } catch (error) {
+      console.error('Error during account linking:', error)
     }
   }
   
@@ -246,10 +262,11 @@ export default function ConnectedAccounts() {
     }
   }
 
-  // Get connected platform names for filtering
-  const getConnectedPlatformNames = () => {
-    if (authUser) {
-      const auth0Connected = authUser.identities?.filter((identity: any) => 
+  // Get connected platform names from Scoop profile or fallback to old system
+  const scoopProfile = getCurrentScoopProfile()
+  const connectedPlatformNames = scoopProfile ? getConnectedPlatformNames() : (
+    authUser ? (
+      authUser.identities?.filter((identity: any) => 
         identity.provider !== 'auth0' && 
         ['google-oauth2', 'facebook', 'linkedin', 'twitter', 'instagram', 'github'].includes(identity.provider)
       ).map((identity: any) => {
@@ -264,16 +281,13 @@ export default function ConnectedAccounts() {
         }
         return providerMap[identity.provider] || identity.provider
       }) || []
-      return auth0Connected
-    } else {
+    ) : (
       // For sample data users
-      return Object.entries(currentUser?.socialLinks || {})
+      Object.entries(currentUser?.socialLinks || {})
         .filter(([_, handle]) => handle)
         .map(([platform, _]) => platform.charAt(0).toUpperCase() + platform.slice(1))
-    }
-  }
-
-  const connectedPlatformNames = getConnectedPlatformNames()
+    )
+  )
   
   // Filter out connected platforms from available platforms
   const availablePlatforms = Object.entries(socialPlatforms).filter(([platform, _]) => 
@@ -332,12 +346,15 @@ export default function ConnectedAccounts() {
         </div>
 
         {/* Connected Social Accounts */}
-        {(authUser ? 
-          (authUser.identities?.filter((identity: any) => 
-            identity.provider !== 'auth0' && 
-            ['google-oauth2', 'facebook', 'linkedin', 'twitter', 'instagram', 'github'].includes(identity.provider)
-          )?.length > 0) :
-          Object.values(currentUser?.socialLinks || {}).some(Boolean)
+        {(scoopProfile ? 
+          (scoopProfile.connectedAccounts.length > 0) :
+          (authUser ? 
+            (authUser.identities?.filter((identity: any) => 
+              identity.provider !== 'auth0' && 
+              ['google-oauth2', 'facebook', 'linkedin', 'twitter', 'instagram', 'github'].includes(identity.provider)
+            )?.length > 0) :
+            Object.values(currentUser?.socialLinks || {}).some(Boolean)
+          )
         ) && (
           <div className="bg-white rounded-2xl border border-slate-200 shadow-lg p-5 md:p-6">
             <div className="flex items-center space-x-2 mb-6">
@@ -346,8 +363,47 @@ export default function ConnectedAccounts() {
             </div>
             
             <div className="space-y-4">
-              {authUser ? (
-                // Display Auth0 connected accounts
+              {scoopProfile ? (
+                // Display Scoop profile connected accounts
+                scoopProfile.connectedAccounts.map((account, index) => {
+                  const platformMap: { [key: string]: { name: string, emoji: string } } = {
+                    'Google': { name: 'Google', emoji: '🔍' },
+                    'Facebook': { name: 'Facebook', emoji: '📘' },
+                    'LinkedIn': { name: 'LinkedIn', emoji: '💼' },
+                    'Twitter': { name: 'Twitter', emoji: '🐦' },
+                    'Instagram': { name: 'Instagram', emoji: '📸' },
+                    'GitHub': { name: 'GitHub', emoji: '🐱' }
+                  }
+                  
+                  const platformInfo = platformMap[account.provider] || { name: account.provider, emoji: '🔗' }
+                  
+                  return (
+                    <div key={index} className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-4 min-w-0 flex-1">
+                          <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm border border-green-100 flex-shrink-0">
+                            <span className="text-xl">{platformInfo.emoji}</span>
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <h3 className="font-medium text-slate-800">{platformInfo.name}</h3>
+                            <p className="text-sm text-slate-600 truncate">
+                              {account.email || account.name || 'Connected account'}
+                            </p>
+                            <p className="text-xs text-slate-500">
+                              Connected {new Date(account.connectedAt).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2 flex-shrink-0">
+                          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                          <span className="text-xs text-green-700 font-medium">Verified</span>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })
+              ) : authUser ? (
+                // Fallback: Display Auth0 connected accounts
                 authUser.identities?.filter((identity: any) => 
                   identity.provider !== 'auth0' && 
                   ['google-oauth2', 'facebook', 'linkedin', 'twitter', 'instagram', 'github'].includes(identity.provider)

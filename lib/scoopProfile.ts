@@ -18,6 +18,7 @@ export interface ScoopProfile {
 
 export interface ConnectedAccount {
   provider: string
+  providerId: string // This is the same as sub
   sub: string
   name: string
   email: string
@@ -69,6 +70,7 @@ export function addConnectedAccount(authUser: any): boolean {
   // Add new connected account
   const newAccount: ConnectedAccount = {
     provider: providerName,
+    providerId: authUser.sub,
     sub: authUser.sub,
     name: authUser.name || '',
     email: authUser.email || '',
