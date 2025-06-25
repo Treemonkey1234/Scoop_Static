@@ -7,7 +7,7 @@ import Layout from '@/components/Layout'
 import TrustBadge from '@/components/TrustBadge'
 import FlagModal from '@/components/FlagModal'
 import { getCurrentUser, sampleReviews, sampleUsers, User, getUserActivities } from '@/lib/sampleData'
-import { getCurrentScoopProfile } from '@/lib/scoopProfile'
+import { getCurrentScoopProfile, ConnectedAccount } from '@/lib/scoopProfile'
 import { 
   Cog6ToothIcon,
   BellIcon,
@@ -286,8 +286,16 @@ export default function ProfilePage() {
   }
 
   // Convert socialLinks to array format for display
-  const socialAccountsArray = authUser ? (
-    // For Auth0 users, convert identities to social accounts format
+  const socialAccountsArray = scoopProfile ? (
+    // For Scoop profile users, use connectedAccounts
+    (scoopProfile.connectedAccounts as any[]).map((account: any) => ({
+      platform: account.provider,
+      handle: account.email || account.name || 'Connected account',
+      verified: true,
+      icon: ''
+    }))
+  ) : authUser ? (
+    // Fallback: For Auth0 users without Scoop profile, convert identities to social accounts format
     authUser.identities?.filter((identity: any) => 
       identity.provider !== 'auth0' && 
       ['google-oauth2', 'facebook', 'linkedin', 'twitter', 'instagram', 'github'].includes(identity.provider)
@@ -446,7 +454,7 @@ export default function ProfilePage() {
                 <h2 className="text-xl font-bold text-slate-800">{displayUser.name}</h2>
                 <TrustBadge score={displayUser.trustScore} size="sm" />
               </div>
-              <p className="text-slate-600 mb-2">@{displayUser.name.toLowerCase().replace(/\s+/g, '_')}</p>
+              <p className="text-slate-600 mb-2">@{(displayUser as any).username || displayUser.name.toLowerCase().replace(/\s+/g, '_')}</p>
               <p className="text-slate-700 mb-3">{displayUser.bio}</p>
               <div className="flex items-center space-x-2 text-sm text-slate-500">
                 <MapPinIcon className="w-4 h-4" />

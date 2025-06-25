@@ -9,6 +9,7 @@ export default function OnboardingPage() {
   const router = useRouter()
   const [authUser, setAuthUser] = useState<any>(null)
   const [username, setUsername] = useState('')
+  const [fullName, setFullName] = useState('')
   const [isCheckingUsername, setIsCheckingUsername] = useState(false)
   const [usernameStatus, setUsernameStatus] = useState<'available' | 'taken' | 'invalid' | null>(null)
   const [isCreatingProfile, setIsCreatingProfile] = useState(false)
@@ -105,7 +106,7 @@ export default function OnboardingPage() {
       const scoopProfile = {
         id: scoopUserId,
         username: cleanUsername,
-        name: authUser.name || 'New User',
+        name: fullName || authUser.name || 'New User',
         email: authUser.email || '',
         avatar: authUser.picture || '',
         bio: 'New to ScoopSocials! 🍦',
@@ -115,6 +116,7 @@ export default function OnboardingPage() {
         connectedAccounts: [
           {
             provider: getProviderFromSub(authUser.sub),
+            providerId: authUser.sub,
             sub: authUser.sub,
             name: authUser.name,
             email: authUser.email,
@@ -229,6 +231,20 @@ export default function OnboardingPage() {
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">
+                Your Full Name
+              </label>
+              <input
+                type="text"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                placeholder="Enter your full name"
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 transition-all duration-200"
+              />
+              <p className="text-xs text-slate-600 mt-1">This will be your display name on your profile</p>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
                 Your Scoop Username
               </label>
               <div className="relative">
@@ -284,9 +300,9 @@ export default function OnboardingPage() {
             {/* Create Profile Button */}
             <button
               onClick={createScoopProfile}
-              disabled={usernameStatus !== 'available' || isCreatingProfile}
+              disabled={usernameStatus !== 'available' || isCreatingProfile || !fullName.trim()}
               className={`w-full py-3 rounded-xl font-medium transition-all duration-200 ${
-                usernameStatus === 'available' && !isCreatingProfile
+                usernameStatus === 'available' && !isCreatingProfile && fullName.trim()
                   ? 'bg-gradient-to-r from-cyan-500 to-teal-600 text-white hover:from-cyan-600 hover:to-teal-700 shadow-lg'
                   : 'bg-slate-200 text-slate-500 cursor-not-allowed'
               }`}
