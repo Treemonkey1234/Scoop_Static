@@ -1,10 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
-import { cookies } from 'next/headers';
 
 export async function GET(request: NextRequest) {
   try {
-    // For now, return null user session to avoid Auth0 deployment issues
-    // This maintains the API contract while we debug the Auth0 integration
+    // Simple session check from cookie
+    const sessionCookie = request.cookies.get('appSession');
+    
+    if (sessionCookie) {
+      const session = JSON.parse(sessionCookie.value);
+      if (session.expiresAt > Date.now()) {
+        return NextResponse.json({ 
+          user: session.user,
+          session: session.user
+        }, { status: 200 });
+      }
+    }
+    
+    // For development - return null session to maintain current functionality
+    // This allows the platform to work with sample users when Auth0 is not fully set up
     return NextResponse.json({ 
       user: null,
       session: null

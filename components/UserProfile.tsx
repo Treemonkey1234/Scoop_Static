@@ -40,17 +40,17 @@ export default function UserProfile({ user, className = '' }: UserProfileProps) 
 
   const handleLogin = () => {
     setIsLoading(true)
-    window.location.href = '/auth/login'
+    window.location.href = '/signin'
   }
 
   const handleSignup = () => {
     setIsLoading(true)
-    window.location.href = '/auth/login?screen_hint=signup'
+    window.location.href = '/signin'
   }
 
   const handleLogout = () => {
     setIsLoading(true)
-    window.location.href = '/auth/logout'
+    window.location.href = '/api/auth/logout'
   }
 
   const handleProfile = () => {
@@ -66,24 +66,19 @@ export default function UserProfile({ user, className = '' }: UserProfileProps) 
   }
 
   if (!user) {
-    // Not authenticated - show login/signup buttons
+    // Not authenticated - show profile icon that redirects to signin
     return (
-      <div className={`flex items-center space-x-3 ${className}`}>
-        <button
-          onClick={handleLogin}
-          disabled={isLoading}
-          className="px-4 py-2 text-slate-600 hover:text-slate-800 font-medium transition-colors duration-200 disabled:opacity-50"
-        >
-          {isLoading ? 'Loading...' : 'Sign In'}
-        </button>
-        <button
-          onClick={handleSignup}
-          disabled={isLoading}
-          className="px-4 py-2 bg-primary-500 text-white rounded-xl hover:bg-primary-600 font-medium transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-50"
-        >
-          {isLoading ? 'Loading...' : 'Sign Up'}
-        </button>
-      </div>
+      <button
+        onClick={handleLogin}
+        disabled={isLoading}
+        className={`flex items-center justify-center w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 transition-colors duration-200 disabled:opacity-50 ${className}`}
+      >
+        {isLoading ? (
+          <div className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></div>
+        ) : (
+          <UserIcon className="w-5 h-5 text-slate-600" />
+        )}
+      </button>
     )
   }
 

@@ -1,16 +1,20 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from 'next/server';
 
 export async function middleware(request: NextRequest) {
-  // Temporarily disable Auth0 middleware to fix deployment issues
-  // The Auth0 integration will be re-enabled once deployment is stable
-  
-  // Just pass through all requests for now
+  // Simple middleware - just pass through all requests
+  // Auth0 routes are handled by the API route handlers
   return NextResponse.next();
 }
 
 export const config = {
   matcher: [
-    // Only match auth routes to avoid unnecessary middleware execution
-    "/auth/:path*"
-  ]
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
+    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+  ],
 }; 

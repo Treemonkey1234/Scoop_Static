@@ -1198,8 +1198,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             
             {/* Action Buttons and User Profile */}
             <div className="flex items-center space-x-2">
-              {/* Analytics Button - only show when logged in */}
-              {authUser && (
+              {/* Analytics Button - show when user is logged in (Auth0 or sample user) */}
+              {(authUser || currentUser) && (
                 <Link
                   href="/analytics"
                   onClick={handleNavigation}
@@ -1209,8 +1209,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 </Link>
               )}
 
-              {/* Create Button - only show when logged in */}
-              {authUser && (
+              {/* Create Button - show when user is logged in (Auth0 or sample user) */}
+              {(authUser || currentUser) && (
                 <button
                   onClick={() => setShowCreateMenu(!showCreateMenu)}
                   className="relative p-2 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-600 hover:from-cyan-600 hover:to-teal-700 text-white transition-all duration-200 shadow-sm"
@@ -1218,20 +1218,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   <PlusIcon className="w-5 h-5" />
                 </button>
               )}
-
-              {/* Auth0 User Profile Component */}
-              <UserProfile 
-                user={authUser ? {
-                  id: authUser.sub,
-                  name: authUser.name,
-                  email: authUser.email,
-                  avatar: authUser.picture,
-                  isVerified: authUser.email_verified,
-                  trustScore: 75, // Default for Auth0 users
-                  connectedAccounts: authUser.identities?.filter((identity: any) => identity.isSocial) || []
-                } : null}
-                className="ml-2"
-              />
             </div>
           </div>
         </div>
