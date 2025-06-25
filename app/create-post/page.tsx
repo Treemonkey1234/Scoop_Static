@@ -4,19 +4,14 @@ import React, { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import Layout from '@/components/Layout'
-import TrustBadge from '@/components/TrustBadge'
 import { sampleUsers, createNewReview, getCurrentUser, areUsersFriends, getUserFriends } from '@/lib/sampleData'
 import { 
   MagnifyingGlassIcon,
-  MapPinIcon,
   UserIcon,
   TagIcon,
   XMarkIcon,
-  ShieldCheckIcon,
-  ChartBarIcon,
-  CalendarIcon,
   PhotoIcon,
-  FlagIcon
+  ArrowLeftIcon
 } from '@heroicons/react/24/outline'
 
 function CreatePostContent() {
@@ -24,59 +19,47 @@ function CreatePostContent() {
   const searchParams = useSearchParams()
   const reviewForId = searchParams?.get('reviewFor')
   const reviewForUser = reviewForId ? sampleUsers.find(u => u.id === reviewForId) : null
-  const eventId = searchParams.get('event')
   
   const currentUser = getCurrentUser()
   const userFriends = getUserFriends(currentUser.id)
 
-  // Validate that reviewForUser is a friend if specified
-  const canReviewUser = reviewForUser ? areUsersFriends(currentUser.id, reviewForUser.id) : true
-
   const [formData, setFormData] = useState({
-    reviewFor: reviewForUser?.id && canReviewUser ? [reviewForUser.id] : [] as string[],
+    reviewFor: reviewForUser?.id || '',
     category: '',
     content: '',
-    location: '',
     tags: [] as string[],
-    title: '',
-    postType: '',
+    photo: null as File | null
   })
 
   const [friendSearch, setFriendSearch] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [showFriendWarning, setShowFriendWarning] = useState(reviewForUser && !canReviewUser)
 
-  // Categories from ASCII design - Consolidated to 6 essential categories
+  // 5 streamlined categories from our discussion
   const categories = [
-    { id: 'professional', label: '💼 Professional', selected: false },
-    { id: 'social', label: '🤝 Social & Personal', selected: false },
-    { id: 'services', label: '🛠️ Services & Trade', selected: false },
-    { id: 'marketplace', label: '🛒 Marketplace & Sales', selected: false },
-    { id: 'roommate', label: '🏠 Roommate & Living', selected: false },
-    { id: 'academic', label: '🎓 Academic & Learning', selected: false }
+    { id: 'professional', label: '💼 Professional', emoji: '💼' },
+    { id: 'marketplace', label: '🛒 Marketplace', emoji: '🛒' },
+    { id: 'dating', label: '💕 Dating', emoji: '💕' },
+    { id: 'social', label: '🤝 Social', emoji: '🤝' },
+    { id: 'general', label: '🔗 General', emoji: '🔗' }
   ]
 
-  // Suggested tags from ASCII design
-  const suggestedTags = [
-    '#reliable', '#responsive', '#professional', '#teamwork', '#skilled',
-    '#punctual', '#creative', '#helpful', '#trustworthy', '#experienced'
-  ]
+  // Quick suggested tags
+  const quickTags = ['#reliable', '#skilled', '#responsive', '#professional', '#recommended']
 
-  // Recent friends from user's actual friends
-  const recentFriends = userFriends.map(friend => ({
+  // Recent friends (top 3 for minimal design)
+  const recentFriends = userFriends.slice(0, 3).map(friend => ({
     id: friend.id,
     name: friend.name,
     trustScore: friend.trustScore
   }))
 
-  const filteredFriends = recentFriends.filter(friend =>
+  const filteredFriends = userFriends.filter(friend =>
     friend.name.toLowerCase().includes(friendSearch.toLowerCase())
   )
 
-  const selectedUsers = formData.reviewFor.map(id => 
-    recentFriends.find(f => f.id === id) || 
-    sampleUsers.find(u => u.id === id)
-  ).filter(user => user !== undefined)
+  const selectedUser = formData.reviewFor ? 
+    userFriends.find(f => f.id === formData.reviewFor) || 
+    sampleUsers.find(u => u.id === formData.reviewFor) : null
 
   const handleCategorySelect = (categoryId: string) => {
     setFormData(prev => ({ ...prev, category: categoryId }))
@@ -98,26 +81,31 @@ function CreatePostContent() {
     }))
   }
 
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setFormData(prev => ({ ...prev, photo: file }))
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!formData.reviewFor || !formData.category || !formData.content.trim()) {
+      return
+    }
+
     setIsSubmitting(true)
 
     try {
-      // Create new review for each selected friend
-      for (const reviewedId of formData.reviewFor) {
-        createNewReview({
-          reviewedId,
-          category: formData.category,
-          content: formData.content,
-          location: formData.location,
-          tags: formData.tags
-        })
-      }
+      createNewReview({
+        reviewedId: formData.reviewFor,
+        category: formData.category,
+        content: formData.content,
+        location: '',
+        tags: formData.tags
+      })
 
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 2000))
-
-      // Redirect back to home
+      await new Promise(resolve => setTimeout(resolve, 1500))
       router.push('/')
     } catch (error) {
       console.error('Error creating review:', error)
@@ -125,174 +113,205 @@ function CreatePostContent() {
     }
   }
 
+  const characterCount = formData.content.length
+  const maxCharacters = 300
+
   return (
     <Layout>
-      <div className="max-w-4xl mx-auto p-4">
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-slate-800 mb-2">Create Post</h1>
-          <p className="text-slate-600">Share your thoughts, experiences, or ask a question</p>
+      <div className="max-w-2xl mx-auto p-4">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6 p-4 bg-white rounded-2xl shadow-soft">
+          <div className="flex items-center space-x-3">
+            <button
+              onClick={() => router.back()}
+              className="p-2 text-slate-500 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition-colors"
+            >
+              <ArrowLeftIcon className="w-5 h-5" />
+            </button>
+            <h1 className="text-xl font-bold text-slate-800">✨ Quick Review</h1>
+          </div>
+          <button
+            onClick={handleSubmit}
+            disabled={!formData.reviewFor || !formData.category || !formData.content.trim() || isSubmitting}
+            className="flex items-center space-x-2 px-6 py-2 bg-gradient-to-r from-cyan-500 to-teal-600 text-white rounded-xl hover:from-cyan-600 hover:to-teal-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm font-medium"
+          >
+            {isSubmitting ? '✨' : '📤'}
+            <span>{isSubmitting ? 'Posting...' : 'Post'}</span>
+          </button>
         </div>
 
-        {/* Friend Warning */}
-        {showFriendWarning && reviewForUser && (
-          <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl">
-            <div className="flex items-start space-x-3">
-              <ShieldCheckIcon className="w-5 h-5 text-amber-600 mt-0.5" />
-              <div>
-                <h3 className="font-semibold text-amber-800 mb-1">Friend-Only Reviews</h3>
-                <p className="text-amber-700 mb-3">
-                  You can only write reviews for people who are your friends. This ensures authentic feedback within trusted networks.
-                </p>
-                <div className="flex space-x-3">
-                  <button
-                    onClick={() => router.push(`/user/${reviewForUser.id}`)}
-                    className="btn-primary text-sm"
-                  >
-                    Add {reviewForUser.name} as Friend
-                  </button>
-                  <button
-                    onClick={() => setShowFriendWarning(false)}
-                    className="btn-secondary text-sm"
-                  >
-                    Continue Without Review
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Post Preview */}
-          <div className="bg-white rounded-2xl shadow-soft p-6 space-y-4">
-            <div className="flex items-start space-x-4">
-              {/* User Avatar */}
-              <Image
-                src="/avatars/default.png"
-                alt="User"
-                width={40}
-                height={40}
-                className="rounded-full"
-              />
-              
-              {/* Post Content */}
-              <div className="flex-1">
-                {/* Post Header */}
-                <div className="flex flex-col space-y-2 mb-4">
-                  <input
-                    type="text"
-                    placeholder="Post title..."
-                    className="text-xl font-semibold text-slate-800 bg-transparent border-none focus:outline-none focus:ring-0 p-0"
-                    value={formData.title}
-                    onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                  />
-                  <textarea
-                    placeholder="What's on your mind?"
-                    className="w-full min-h-[120px] text-slate-600 bg-transparent border-none focus:outline-none focus:ring-0 p-0 resize-none"
-                    value={formData.content}
-                    onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
-                  />
-                </div>
-
-                {/* Post Metadata */}
-                <div className="flex flex-col space-y-2 text-sm text-slate-500">
-                  {/* Category */}
-                  <div className="flex items-center space-x-2">
-                    <TagIcon className="w-4 h-4" />
-                    <select
-                      className="bg-transparent border-none focus:outline-none focus:ring-0 p-0"
-                      value={formData.category}
-                      onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
-                    >
-                      <option value="">Select Category</option>
-                      <option value="question">Question</option>
-                      <option value="discussion">Discussion</option>
-                      <option value="review">Review</option>
-                      <option value="announcement">Announcement</option>
-                    </select>
-                  </div>
-
-                  {/* Post Type */}
-                  <div className="flex items-center space-x-2">
-                    <TagIcon className="w-4 h-4" />
-                    <select
-                      className="bg-transparent border-none focus:outline-none focus:ring-0 p-0"
-                      value={formData.postType}
-                      onChange={(e) => setFormData(prev => ({ ...prev, postType: e.target.value }))}
-                    >
-                      <option value="">Select Post Type</option>
-                      <option value="general">General</option>
-                      <option value="event-review">Event Review</option>
-                      <option value="recommendation">Recommendation</option>
-                    </select>
-                  </div>
-
-                  {/* Date */}
-                  <div className="flex items-center space-x-2">
-                    <CalendarIcon className="w-4 h-4" />
-                    <span>{new Date().toLocaleDateString()}</span>
-                  </div>
-
-                  {/* Location */}
-                  <div className="flex items-center space-x-2">
-                    <MapPinIcon className="w-4 h-4" />
-                    <input
-                      type="text"
-                      placeholder="Add location"
-                      className="bg-transparent border-none focus:outline-none focus:ring-0 p-0"
-                      value={formData.location}
-                      onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
-                    />
-                  </div>
-                </div>
-
-                {/* Event Details Box (if reviewing an event) */}
-                {eventId && formData.postType === 'event-review' && (
-                  <div className="mt-4 p-4 bg-cyan-50 rounded-xl border border-cyan-100">
-                    <h4 className="font-medium text-cyan-800 mb-2">Event Details</h4>
-                    <div className="text-sm text-cyan-600">
-                      {/* Event details would be populated here */}
-                      <p>Event Name: Sample Event</p>
-                      <p>Date: January 1, 2024</p>
-                      <p>Location: Sample Location</p>
-                    </div>
-                  </div>
-                )}
-
-                {/* Image Upload */}
-                <div className="mt-4">
-                  <button
-                    type="button"
-                    className="inline-flex items-center space-x-2 text-sm text-cyan-600 hover:text-cyan-700"
-                    onClick={() => {/* Handle image upload */}}
-                  >
-                    <PhotoIcon className="w-5 h-5" />
-                    <span>Add Photos</span>
-                  </button>
-                </div>
-
-                {/* Flag Button */}
-                <div className="absolute top-4 right-4">
-                  <button
-                    type="button"
-                    className="p-2 text-slate-400 hover:text-orange-500 rounded-full hover:bg-orange-50 transition-colors duration-200"
-                    onClick={() => {/* Handle flag */}}
-                  >
-                    <FlagIcon className="w-5 h-5" />
-                  </button>
+          {/* Who */}
+          <div className="bg-white rounded-2xl shadow-soft p-6">
+            <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center space-x-2">
+              <UserIcon className="w-5 h-5" />
+              <span>👤 WHO?</span>
+            </h3>
+            
+            {/* Friend Search */}
+            <div className="mb-4">
+              <div className="relative">
+                <MagnifyingGlassIcon className="w-5 h-5 absolute left-3 top-3 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search: Alex M..."
+                  className="w-full pl-10 pr-12 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+                  value={friendSearch}
+                  onChange={(e) => setFriendSearch(e.target.value)}
+                />
+                <div className="absolute right-3 top-3 text-slate-400">
+                  🔍
                 </div>
               </div>
             </div>
+
+            {/* Friends List */}
+            <div className="space-y-2">
+              {(friendSearch ? filteredFriends.slice(0, 3) : recentFriends).map((friend) => (
+                <button
+                  key={friend.id}
+                  type="button"
+                  onClick={() => setFormData(prev => ({ ...prev, reviewFor: friend.id }))}
+                  className={`w-full text-left p-3 rounded-xl border-2 transition-all ${
+                    formData.reviewFor === friend.id
+                      ? 'border-cyan-500 bg-cyan-50'
+                      : 'border-slate-200 hover:border-slate-300'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium text-slate-800">
+                      📍 {friend.name} {formData.reviewFor === friend.id && '✓ Selected'}
+                    </span>
+                    <span className="text-sm text-slate-600">({friend.trustScore})</span>
+                  </div>
+                </button>
+              ))}
+            </div>
           </div>
 
-          {/* Submit Button */}
-          <div className="flex justify-end">
-            <button
-              type="submit"
-              className="btn-primary bg-gradient-to-r from-cyan-500 to-teal-600 hover:from-cyan-600 hover:to-teal-700"
-            >
-              Post
-            </button>
+          {/* What About */}
+          <div className="bg-white rounded-2xl shadow-soft p-6">
+            <h3 className="text-lg font-semibold text-slate-800 mb-4">📝 WHAT ABOUT?</h3>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {categories.map((category) => (
+                <button
+                  key={category.id}
+                  type="button"
+                  onClick={() => handleCategorySelect(category.id)}
+                  className={`p-4 rounded-xl border-2 text-sm font-medium transition-all ${
+                    formData.category === category.id
+                      ? 'border-cyan-500 bg-cyan-50 text-cyan-700'
+                      : 'border-slate-200 hover:border-slate-300 text-slate-600'
+                  }`}
+                >
+                  {category.label}
+                  {formData.category === category.id && (
+                    <div className="mt-1 text-xs text-cyan-600">████</div>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Your Review */}
+          <div className="bg-white rounded-2xl shadow-soft p-6">
+            <h3 className="text-lg font-semibold text-slate-800 mb-4">✍️ YOUR REVIEW</h3>
+            
+            <textarea
+              placeholder={selectedUser ? 
+                `${selectedUser.name} was amazing to work with on our React project. Super responsive and delivered quality code on time. Would definitely collaborate again! 🚀` :
+                "Alex was amazing to work with on our React project. Super responsive and delivered quality code on time. Would definitely collaborate again! 🚀"
+              }
+              className="w-full h-28 p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-transparent resize-none"
+              value={formData.content}
+              onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
+              maxLength={maxCharacters}
+            />
+            
+            <div className="flex justify-between items-center mt-3">
+              <div className="flex items-center space-x-4">
+                <label className="flex items-center space-x-2 text-sm text-cyan-600 hover:text-cyan-700 cursor-pointer">
+                  <PhotoIcon className="w-5 h-5" />
+                  <span>📸 Add Photo</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handlePhotoUpload}
+                    className="hidden"
+                  />
+                </label>
+                {formData.photo && (
+                  <span className="text-sm text-green-600">✅ {formData.photo.name}</span>
+                )}
+              </div>
+              <span className={`text-sm ${characterCount > maxCharacters * 0.9 ? 'text-orange-600' : 'text-slate-500'}`}>
+                {characterCount}/{maxCharacters} chars
+              </span>
+            </div>
+          </div>
+
+          {/* Quick Tags */}
+          <div className="bg-white rounded-2xl shadow-soft p-6">
+            <h3 className="text-lg font-semibold text-slate-800 mb-4">🏷️ Quick Tags:</h3>
+            
+            <div className="flex flex-wrap gap-2 mb-4">
+              {quickTags.map((tag) => (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() => handleTagAdd(tag)}
+                  disabled={formData.tags.includes(tag)}
+                  className={`px-3 py-1 rounded-full text-sm transition-all ${
+                    formData.tags.includes(tag)
+                      ? 'bg-cyan-100 text-cyan-700 cursor-not-allowed'
+                      : 'bg-slate-100 text-slate-600 hover:bg-cyan-50 hover:text-cyan-600'
+                  }`}
+                >
+                  {tag}
+                </button>
+              ))}
+              <button
+                type="button"
+                className="px-3 py-1 rounded-full text-sm bg-slate-100 text-slate-600 hover:bg-cyan-50 hover:text-cyan-600 transition-all"
+                onClick={() => {
+                  const customTag = prompt('Enter custom tag (without #):')
+                  if (customTag && customTag.trim()) {
+                    handleTagAdd(`#${customTag.trim()}`)
+                  }
+                }}
+              >
+                + Custom
+              </button>
+            </div>
+
+            {/* Selected Tags */}
+            {formData.tags.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {formData.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="flex items-center space-x-1 px-3 py-1 bg-cyan-100 text-cyan-700 rounded-full text-sm"
+                  >
+                    <span>{tag}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleTagRemove(tag)}
+                      className="text-cyan-500 hover:text-cyan-700"
+                    >
+                      <XMarkIcon className="w-3 h-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Privacy Notice */}
+          <div className="bg-white rounded-2xl shadow-soft p-6">
+            <p className="text-sm text-slate-600 text-center">
+              🔒 This review will be public • Trust scores may be affected
+            </p>
           </div>
         </form>
       </div>
@@ -304,7 +323,7 @@ export default function CreatePostPage() {
   return (
     <Suspense fallback={
       <Layout>
-        <div className="max-w-4xl mx-auto p-4">
+        <div className="max-w-2xl mx-auto p-4">
           <div className="animate-pulse">
             <div className="h-8 bg-slate-200 rounded w-1/4 mb-4"></div>
             <div className="h-4 bg-slate-200 rounded w-1/2 mb-8"></div>
