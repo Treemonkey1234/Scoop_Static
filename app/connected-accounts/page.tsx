@@ -40,7 +40,7 @@ const SocialIcon = ({ platform }: { platform: string }) => {
                 <stop offset="100%" stopColor="#FCB045"/>
               </linearGradient>
             </defs>
-            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.249 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
           </svg>
         )
       case 'LinkedIn':
@@ -94,7 +94,7 @@ const SocialIcon = ({ platform }: { platform: string }) => {
       case 'Telegram':
         return (
           <svg width="24" height="24" viewBox="0 0 24 24" fill="#0088CC">
-            <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.305.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+            <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.305.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.095-.049.141-.080zm10.6-9.332c0-1.663-1.351-3.015-3.015-3.015-1.665 0-3.015 1.352-3.015 3.015 0 1.664 1.35 3.015 3.015 3.015 1.664 0 3.015-1.351 3.015-3.015zm-5.418 0c0-1.329 1.077-2.405 2.403-2.405 1.33 0 2.405 1.076 2.405 2.405 0 1.328-1.075 2.405-2.405 2.405-1.326 0-2.403-1.077-2.403-2.405z"/>
           </svg>
         )
       case 'Pinterest':
@@ -154,6 +154,7 @@ const SocialIcon = ({ platform }: { platform: string }) => {
 export default function ConnectedAccounts() {
   const router = useRouter()
   const [currentUser, setCurrentUser] = useState<User | null>(null)
+  const [authUser, setAuthUser] = useState<any>(null)
   const [currentPage, setCurrentPage] = useState(0)
   const [selectedPlatform, setSelectedPlatform] = useState<string | null>(null)
   const [usernameInput, setUsernameInput] = useState('')
@@ -163,7 +164,40 @@ export default function ConnectedAccounts() {
   // Define which platforms have Auth0 integration
   const auth0Platforms = ['Google', 'Facebook', 'LinkedIn']
   
+  // Fetch Auth0 user session data
+  const fetchUserSession = async () => {
+    try {
+      const response = await fetch('/api/user')
+      if (response.ok) {
+        const data = await response.json()
+        setAuthUser(data.session)
+        
+        // Debug logging to understand Auth0 data structure
+        if (data.session) {
+          console.log('Auth0 User Session:', data.session)
+          console.log('Auth0 Identities:', data.session.identities)
+          if (data.session.identities) {
+            data.session.identities.forEach((identity: any, index: number) => {
+              console.log(`Identity ${index}:`, {
+                provider: identity.provider,
+                connection: identity.connection,
+                isSocial: identity.isSocial,
+                profileData: identity.profileData
+              })
+            })
+          }
+        }
+      } else {
+        setAuthUser(null)
+      }
+    } catch (error) {
+      console.error('Error fetching user session:', error)
+      setAuthUser(null)
+    }
+  }
+  
   useEffect(() => {
+    fetchUserSession()
     const user = getCurrentUser()
     setCurrentUser(user)
     
@@ -254,12 +288,24 @@ export default function ConnectedAccounts() {
             </div>
           </div>
           <div className="bg-gradient-to-r from-cyan-500 to-teal-500 text-white px-3 md:px-4 py-2 rounded-full text-xs md:text-sm font-medium whitespace-nowrap">
-            {Object.values(currentUser?.socialLinks || {}).filter(Boolean).length || 0} connected
+            {authUser 
+              ? (authUser.identities?.filter((identity: any) => 
+                  identity.provider !== 'auth0' && 
+                  ['google-oauth2', 'facebook', 'linkedin', 'twitter', 'instagram', 'github'].includes(identity.provider)
+                )?.length || 0)
+              : (Object.values(currentUser?.socialLinks || {}).filter(Boolean).length || 0)
+            } connected
           </div>
         </div>
 
         {/* Connected Social Accounts */}
-        {Object.values(currentUser?.socialLinks || {}).some(Boolean) && (
+        {(authUser ? 
+          (authUser.identities?.filter((identity: any) => 
+            identity.provider !== 'auth0' && 
+            ['google-oauth2', 'facebook', 'linkedin', 'twitter', 'instagram', 'github'].includes(identity.provider)
+          )?.length > 0) :
+          Object.values(currentUser?.socialLinks || {}).some(Boolean)
+        ) && (
           <div className="bg-white rounded-2xl border border-slate-200 shadow-lg p-5 md:p-6">
             <div className="flex items-center space-x-2 mb-6">
               <div className="w-3 h-3 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full"></div>
@@ -267,29 +313,106 @@ export default function ConnectedAccounts() {
             </div>
             
             <div className="space-y-4">
-              {Object.entries(currentUser?.socialLinks || {}).map(([platform, handle], index) => (
-                handle && (
-                  <div key={index} className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-4 min-w-0 flex-1">
-                        <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm border border-green-100 flex-shrink-0">
-                          <span className="text-xl">
-                            {platform === 'instagram' ? '📸' : platform === 'twitter' ? '🐦' : platform === 'linkedin' ? '💼' : '🔗'}
-                          </span>
+              {authUser ? (
+                // Display Auth0 connected accounts
+                authUser.identities?.filter((identity: any) => 
+                  identity.provider !== 'auth0' && 
+                  ['google-oauth2', 'facebook', 'linkedin', 'twitter', 'instagram', 'github'].includes(identity.provider)
+                ).map((identity: any, index: number) => {
+                  // Map Auth0 provider names to display names
+                  const platformMap: { [key: string]: { name: string, emoji: string } } = {
+                    'google-oauth2': { name: 'Google', emoji: '🔍' },
+                    'facebook': { name: 'Facebook', emoji: '📘' },
+                    'linkedin': { name: 'LinkedIn', emoji: '💼' },
+                    'twitter': { name: 'Twitter', emoji: '🐦' },
+                    'instagram': { name: 'Instagram', emoji: '📸' },
+                    'github': { name: 'GitHub', emoji: '🐱' }
+                  }
+                  
+                  const platformInfo = platformMap[identity.provider] || { name: identity.provider, emoji: '🔗' }
+                  
+                  return (
+                    <div key={index} className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-4 min-w-0 flex-1">
+                          <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm border border-green-100 flex-shrink-0">
+                            <span className="text-xl">{platformInfo.emoji}</span>
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <h3 className="font-medium text-slate-800">{platformInfo.name}</h3>
+                            <p className="text-sm text-slate-600 truncate">
+                              {identity.profileData?.email || identity.profileData?.name || 'Connected account'}
+                            </p>
+                          </div>
                         </div>
-                        <div className="min-w-0 flex-1">
-                          <h3 className="font-medium text-slate-800 capitalize">{platform}</h3>
-                          <p className="text-sm text-slate-600 truncate">{handle}</p>
+                        <div className="flex items-center space-x-2 flex-shrink-0">
+                          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                          <span className="text-xs text-green-700 font-medium">Connected</span>
                         </div>
-                      </div>
-                      <div className="flex items-center space-x-2 flex-shrink-0">
-                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                        <span className="text-xs text-green-700 font-medium">Connected</span>
                       </div>
                     </div>
-                  </div>
-                )
-              ))}
+                  )
+                })
+              ) : (
+                // Display sample data connected accounts (fallback)
+                Object.entries(currentUser?.socialLinks || {}).map(([platform, handle], index) => (
+                  handle && (
+                    <div key={index} className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-4 min-w-0 flex-1">
+                          <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm border border-green-100 flex-shrink-0">
+                            <span className="text-xl">
+                              {platform === 'instagram' ? '📸' : platform === 'twitter' ? '🐦' : platform === 'linkedin' ? '💼' : '🔗'}
+                            </span>
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <h3 className="font-medium text-slate-800 capitalize">{platform}</h3>
+                            <p className="text-sm text-slate-600 truncate">{handle}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2 flex-shrink-0">
+                          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                          <span className="text-xs text-green-700 font-medium">Connected</span>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                ))
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Debug Section - Remove this after fixing */}
+        {authUser && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-5 md:p-6">
+            <h3 className="text-lg font-semibold text-yellow-800 mb-4">Debug: Auth0 User Data</h3>
+            <div className="space-y-2 text-sm">
+              <div><strong>User Sub:</strong> {authUser.sub}</div>
+              <div><strong>User Name:</strong> {authUser.name}</div>
+              <div><strong>User Email:</strong> {authUser.email}</div>
+              <div><strong>Total Identities:</strong> {authUser.identities?.length || 0}</div>
+              {authUser.identities && (
+                <div>
+                  <strong>All Identities:</strong>
+                  <ul className="mt-2 space-y-1 pl-4">
+                    {authUser.identities.map((identity: any, index: number) => (
+                      <li key={index} className="text-xs bg-white p-2 rounded border">
+                        <div><strong>Provider:</strong> {identity.provider}</div>
+                        <div><strong>Connection:</strong> {identity.connection}</div>
+                        <div><strong>User ID:</strong> {identity.user_id}</div>
+                        <div><strong>Is Social:</strong> {identity.isSocial ? 'Yes' : 'No'}</div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              <div><strong>Filtered Social Count:</strong> {
+                authUser.identities?.filter((identity: any) => 
+                  identity.provider !== 'auth0' && 
+                  ['google-oauth2', 'facebook', 'linkedin', 'twitter', 'instagram', 'github'].includes(identity.provider)
+                )?.length || 0
+              }</div>
             </div>
           </div>
         )}

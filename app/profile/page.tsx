@@ -73,7 +73,11 @@ export default function ProfilePage() {
     if (user.email) score += 20
     if (user.email_verified) score += 20
     if (user.picture) score += 20
-    if (user.identities && user.identities.length > 1) score += 20 // Multiple connected accounts
+    const connectedSocialCount = user.identities?.filter(identity => 
+      identity.provider !== 'auth0' && 
+      ['google-oauth2', 'facebook', 'linkedin', 'twitter', 'instagram', 'github'].includes(identity.provider)
+    )?.length || 0
+    if (connectedSocialCount > 0) score += 20 // Multiple connected accounts bonus
     return score
   }
 
@@ -108,13 +112,19 @@ export default function ProfilePage() {
     location: 'Connected via Auth0',
     trustScore: 75, // Default trust score for Auth0 users
     reviewsCount: 0,
-    friendsCount: authUser.identities?.filter(id => id.isSocial)?.length || 0,
+    friendsCount: authUser.identities?.filter(identity => 
+      identity.provider !== 'auth0' && // Not the primary username/password connection
+      ['google-oauth2', 'facebook', 'linkedin', 'twitter', 'instagram', 'github'].includes(identity.provider)
+    )?.length || 0,
     eventsAttended: 0,
     socialLinks: {},
     phoneVerified: authUser.email_verified || false,
     joinDate: new Date().toISOString().split('T')[0],
     lastActive: new Date().toISOString(),
-    connectedAccounts: authUser.identities?.filter(id => id.isSocial) || [],
+    connectedAccounts: authUser.identities?.filter(identity => 
+      identity.provider !== 'auth0' && // Not the primary username/password connection
+      ['google-oauth2', 'facebook', 'linkedin', 'twitter', 'instagram', 'github'].includes(identity.provider)
+    ) || [],
     isAuth0User: true
   } : currentUser
 
@@ -153,7 +163,13 @@ export default function ProfilePage() {
   const authTrustBreakdown = authUser ? [
     { category: 'Account Verification', score: authUser.email_verified ? 95 : 30, count: authUser.email_verified ? 'Email verified' : 'Pending verification' },
     { category: 'Profile Completeness', score: calculateAuth0ProfileCompleteness(authUser), count: `${calculateAuth0ProfileCompleteness(authUser)}% complete` },
-    { category: 'Connected Accounts', score: Math.min(95, 30 + ((authUser.identities?.filter(id => id.isSocial)?.length || 0) * 20)), count: `${authUser.identities?.filter(id => id.isSocial)?.length || 0} social accounts` },
+    { category: 'Connected Accounts', score: Math.min(95, 30 + ((authUser.identities?.filter(identity => 
+      identity.provider !== 'auth0' && 
+      ['google-oauth2', 'facebook', 'linkedin', 'twitter', 'instagram', 'github'].includes(identity.provider)
+    )?.length || 0) * 20)), count: `${authUser.identities?.filter(identity => 
+      identity.provider !== 'auth0' && 
+      ['google-oauth2', 'facebook', 'linkedin', 'twitter', 'instagram', 'github'].includes(identity.provider)
+    )?.length || 0} social accounts` },
     { category: 'Time on Platform', score: 65, count: 'New member' },
     { category: 'Community Activity', score: 40, count: 'Getting started' },
     { category: 'Content Quality', score: 50, count: 'No posts yet' },

@@ -771,8 +771,8 @@ export const sampleUsers: User[] = [
     badges: ['Early Adopter', 'Beta Tester'],
     interests: ['Technology', 'Networking', 'Testing'],
     socialLinks: {
-      instagram: '@testuser',
-      twitter: '@testuser'
+      instagram: '',
+      twitter: ''
     },
     phoneVerified: true,
     emailVerified: true

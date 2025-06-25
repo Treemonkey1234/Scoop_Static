@@ -35,7 +35,10 @@ export function getUserFromSession(session: any) {
     avatar: session.user.picture,
     isVerified: session.user.email_verified || false,
     // Extract connected social accounts from identities
-    connectedAccounts: session.user.identities?.filter((identity: any) => identity.isSocial) || [],
+    connectedAccounts: session.user.identities?.filter((identity: any) => 
+      identity.provider !== 'auth0' && // Not the primary username/password connection
+      ['google-oauth2', 'facebook', 'linkedin', 'twitter', 'instagram', 'github'].includes(identity.provider)
+    ) || [],
     // Map Auth0 user to platform user format
     trustScore: 75, // Default trust score for new Auth0 users
     joinDate: new Date().toISOString().split('T')[0],
