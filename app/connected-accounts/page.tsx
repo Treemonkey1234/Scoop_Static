@@ -165,9 +165,9 @@ export default function ConnectedAccounts() {
     setCurrentUser(user)
   }, [])
 
-  const handleConnect = (platform: string) => {
+  const handleConnect = (platform: string, username?: string) => {
     if (currentUser) {
-      connectSocialAccount(platform, currentUser.id)
+      connectSocialAccount(platform, currentUser.id, username)
       // Refresh user data
       const updatedUser = getCurrentUser()
       setCurrentUser(updatedUser)
@@ -361,7 +361,7 @@ export default function ConnectedAccounts() {
               <div className="flex space-x-3">
                 <button
                   onClick={() => {
-                    handleConnect(selectedPlatform)
+                    handleConnect(selectedPlatform, usernameInput.trim())
                     setSelectedPlatform(null)
                     setUsernameInput('')
                   }}

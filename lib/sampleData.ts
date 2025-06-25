@@ -20,6 +20,21 @@ export interface User {
     instagram: string
     twitter: string
     linkedin?: string
+    facebook?: string
+    youtube?: string
+    tiktok?: string
+    snapchat?: string
+    discord?: string
+    reddit?: string
+    whatsapp?: string
+    telegram?: string
+    pinterest?: string
+    twitch?: string
+    steam?: string
+    signal?: string
+    clubhouse?: string
+    bereal?: string
+    github?: string
   }
   phoneVerified: boolean
   emailVerified: boolean
@@ -684,12 +699,28 @@ export function verifyPhone(userId?: string): void {
   recordUserActivity(targetUserId, 'phone_verified')
 }
 
-export function connectSocialAccount(platform: string, userId?: string): void {
+export function connectSocialAccount(platform: string, userId?: string, username?: string): void {
   const currentUser = getCurrentUser()
   const targetUserId = userId || currentUser.id
   
+  // If this is the current user, update their social links
+  if (targetUserId === currentUser.id && username) {
+    const platformKey = platform.toLowerCase() as keyof typeof currentUser.socialLinks
+    const updatedSocialLinks = {
+      ...currentUser.socialLinks,
+      [platformKey]: username
+    }
+    
+    const updatedUser = {
+      ...currentUser,
+      socialLinks: updatedSocialLinks
+    }
+    
+    saveCurrentUser(updatedUser)
+  }
+  
   updateTrustScore(targetUserId, 'social_connected')
-  recordUserActivity(targetUserId, 'social_connected', { platform })
+  recordUserActivity(targetUserId, 'social_connected', { platform, username })
 }
 
 // Friend relationships - who is friends with whom
@@ -1361,6 +1392,12 @@ export const socialPlatforms = {
   'Twitch': '🎬',
   'Pinterest': '📌',
   'GitHub': '💻',
+  'WhatsApp': '💬',
+  'Telegram': '✈️',
+  'Steam': '🎮',
+  'Signal': '🔒',
+  'Clubhouse': '🎙️',
+  'BeReal': '📱',
 }
 
 export function createUserProfile(userData: any): User {
