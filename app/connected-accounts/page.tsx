@@ -162,7 +162,7 @@ export default function ConnectedAccounts() {
   const platformsPerPage = 6
 
   // Define which platforms have Auth0 integration
-  const auth0Platforms = ['Google', 'Facebook', 'LinkedIn']
+  const auth0Platforms = ['Facebook', 'LinkedIn', 'Google']
   
   // Fetch Auth0 user session data
   const fetchUserSession = async () => {
@@ -234,9 +234,9 @@ export default function ConnectedAccounts() {
   const handleAuth0Connect = (platform: string) => {
     // Map platform names to Auth0 connection strings
     const connectionMap: { [key: string]: string } = {
-      'Google': 'google-oauth2',
-      'Facebook': 'facebook', 
-      'LinkedIn': 'linkedin'
+      'Facebook': 'facebook',
+      'LinkedIn': 'linkedin',
+      'Google': 'google-oauth2'
     }
     
     const connection = connectionMap[platform]

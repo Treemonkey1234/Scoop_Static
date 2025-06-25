@@ -1381,9 +1381,10 @@ export function getTrustLevel(score: number): 'excellent' | 'good' | 'fair' | 'p
 // Social Platform Icons
 export const socialPlatforms = {
   'Facebook': '👥',
+  'LinkedIn': '💼',
+  'Google': '🔍',
   'Instagram': '📸',
   'Twitter': '🐦',
-  'LinkedIn': '💼',
   'TikTok': '🎵',
   'YouTube': '📺',
   'Snapchat': '👻',

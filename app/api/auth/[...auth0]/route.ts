@@ -116,6 +116,45 @@ async function handleCallback(request: NextRequest) {
       return NextResponse.redirect('/signin?error=user_info_failed');
     }
     
+    // Log user data for debugging
+    console.log('Auth0 User Data:', JSON.stringify(user, null, 2));
+    
+    // Try to get detailed user info with identities using Management API
+    try {
+      const mgmtTokenResponse = await fetch(`https://${auth0Config.domain}/oauth/token`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          grant_type: 'client_credentials',
+          client_id: auth0Config.clientId,
+          client_secret: auth0Config.clientSecret,
+          audience: `https://${auth0Config.domain}/api/v2/`
+        })
+      });
+      
+      const mgmtTokens = await mgmtTokenResponse.json();
+      
+      if (mgmtTokenResponse.ok && mgmtTokens.access_token) {
+        const userDetailResponse = await fetch(`https://${auth0Config.domain}/api/v2/users/${encodeURIComponent(user.sub)}`, {
+          headers: {
+            'Authorization': `Bearer ${mgmtTokens.access_token}`,
+          },
+        });
+        
+        if (userDetailResponse.ok) {
+          const detailedUser = await userDetailResponse.json();
+          console.log('Detailed User Data with Identities:', JSON.stringify(detailedUser, null, 2));
+          
+          // Merge the detailed user data
+          if (detailedUser.identities) {
+            user.identities = detailedUser.identities;
+          }
+        }
+      }
+    } catch (mgmtError) {
+      console.error('Management API error:', mgmtError);
+    }
+    
     // If this was a social connection from Connected Accounts, save the connection
     if (stateData.connection && stateData.returnTo === '/connected-accounts') {
       const platformMap: { [key: string]: string } = {
