@@ -246,9 +246,42 @@ export default function ConnectedAccounts() {
     }
   }
 
-  const platforms = Object.entries(socialPlatforms)
-  const totalPages = Math.ceil(platforms.length / platformsPerPage)
-  const currentPlatforms = platforms.slice(
+  // Get connected platform names for filtering
+  const getConnectedPlatformNames = () => {
+    if (authUser) {
+      const auth0Connected = authUser.identities?.filter((identity: any) => 
+        identity.provider !== 'auth0' && 
+        ['google-oauth2', 'facebook', 'linkedin', 'twitter', 'instagram', 'github'].includes(identity.provider)
+      ).map((identity: any) => {
+        // Map Auth0 provider names to platform names
+        const providerMap: { [key: string]: string } = {
+          'google-oauth2': 'Google',
+          'facebook': 'Facebook', 
+          'linkedin': 'LinkedIn',
+          'twitter': 'Twitter',
+          'instagram': 'Instagram',
+          'github': 'GitHub'
+        }
+        return providerMap[identity.provider] || identity.provider
+      }) || []
+      return auth0Connected
+    } else {
+      // For sample data users
+      return Object.entries(currentUser?.socialLinks || {})
+        .filter(([_, handle]) => handle)
+        .map(([platform, _]) => platform.charAt(0).toUpperCase() + platform.slice(1))
+    }
+  }
+
+  const connectedPlatformNames = getConnectedPlatformNames()
+  
+  // Filter out connected platforms from available platforms
+  const availablePlatforms = Object.entries(socialPlatforms).filter(([platform, _]) => 
+    !connectedPlatformNames.includes(platform)
+  )
+  
+  const totalPages = Math.ceil(availablePlatforms.length / platformsPerPage)
+  const currentPlatforms = availablePlatforms.slice(
     currentPage * platformsPerPage,
     (currentPage + 1) * platformsPerPage
   )
@@ -383,39 +416,7 @@ export default function ConnectedAccounts() {
           </div>
         )}
 
-        {/* Debug Section - Remove this after fixing */}
-        {authUser && (
-          <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-5 md:p-6">
-            <h3 className="text-lg font-semibold text-yellow-800 mb-4">Debug: Auth0 User Data</h3>
-            <div className="space-y-2 text-sm">
-              <div><strong>User Sub:</strong> {authUser.sub}</div>
-              <div><strong>User Name:</strong> {authUser.name}</div>
-              <div><strong>User Email:</strong> {authUser.email}</div>
-              <div><strong>Total Identities:</strong> {authUser.identities?.length || 0}</div>
-              {authUser.identities && (
-                <div>
-                  <strong>All Identities:</strong>
-                  <ul className="mt-2 space-y-1 pl-4">
-                    {authUser.identities.map((identity: any, index: number) => (
-                      <li key={index} className="text-xs bg-white p-2 rounded border">
-                        <div><strong>Provider:</strong> {identity.provider}</div>
-                        <div><strong>Connection:</strong> {identity.connection}</div>
-                        <div><strong>User ID:</strong> {identity.user_id}</div>
-                        <div><strong>Is Social:</strong> {identity.isSocial ? 'Yes' : 'No'}</div>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              <div><strong>Filtered Social Count:</strong> {
-                authUser.identities?.filter((identity: any) => 
-                  identity.provider !== 'auth0' && 
-                  ['google-oauth2', 'facebook', 'linkedin', 'twitter', 'instagram', 'github'].includes(identity.provider)
-                )?.length || 0
-              }</div>
-            </div>
-          </div>
-        )}
+
 
         {/* Available Platforms - Swipeable */}
         <div className="bg-white rounded-2xl border border-slate-200 shadow-lg p-5 md:p-6">
@@ -456,8 +457,8 @@ export default function ConnectedAccounts() {
             onTouchEnd={handleTouchEnd}
           >
             {currentPlatforms.map(([platform, icon]) => {
-              const isConnected = platform.toLowerCase() in (currentUser?.socialLinks || {}) && 
-                                currentUser?.socialLinks[platform.toLowerCase() as keyof typeof currentUser.socialLinks]
+              // Check if platform is connected (should not happen since we filter them out, but keeping for safety)
+              const isConnected = connectedPlatformNames.includes(platform)
 
               return (
                 <div

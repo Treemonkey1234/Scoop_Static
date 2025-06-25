@@ -112,10 +112,7 @@ export default function ProfilePage() {
     location: 'Connected via Auth0',
     trustScore: 75, // Default trust score for Auth0 users
     reviewsCount: 0,
-    friendsCount: authUser.identities?.filter(identity => 
-      identity.provider !== 'auth0' && // Not the primary username/password connection
-      ['google-oauth2', 'facebook', 'linkedin', 'twitter', 'instagram', 'github'].includes(identity.provider)
-    )?.length || 0,
+    friendsCount: 12, // Default friends count for Auth0 users
     eventsAttended: 0,
     socialLinks: {},
     phoneVerified: authUser.email_verified || false,
@@ -264,9 +261,32 @@ export default function ProfilePage() {
   }
 
   // Convert socialLinks to array format for display
-  const socialAccountsArray = Object.entries(displayUser.socialLinks || {})
-    .filter(([platform, handle]) => handle && typeof handle === 'string' && handle.trim() !== '')
-    .map(([platform, handle]) => ({ platform, handle: handle as string, verified: false, icon: '' }))
+  const socialAccountsArray = authUser ? (
+    // For Auth0 users, convert identities to social accounts format
+    authUser.identities?.filter((identity: any) => 
+      identity.provider !== 'auth0' && 
+      ['google-oauth2', 'facebook', 'linkedin', 'twitter', 'instagram', 'github'].includes(identity.provider)
+    ).map((identity: any) => {
+      // Map Auth0 provider names to platform names
+      const providerMap: { [key: string]: string } = {
+        'google-oauth2': 'Google',
+        'facebook': 'Facebook', 
+        'linkedin': 'LinkedIn',
+        'twitter': 'Twitter',
+        'instagram': 'Instagram',
+        'github': 'GitHub'
+      }
+      const platform = providerMap[identity.provider] || identity.provider
+      const handle = identity.profileData?.email || identity.profileData?.name || 'Connected account'
+      
+      return { platform, handle, verified: true, icon: '' }
+    }) || []
+  ) : (
+    // For sample data users, use socialLinks
+    Object.entries(displayUser.socialLinks || {})
+      .filter(([platform, handle]) => handle && typeof handle === 'string' && handle.trim() !== '')
+      .map(([platform, handle]) => ({ platform, handle: handle as string, verified: false, icon: '' }))
+  )
   
   const visibleSocials = showAllSocials ? socialAccountsArray : socialAccountsArray.slice(0, 6)
 
