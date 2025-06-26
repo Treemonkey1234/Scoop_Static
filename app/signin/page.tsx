@@ -335,7 +335,7 @@ export default function SignInPage() {
 
         {/* Footer */}
         <div className="text-center mt-8 text-xs text-slate-500">
-          © 2024 ScoopSocials • <Link href="/terms" className="hover:text-cyan-600">Terms</Link> • <Link href="/privacy" className="hover:text-cyan-600">Privacy</Link>
+          © 2025 ScoopSocials • <Link href="/terms" className="hover:text-cyan-600">Terms</Link> • <Link href="/privacy" className="hover:text-cyan-600">Privacy</Link>
         </div>
       </div>
     </div>
