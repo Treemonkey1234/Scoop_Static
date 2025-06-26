@@ -119,7 +119,7 @@ const SocialIcon = ({ platform }: { platform: string }) => {
       case 'Signal':
         return (
           <svg width="24" height="24" viewBox="0 0 24 24" fill="#3A76F0">
-            <path d="M12.006 0C5.374 0 0 5.373 0 12.006S5.374 24.012 12.006 24.012c6.628 0 12.006-5.373 12.006-12.006S18.634.001 12.006.001zm5.618 8.177l-2.786 13.15c-.208.98-.757 1.223-1.535.761l-4.244-3.126-2.047 1.97c-.227.226-.416.415-.853.415l.305-4.317 7.865-7.112c.342-.305-.074-.475-.531-.17L17.618 6.22c.758-.283 1.42.17 1.174 1.197l-.168.76z"/>
+            <path d="M12.006 0C5.374 0 0 5.373 0 12.006S5.374 24.012 12.006 24.012c6.628 0 12.006-5.373 12.006-12.006S18.634.001 12.006.001zm5.618 7.224c.1-.002.321.023.305.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.095-.049.141-.080zm10.6-9.332c0-1.663-1.351-3.015-3.015-3.015-1.665 0-3.015 1.352-3.015 3.015 0 1.664 1.35 3.015 3.015 3.015 1.664 0 3.015-1.351 3.015-3.015zm-5.418 0c0-1.329 1.077-2.405 2.403-2.405 1.33 0 2.405 1.076 2.405 2.405 0 1.328-1.075 2.405-2.405 2.405-1.326 0-2.403-1.077-2.403-2.405z"/>
           </svg>
         )
       case 'Clubhouse':
@@ -137,6 +137,57 @@ const SocialIcon = ({ platform }: { platform: string }) => {
             <circle cx="9" cy="9" r="1.5"/>
             <circle cx="15" cy="9" r="1.5"/>
             <path d="M12 17.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/>
+          </svg>
+        )
+      case 'Apple':
+        return (
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="#000">
+            <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+          </svg>
+        )
+      case 'Microsoft':
+        return (
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="#00A4EF">
+            <path d="M11.4 24H0V12.6h11.4V24zM24 24H12.6V12.6H24V24zM11.4 11.4H0V0h11.4v11.4zM24 11.4H12.6V0H24v11.4z"/>
+          </svg>
+        )
+      case 'PayPal':
+        return (
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="#0070BA">
+            <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a.953.953 0 0 0-.195-.04c-.093-.01-.191-.01-.293-.01H18.65c-.524 0-.967.382-1.05.9L16.42 14.91c-.013.087-.013.17 0 .251.085.464.529.846 1.053.846h2.065c4.298 0 7.664-1.747 8.647-6.797.03-.149.054-.294.077-.437.201-1.05.072-1.806-.413-2.354a3.746 3.746 0 0 0-.673-.502z"/>
+          </svg>
+        )
+      case 'Fitbit':
+        return (
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="#00B0B9">
+            <path d="M13.298 1.825c0 .976-.81 1.767-1.809 1.767-.998 0-1.808-.79-1.808-1.767C9.681.85 10.491.06 11.49.06c.998 0 1.808.791 1.808 1.765zm-1.81 4.424c-.998 0-1.808-.79-1.808-1.766 0-.975.81-1.766 1.809-1.766.998 0 1.808.791 1.808 1.766 0 .976-.81 1.766-1.808 1.766zm0 4.424c-.998 0-1.808-.791-1.808-1.767 0-.975.81-1.766 1.809-1.766.998 0 1.808.791 1.808 1.766 0 .976-.81 1.767-1.808 1.767zm0 4.424c-.998 0-1.808-.791-1.808-1.767 0-.975.81-1.766 1.809-1.766.998 0 1.808.791 1.808 1.766 0 .976-.81 1.767-1.808 1.767zm0 4.423c-.998 0-1.808-.79-1.808-1.766 0-.976.81-1.767 1.809-1.767.998 0 1.808.791 1.808 1.767 0 .976-.81 1.766-1.808 1.766z"/>
+          </svg>
+        )
+      case 'ID.me':
+        return (
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="#1E88E5">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none"/>
+            <text x="12" y="16" textAnchor="middle" fontSize="10" fill="currentColor">ID</text>
+          </svg>
+        )
+      case 'IDPartner':
+        return (
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="#6B46C1">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none"/>
+            <text x="12" y="16" textAnchor="middle" fontSize="8" fill="currentColor">IDP</text>
+          </svg>
+        )
+      case 'Okta':
+        return (
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="#007DC1">
+            <circle cx="12" cy="12" r="10"/>
+            <circle cx="12" cy="12" r="5" fill="white"/>
+          </svg>
+        )
+      case 'Spotify':
+        return (
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="#1DB954">
+            <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.262.3-.339-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.42 1.56-.299.421-1.02.599-1.559.3z"/>
           </svg>
         )
       default:
@@ -162,8 +213,12 @@ export default function ConnectedAccounts() {
   const [startX, setStartX] = useState(0)
   const platformsPerPage = 6
 
-  // Define which platforms have Auth0 integration
-  const auth0Platforms = ['Facebook', 'LinkedIn', 'Google']
+  // Define which platforms have Auth0 integration (ordered by popularity)
+  const auth0Platforms = [
+    'Google', 'Facebook', 'Apple', 'Microsoft', 'LinkedIn', 'GitHub', 
+    'YouTube', 'Twitter', 'Discord', 'PayPal', 'Snapchat', 'Spotify', 'Twitch', 
+    'Fitbit', 'ID.me', 'IDPartner', 'Okta'
+  ]
   
   // Fetch Auth0 user session data
   const fetchUserSession = async () => {
@@ -250,15 +305,37 @@ export default function ConnectedAccounts() {
   const handleAuth0Connect = (platform: string) => {
     // Map platform names to Auth0 connection strings
     const connectionMap: { [key: string]: string } = {
+      'Google': 'google-oauth2',
       'Facebook': 'facebook',
+      'Apple': 'apple',
+      'Microsoft': 'windowslive',
       'LinkedIn': 'linkedin',
-      'Google': 'google-oauth2'
+      'GitHub': 'github',
+      'YouTube': 'google-oauth2', // YouTube uses Google OAuth with YouTube scopes
+      'Twitter': 'twitter',
+      'Discord': 'discord',
+      'PayPal': 'paypal',
+      'Snapchat': 'snapchat',
+      'Spotify': 'spotify',
+      'Twitch': 'twitch',
+      'Fitbit': 'fitbit',
+      'ID.me': 'samlp', // ID.me uses SAML
+      'IDPartner': 'samlp', // IDPartner uses SAML  
+      'Okta': 'okta'
     }
     
     const connection = connectionMap[platform]
     if (connection) {
+      let authUrl = `/api/auth/login?connection=${connection}&returnTo=${encodeURIComponent('/connected-accounts')}`
+      
+      // For YouTube, add YouTube scopes to Google OAuth
+      if (platform === 'YouTube') {
+        const youtubeScopes = 'openid profile email https://www.googleapis.com/auth/youtube.readonly https://www.googleapis.com/auth/youtube'
+        authUrl += `&scope=${encodeURIComponent(youtubeScopes)}`
+      }
+      
       // Redirect to Auth0 login with the specific social provider
-      window.location.href = `/api/auth/login?connection=${connection}&returnTo=${encodeURIComponent('/connected-accounts')}`
+      window.location.href = authUrl
     }
   }
 
@@ -472,8 +549,6 @@ export default function ConnectedAccounts() {
           </div>
         )}
 
-
-
         {/* Available Platforms - Swipeable */}
         <div className="bg-white rounded-2xl border border-slate-200 shadow-lg p-5 md:p-6">
           <div className="flex items-center justify-between mb-6">
@@ -531,6 +606,9 @@ export default function ConnectedAccounts() {
                     </div>
                     <div className="text-center min-w-0 w-full">
                       <h3 className="font-medium text-slate-800 text-sm truncate">{platform}</h3>
+                      {platform === 'Facebook' && (
+                        <p className="text-xs text-amber-600 mt-1">⚠️ Login only</p>
+                      )}
                       {isConnected ? (
                         <span className="text-xs text-green-600 flex items-center justify-center mt-1">
                           <CheckBadgeIcon className="w-3 h-3 mr-1 flex-shrink-0" />
@@ -607,8 +685,6 @@ export default function ConnectedAccounts() {
             </div>
           </div>
         )}
-
-
       </div>
     </Layout>
   )

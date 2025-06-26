@@ -1378,23 +1378,34 @@ export function getTrustLevel(score: number): 'excellent' | 'good' | 'fair' | 'p
   return 'new'
 }
 
-// Social Platform Icons
+// Social Platform Icons - Organized by Auth0 availability and popularity
 export const socialPlatforms = {
-  'Facebook': '👥',
-  'LinkedIn': '💼',
+  // Auth0 Available Platforms (Most to Least Popular)
   'Google': '🔍',
-  'Instagram': '📸',
-  'Twitter': '🐦',
-  'TikTok': '🎵',
-  'YouTube': '📺',
-  'Snapchat': '👻',
-  'Discord': '🎮',
-  'Reddit': '🤖',
-  'Twitch': '🎬',
-  'Pinterest': '📌',
+  'Facebook': '👥', 
+  'Apple': '🍎',
+  'Microsoft': '🪟',
+  'LinkedIn': '💼',
   'GitHub': '💻',
+  'YouTube': '📺',
+  'Twitter': '🐦',
+  'Discord': '🎮',
+  'PayPal': '💰',
+  'Snapchat': '👻',
+  'Spotify': '🎵',
+  'Twitch': '🎬',
+  'Fitbit': '⌚',
+  'ID.me': '🆔',
+  'IDPartner': '🔗',
+  'Okta': '🔐',
+  
+  // Non-Auth0 Platforms (Most to Least Popular)
+  'Instagram': '📸',
+  'TikTok': '🎵',
   'WhatsApp': '💬',
   'Telegram': '✈️',
+  'Reddit': '🤖',
+  'Pinterest': '📌',
   'Steam': '🎮',
   'Signal': '🔒',
   'Clubhouse': '🎙️',
