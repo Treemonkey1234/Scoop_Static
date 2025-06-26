@@ -2,6 +2,46 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Custom animations for map markers */
+@keyframes ping {
+  75%, 100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: .5;
+  }
+}
+
+/* Enhanced map pin styles for better locking */
+.map-pin {
+  will-change: transform;
+  transform-origin: center center;
+  backface-visibility: hidden;
+  /* Prevent pixel shifts during animations */
+  transform: translateZ(0);
+}
+
+.map-pin:hover {
+  transform: translateZ(0) scale(1.05);
+}
+
+/* Mapbox container enhancements */
+.mapboxgl-map {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+.mapboxgl-marker {
+  /* Ensure pins stay locked to coordinates */
+  transform-origin: center center;
+}
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 @import 'mapbox-gl/dist/mapbox-gl.css';
 
