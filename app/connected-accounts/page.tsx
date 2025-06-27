@@ -43,7 +43,7 @@ export default function ConnectedAccounts() {
         
         // Check if this is an account linking operation
         if (data.session?.isAccountLinking) {
-          console.log('Account linking detected, adding account to Scoop profile')
+          // Account linking detected, adding account to Scoop profile
           await handleAccountLinking(data.session)
         }
         
@@ -68,7 +68,7 @@ export default function ConnectedAccounts() {
       const success = addConnectedAccount(authSession)
       
       if (success) {
-        console.log('Successfully added connected account')
+        // Successfully added connected account
         // Refresh the page data
         const updatedUser = getCurrentUser()
         setCurrentUser(updatedUser)
@@ -256,23 +256,23 @@ export default function ConnectedAccounts() {
               {scoopProfile ? (
                 // Display Scoop profile connected accounts
                 scoopProfile.connectedAccounts.map((account, index) => {
-                  const platformMap: { [key: string]: { name: string, emoji: string } } = {
-                    'Google': { name: 'Google', emoji: '🔍' },
-                    'Facebook': { name: 'Facebook', emoji: '📘' },
-                    'LinkedIn': { name: 'LinkedIn', emoji: '💼' },
-                    'Twitter': { name: 'Twitter', emoji: '🐦' },
-                    'Instagram': { name: 'Instagram', emoji: '📸' },
-                    'GitHub': { name: 'GitHub', emoji: '🐱' }
+                  const platformMap: { [key: string]: { name: string } } = {
+                    'Google': { name: 'Google' },
+                    'Facebook': { name: 'Facebook' },
+                    'LinkedIn': { name: 'LinkedIn' },
+                    'Twitter': { name: 'Twitter' },
+                    'Instagram': { name: 'Instagram' },
+                    'GitHub': { name: 'GitHub' }
                   }
                   
-                  const platformInfo = platformMap[account.provider] || { name: account.provider, emoji: '🔗' }
+                  const platformInfo = platformMap[account.provider] || { name: account.provider }
                   
                   return (
                     <div key={index} className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-4 min-w-0 flex-1">
                           <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm border border-green-100 flex-shrink-0">
-                            <span className="text-xl">{platformInfo.emoji}</span>
+                            <SocialIcon platform={platformInfo.name} size={24} />
                           </div>
                           <div className="min-w-0 flex-1">
                             <h3 className="font-medium text-slate-800">{platformInfo.name}</h3>
@@ -299,23 +299,23 @@ export default function ConnectedAccounts() {
                   ['google-oauth2', 'facebook', 'linkedin', 'twitter', 'instagram', 'github'].includes(identity.provider)
                 ).map((identity: any, index: number) => {
                   // Map Auth0 provider names to display names
-                  const platformMap: { [key: string]: { name: string, emoji: string } } = {
-                    'google-oauth2': { name: 'Google', emoji: '🔍' },
-                    'facebook': { name: 'Facebook', emoji: '📘' },
-                    'linkedin': { name: 'LinkedIn', emoji: '💼' },
-                    'twitter': { name: 'Twitter', emoji: '🐦' },
-                    'instagram': { name: 'Instagram', emoji: '📸' },
-                    'github': { name: 'GitHub', emoji: '🐱' }
+                  const platformMap: { [key: string]: { name: string } } = {
+                    'google-oauth2': { name: 'Google' },
+                    'facebook': { name: 'Facebook' },
+                    'linkedin': { name: 'LinkedIn' },
+                    'twitter': { name: 'Twitter' },
+                    'instagram': { name: 'Instagram' },
+                    'github': { name: 'GitHub' }
                   }
                   
-                  const platformInfo = platformMap[identity.provider] || { name: identity.provider, emoji: '🔗' }
+                  const platformInfo = platformMap[identity.provider] || { name: identity.provider }
                   
                   return (
                     <div key={index} className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-4 min-w-0 flex-1">
                           <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm border border-green-100 flex-shrink-0">
-                            <span className="text-xl">{platformInfo.emoji}</span>
+                            <SocialIcon platform={platformInfo.name} size={24} />
                           </div>
                           <div className="min-w-0 flex-1">
                             <h3 className="font-medium text-slate-800">{platformInfo.name}</h3>
@@ -340,9 +340,7 @@ export default function ConnectedAccounts() {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-4 min-w-0 flex-1">
                           <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm border border-green-100 flex-shrink-0">
-                            <span className="text-xl">
-                              {platform === 'instagram' ? '📸' : platform === 'twitter' ? '🐦' : platform === 'linkedin' ? '💼' : '🔗'}
-                            </span>
+                            <SocialIcon platform={platform} size={24} />
                           </div>
                           <div className="min-w-0 flex-1">
                             <h3 className="font-medium text-slate-800 capitalize">{platform}</h3>

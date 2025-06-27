@@ -327,7 +327,7 @@ export default function EventsPage() {
       })
 
       map.current.on('load', () => {
-        console.log('Map loaded successfully')
+                  // Map loaded successfully
         setMapLoaded(true)
         addEventMarkers()
       })
@@ -1356,7 +1356,7 @@ export default function EventsPage() {
                         onClick={async () => {
                           const matrix = await calculateTravelMatrix()
                           if (matrix) {
-                            console.log('Travel matrix calculated:', matrix)
+                            // Travel matrix calculated
                             // You could update UI with real travel times
                           }
                         }}
@@ -1431,17 +1431,7 @@ export default function EventsPage() {
                 </div>
               </div>
 
-              {/* Debug Panel (Remove in production) */}
-              {process.env.NODE_ENV === 'development' && (
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-xs">
-                  <div className="font-semibold text-yellow-800 mb-2">🛠️ Debug Info:</div>
-                  <div className="text-yellow-700">
-                    Journey: {journey.length} events • Maybe: {maybeEvents.length} • Notify: {notifyEvents.length}
-                    <br />Current Index: {currentSwipeIndex + 1}/{getFilteredEvents().length} • User: {USER_LOCATION.address}
-                    <br />Saved Journeys: {JSON.parse(localStorage.getItem('userJourneys') || '[]').length}
-                  </div>
-                </div>
-              )}
+
 
               {/* Discovery & Journey Panels */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

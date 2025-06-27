@@ -38,6 +38,10 @@ export interface User {
   }
   phoneVerified: boolean
   emailVerified: boolean
+  flavors?: Array<{
+    flavor: string
+    score: number
+  }>
 }
 
 export interface SocialAccount {
@@ -1438,4 +1442,82 @@ export function createUserProfile(userData: any): User {
   }
 
   return newUser
+}
+
+// Generate demo flavors for sample users based on their reviews
+export function generateDemoFlavors(): void {
+  if (typeof window === 'undefined') return
+
+  // Demo flavors based on user personalities and reviews they've received
+  const demoFlavors = {
+    '0': [ // Test User
+      { flavor: 'helpful', score: 78 },
+      { flavor: 'tech-savvy', score: 85 },
+      { flavor: 'friendly', score: 72 },
+      { flavor: 'reliable', score: 68 }
+    ],
+    '1': [ // Jake Martinez - Event organizer and community builder
+      { flavor: 'leader', score: 92 },
+      { flavor: 'organized', score: 89 },
+      { flavor: 'helpful', score: 86 },
+      { flavor: 'professional', score: 83 }
+    ],
+    '2': [ // Sarah Chen - Software engineer
+      { flavor: 'tech-savvy', score: 95 },
+      { flavor: 'smart', score: 88 },
+      { flavor: 'reliable', score: 84 },
+      { flavor: 'helpful', score: 79 }
+    ],
+    '3': [ // Emily Rodriguez - Creative professional
+      { flavor: 'creative', score: 93 },
+      { flavor: 'friendly', score: 87 },
+      { flavor: 'positive', score: 82 },
+      { flavor: 'empathetic', score: 76 }
+    ],
+    '4': [ // David Kim - Business consultant
+      { flavor: 'professional', score: 91 },
+      { flavor: 'smart', score: 87 },
+      { flavor: 'confident', score: 84 },
+      { flavor: 'reliable', score: 81 }
+    ],
+    '5': [ // Lisa Thompson - Insurance professional
+      { flavor: 'reliable', score: 94 },
+      { flavor: 'professional', score: 90 },
+      { flavor: 'helpful', score: 85 },
+      { flavor: 'empathetic', score: 78 }
+    ]
+  }
+
+  // Store flavors in localStorage for the demo
+  try {
+    localStorage.setItem('demoFlavors', JSON.stringify(demoFlavors))
+  } catch (error) {
+    console.error('Error storing demo flavors:', error)
+  }
+}
+
+// Get user flavors (demo or real)
+export function getUserFlavors(userId: string): Array<{flavor: string, score: number}> {
+  if (typeof window === 'undefined') return []
+
+  try {
+    const demoFlavors = localStorage.getItem('demoFlavors')
+    if (demoFlavors) {
+      const flavors = JSON.parse(demoFlavors)
+      return flavors[userId] || []
+    }
+  } catch (error) {
+    console.error('Error retrieving flavors:', error)
+  }
+
+  return []
+}
+
+// Initialize demo flavors on first load
+if (typeof window !== 'undefined') {
+  const hasGeneratedFlavors = localStorage.getItem('demoFlavorsGenerated')
+  if (!hasGeneratedFlavors) {
+    generateDemoFlavors()
+    localStorage.setItem('demoFlavorsGenerated', 'true')
+  }
 } 

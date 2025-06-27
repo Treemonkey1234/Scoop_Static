@@ -6,7 +6,8 @@ import Link from 'next/link'
 import Layout from '@/components/Layout'
 import TrustBadge from '@/components/TrustBadge'
 import FlagModal from '@/components/FlagModal'
-import { getCurrentUser, sampleReviews, sampleUsers, User, getUserActivities } from '@/lib/sampleData'
+import PersonalityFlavors from '@/components/PersonalityFlavors'
+import { getCurrentUser, sampleReviews, sampleUsers, User, getUserActivities, getUserFlavors } from '@/lib/sampleData'
 import { getCurrentScoopProfile, ConnectedAccount } from '@/lib/scoopProfile'
 import { 
   Cog6ToothIcon,
@@ -51,6 +52,7 @@ export default function ProfilePage() {
     contentTitle: ''
   })
   const [activeTab, setActiveTab] = useState<'overview' | 'events' | 'reviews'>('overview')
+  const [activeReviewTab, setActiveReviewTab] = useState<'about' | 'by'>('about')
 
   // Fetch Auth0 user session data
   const fetchUserSession = async () => {
@@ -161,6 +163,8 @@ export default function ProfilePage() {
   }
 
   const userReviews = sampleReviews.filter(r => r.reviewedId === displayUser.id)
+  // Reviews made by this user about others
+  const reviewsByUser = sampleReviews.filter(review => review.reviewerId === displayUser.id)
   
   const handleFlag = (contentType: 'post' | 'event' | 'social', contentId: string, contentTitle?: string) => {
     console.log('Profile flag clicked:', { contentType, contentId, contentTitle })
@@ -480,23 +484,13 @@ export default function ProfilePage() {
               {displayUser.trustScore < 60 && '🆓 Standard Member'}
             </div>
           </div>
-
-          {/* Stats */}
-          <div className="grid grid-cols-3 gap-4">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-slate-800">{displayUser.friendsCount}</div>
-              <div className="text-sm text-slate-500">Friends</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-slate-800">{displayUser.reviewsCount}</div>
-              <div className="text-sm text-slate-500">Reviews</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-slate-800">{displayUser.eventsAttended}</div>
-              <div className="text-sm text-slate-500">Events</div>
-            </div>
-          </div>
         </div>
+
+        {/* Personality Flavors Section */}
+        <PersonalityFlavors 
+          flavors={getUserFlavors(displayUser.id)} 
+          className="card-soft"
+        />
 
         {/* Trust Score Section - Collapsed by Default */}
         <div className="card-soft bg-gradient-to-r from-cyan-50 to-teal-50 border-cyan-200">
@@ -560,7 +554,7 @@ export default function ProfilePage() {
           )}
         </div>
 
-        {/* Connected Accounts - Redesigned with Icons Only */}
+        {/* Connected Accounts - Restored Original Design */}
         <div className="card-soft">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-slate-800 flex items-center">
@@ -568,7 +562,7 @@ export default function ProfilePage() {
               Connected Accounts
             </h3>
             <span className="text-sm text-cyan-600 bg-cyan-100 px-2 py-1 rounded-full">
-                              {socialAccountsArray.length} connected
+              {socialAccountsArray.length} connected
             </span>
           </div>
           
@@ -617,32 +611,95 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Recent Reviews */}
+        {/* Reviews Section - Split into Reviews About & Reviews By */}
         <div className="card-soft">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-slate-800 flex items-center">
               <StarIcon className="w-5 h-5 mr-2 text-cyan-500" />
-              Recent Reviews
+              Reviews
             </h3>
-            <Link href="/profile/reviews" className="text-sm text-cyan-600 hover:text-cyan-700 font-medium">
-              View all →
-            </Link>
           </div>
+          
+          {/* Tab Navigation */}
+          <div className="flex bg-slate-100 rounded-xl p-1 mb-4">
+            <button
+              onClick={() => setActiveReviewTab('about')}
+              className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
+                activeReviewTab === 'about'
+                  ? 'bg-white text-cyan-600 shadow-sm'
+                  : 'text-slate-600 hover:text-slate-800'
+              }`}
+            >
+                             Reviews About ({userReviews.length})
+            </button>
+            <button
+              onClick={() => setActiveReviewTab('by')}
+              className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
+                activeReviewTab === 'by'
+                  ? 'bg-white text-cyan-600 shadow-sm'
+                  : 'text-slate-600 hover:text-slate-800'
+              }`}
+            >
+                             Reviews By ({reviewsByUser.length})
+            </button>
+          </div>
+
+          {/* Reviews Content */}
           <div className="space-y-3">
-            {userReviews.slice(0, 3).map((review) => {
-              const reviewer = sampleUsers.find(u => u.id === review.reviewerId)
-              return (
-                <div key={review.id} className="p-3 bg-slate-50 rounded-xl">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <span className="text-sm font-medium text-slate-800">{reviewer?.name}</span>
-                    <span className="text-xs text-cyan-600 bg-cyan-100 px-2 py-1 rounded-full">
-                      {review.category}
-                    </span>
-                  </div>
-                  <p className="text-sm text-slate-700">"{review.content}"</p>
+            {activeReviewTab === 'about' ? (
+              userReviews.length > 0 ? (
+                userReviews.slice(0, 3).map((review) => {
+                  const reviewer = sampleUsers.find(u => u.id === review.reviewerId)
+                  return (
+                    <div key={review.id} className="p-3 bg-slate-50 rounded-xl">
+                      <div className="flex items-center space-x-2 mb-2">
+                        <span className="text-sm font-medium text-slate-800">{reviewer?.name}</span>
+                        <span className="text-xs text-cyan-600 bg-cyan-100 px-2 py-1 rounded-full">
+                          {review.category}
+                        </span>
+                      </div>
+                      <p className="text-sm text-slate-700">"{review.content}"</p>
+                    </div>
+                  )
+                })
+              ) : (
+                <div className="text-center py-6 text-slate-500">
+                  <p className="text-sm">No reviews received yet</p>
                 </div>
               )
-            })}
+            ) : (
+              reviewsByUser.length > 0 ? (
+                reviewsByUser.slice(0, 3).map((review) => {
+                  const reviewee = sampleUsers.find(u => u.id === review.reviewedId)
+                  return (
+                    <div key={review.id} className="p-3 bg-slate-50 rounded-xl">
+                      <div className="flex items-center space-x-2 mb-2">
+                        <span className="text-sm text-slate-600">Review for:</span>
+                        <span className="text-sm font-medium text-slate-800">{reviewee?.name}</span>
+                        <span className="text-xs text-cyan-600 bg-cyan-100 px-2 py-1 rounded-full">
+                          {review.category}
+                        </span>
+                      </div>
+                      <p className="text-sm text-slate-700">"{review.content}"</p>
+                    </div>
+                  )
+                })
+              ) : (
+                <div className="text-center py-6 text-slate-500">
+                  <p className="text-sm">No reviews written yet</p>
+                </div>
+              )
+            )}
+          </div>
+
+          {/* View All Button */}
+          <div className="mt-4 text-center">
+            <Link 
+              href={`/profile/reviews?tab=${activeReviewTab}`} 
+              className="text-sm text-cyan-600 hover:text-cyan-700 font-medium"
+            >
+                             View All {activeReviewTab === 'about' ? 'Reviews About' : 'Reviews By'} →
+            </Link>
           </div>
         </div>
 
@@ -656,6 +713,25 @@ export default function ProfilePage() {
             <span className="text-sm text-slate-500">Last 7 days</span>
           </div>
           <RecentActivitySection userId={displayUser.id} />
+        </div>
+
+        {/* Profile Stats - Moved to Bottom */}
+        <div className="card-soft">
+          <h3 className="text-lg font-semibold text-slate-800 mb-4">Profile Stats</h3>
+          <div className="grid grid-cols-3 gap-4">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-slate-800">{displayUser.friendsCount}</div>
+              <div className="text-sm text-slate-500">Friends</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-slate-800">{displayUser.reviewsCount}</div>
+              <div className="text-sm text-slate-500">Reviews</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-slate-800">{displayUser.eventsAttended}</div>
+              <div className="text-sm text-slate-500">Events</div>
+            </div>
+          </div>
         </div>
 
         {/* Settings Link */}

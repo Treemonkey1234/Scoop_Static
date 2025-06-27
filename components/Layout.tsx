@@ -1288,10 +1288,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         />
       )}
 
-      {/* Floating Action Button for Mobile (Optional) */}
-      <button className="fixed bottom-20 right-4 w-14 h-14 bg-gradient-to-r from-cyan-500 to-teal-600 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 flex items-center justify-center z-40 hover:scale-110 active:scale-95 md:hidden">
-        <SparklesIcon className="w-6 h-6 text-white" />
-      </button>
+
 
       {/* Sprinkle Celebration */}
       <SprinkleCelebration show={showToast} />

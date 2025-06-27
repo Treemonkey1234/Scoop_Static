@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScoopSocials Flavor Analysis Demo</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        .flavors-display {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .flavor-tag {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+        }
+        .results {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border-left: 4px solid #667eea;
+        }
+        .user-profile {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        .demo-comments {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        .comment-example {
+            background: white;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 1px solid #ddd;
+        }
+        .comment-example:hover {
+            background: #f0f8ff;
+            border-color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎭 ScoopSocials Flavor Analysis Demo</h1>
+        <p>Test the real-time AI analysis that generates personality "flavors" from user comments!</p>
+    </div>
+
+    <div class="container">
+        <h2>📝 Analyze a Comment</h2>
+        <div class="input-group">
+            <label for="targetUser">User Being Commented About:</label>
+            <select id="targetUser">
+                <option value="user1">Sarah Johnson</option>
+                <option value="user2">Mike Chen</option>
+                <option value="user3">Alex Rivera</option>
+                <option value="user4">Jessica Park</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <label for="comment">Comment Text:</label>
+            <textarea id="comment" rows="3" placeholder="Enter a comment about the user..."></textarea>
+        </div>
+
+        <button onclick="analyzeComment()">🔍 Analyze Comment</button>
+
+        <div id="analysisResults"></div>
+    </div>
+
+    <div class="container">
+        <h2>👤 User Flavor Profiles</h2>
+        <div id="userProfiles"></div>
+    </div>
+
+    <div class="container demo-comments">
+        <h3>💡 Try These Example Comments</h3>
+        <p>Click any comment to analyze it automatically:</p>
+        
+        <div class="comment-example" onclick="useExample('Sarah was incredibly helpful during the event planning. She organized everything perfectly and made sure everyone felt included.')">
+            "Sarah was incredibly helpful during the event planning. She organized everything perfectly and made sure everyone felt included."
+        </div>
+        
+        <div class="comment-example" onclick="useExample('Mike is such a creative problem-solver! His innovative ideas always inspire the team.')">
+            "Mike is such a creative problem-solver! His innovative ideas always inspire the team."
+        </div>
+        
+        <div class="comment-example" onclick="useExample('Alex is super friendly and outgoing. Always brings positive energy to every gathering.')">
+            "Alex is super friendly and outgoing. Always brings positive energy to every gathering."
+        </div>
+        
+        <div class="comment-example" onclick="useExample('Jessica is very professional and reliable. You can always count on her to deliver quality work.')">
+            "Jessica is very professional and reliable. You can always count on her to deliver quality work."
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/sentiment@5.0.2/lib/index.js"></script>
+    <script>
+        // Simplified version of the flavor analysis for demo
+        const FLAVOR_KEYWORDS = {
+            'helpful': ['helpful', 'helping', 'supportive', 'assists', 'assistance', 'aids', 'caring'],
+            'professional': ['professional', 'business-like', 'formal', 'corporate', 'work-oriented', 'serious'],
+            'creative': ['creative', 'artistic', 'innovative', 'original', 'imaginative', 'inventive'],
+            'friendly': ['friendly', 'nice', 'kind', 'warm', 'welcoming', 'approachable', 'pleasant'],
+            'funny': ['funny', 'hilarious', 'humorous', 'witty', 'comedy', 'jokes', 'entertaining'],
+            'smart': ['smart', 'intelligent', 'clever', 'bright', 'brilliant', 'genius', 'wise'],
+            'reliable': ['reliable', 'dependable', 'trustworthy', 'consistent', 'steady', 'responsible'],
+            'energetic': ['energetic', 'active', 'dynamic', 'enthusiastic', 'lively', 'vibrant'],
+            'outgoing': ['outgoing', 'social', 'extroverted', 'talkative', 'engaging', 'interactive'],
+            'calm': ['calm', 'peaceful', 'relaxed', 'chill', 'zen', 'tranquil', 'serene'],
+            'confident': ['confident', 'self-assured', 'bold', 'assertive', 'strong', 'decisive'],
+            'humble': ['humble', 'modest', 'down-to-earth', 'unpretentious', 'grounded'],
+            'organized': ['organized', 'structured', 'planned', 'systematic', 'orderly'],
+            'positive': ['positive', 'optimistic', 'upbeat', 'cheerful', 'happy', 'joyful']
+        };
+
+        // In-memory storage for demo
+        let userFlavors = JSON.parse(localStorage.getItem('demoUserFlavors') || '{}');
+
+        function performFlavorAnalysis(text) {
+            const sentiment = new Sentiment();
+            const sentimentResult = sentiment.analyze(text);
+            const flavors = {};
+            const words = text.toLowerCase().split(/\W+/);
+            
+            Object.entries(FLAVOR_KEYWORDS).forEach(([flavor, keywords]) => {
+                let score = 0;
+                
+                keywords.forEach(keyword => {
+                    if (words.includes(keyword) || text.toLowerCase().includes(keyword)) {
+                        score += 1;
+                    }
+                });
+                
+                if (score > 0) {
+                    let normalizedScore = Math.min(score / keywords.length, 1);
+                    if (sentimentResult.score > 0) {
+                        normalizedScore = Math.min(normalizedScore * 1.2, 1);
+                    }
+                    flavors[flavor] = normalizedScore;
+                }
+            });
+
+            return {
+                flavors,
+                sentiment: sentimentResult.score,
+                confidence: Math.min((Object.keys(flavors).length * 0.2) + (text.length / 100 * 0.3) + 0.5, 1)
+            };
+        }
+
+        function updateUserProfile(userId, analysis) {
+            if (!userFlavors[userId]) {
+                userFlavors[userId] = {
+                    allFlavors: {},
+                    totalComments: 0
+                };
+            }
+
+            const profile = userFlavors[userId];
+            
+            Object.entries(analysis.flavors).forEach(([flavor, score]) => {
+                const currentScore = profile.allFlavors[flavor] || 0;
+                const currentCount = profile.totalComments;
+                
+                const newScore = currentCount === 0 
+                    ? score 
+                    : (currentScore * currentCount + score * 1.5) / (currentCount + 1.5);
+                
+                profile.allFlavors[flavor] = Math.min(newScore, 1);
+            });
+
+            profile.totalComments++;
+            
+            // Save to localStorage
+            localStorage.setItem('demoUserFlavors', JSON.stringify(userFlavors));
+        }
+
+        function getTopFlavors(userId) {
+            const profile = userFlavors[userId];
+            if (!profile) return [];
+            
+            return Object.entries(profile.allFlavors)
+                .map(([flavor, score]) => ({flavor, score: Math.round(score * 100)}))
+                .sort((a, b) => b.score - a.score)
+                .slice(0, 4);
+        }
+
+        function analyzeComment() {
+            const targetUser = document.getElementById('targetUser').value;
+            const comment = document.getElementById('comment').value;
+            
+            if (!comment.trim()) {
+                alert('Please enter a comment to analyze!');
+                return;
+            }
+
+            const analysis = performFlavorAnalysis(comment);
+            updateUserProfile(targetUser, analysis);
+
+            displayResults(analysis, targetUser);
+            updateUserProfiles();
+        }
+
+        function displayResults(analysis, userId) {
+            const resultsDiv = document.getElementById('analysisResults');
+            
+            const flavorTags = Object.entries(analysis.flavors)
+                .map(([flavor, score]) => `<span class="flavor-tag">${flavor} (${Math.round(score * 100)}%)</span>`)
+                .join('');
+
+            resultsDiv.innerHTML = `
+                <div class="results">
+                    <h3>🎯 Analysis Results</h3>
+                    <p><strong>Detected Flavors:</strong></p>
+                    <div class="flavors-display">${flavorTags}</div>
+                    <p><strong>Sentiment:</strong> ${analysis.sentiment > 0 ? '😊 Positive' : analysis.sentiment < 0 ? '😞 Negative' : '😐 Neutral'} (${analysis.sentiment.toFixed(2)})</p>
+                    <p><strong>Confidence:</strong> ${Math.round(analysis.confidence * 100)}%</p>
+                </div>
+            `;
+        }
+
+        function updateUserProfiles() {
+            const profilesDiv = document.getElementById('userProfiles');
+            const userNames = {
+                'user1': 'Sarah Johnson',
+                'user2': 'Mike Chen', 
+                'user3': 'Alex Rivera',
+                'user4': 'Jessica Park'
+            };
+            
+            let profilesHTML = '';
+            
+            Object.keys(userNames).forEach(userId => {
+                const flavors = getTopFlavors(userId);
+                const userName = userNames[userId];
+                const totalComments = userFlavors[userId]?.totalComments || 0;
+                
+                const flavorTags = flavors.length > 0 
+                    ? flavors.map(f => `<span class="flavor-tag">${f.flavor} ${f.score}%</span>`).join('')
+                    : '<span class="flavor-tag">No flavors yet</span>';
+                
+                profilesHTML += `
+                    <div class="user-profile">
+                        <h3>👤 ${userName}</h3>
+                        <p>Comments analyzed: ${totalComments}</p>
+                        <div class="flavors-display">${flavorTags}</div>
+                    </div>
+                `;
+            });
+            
+            profilesDiv.innerHTML = profilesHTML;
+        }
+
+        function useExample(exampleText) {
+            document.getElementById('comment').value = exampleText;
+            analyzeComment();
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateUserProfiles();
+        });
+    </script>
+</body>
+</html> 
