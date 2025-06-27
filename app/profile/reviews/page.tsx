@@ -1,13 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Layout from '@/components/Layout'
 import { StarIcon, ArrowLeftIcon } from '@heroicons/react/24/outline'
 import { sampleReviews, sampleUsers, getCurrentUser } from '@/lib/sampleData'
 
-export default function AllReviewsPage() {
+function ReviewsContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const initialTab = searchParams.get('tab') === 'by' ? 'by' : 'about'
@@ -160,5 +160,19 @@ export default function AllReviewsPage() {
         </div>
       </div>
     </Layout>
+  )
+}
+
+export default function AllReviewsPage() {
+  return (
+    <Suspense fallback={
+      <Layout>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="w-8 h-8 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      </Layout>
+    }>
+      <ReviewsContent />
+    </Suspense>
   )
 } 
