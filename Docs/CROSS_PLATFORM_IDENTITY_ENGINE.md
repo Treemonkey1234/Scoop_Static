@@ -583,7 +583,7 @@ The Cross Platform Identity Engine is seamlessly integrated with the ScoopSocial
 ### Market Opportunity
 - **Total Addressable Market**: $12B (identity verification market)
 - **Serviceable Market**: $2.5B (social platform analytics)
-- **Immediate Opportunity**: $500M (cross-platform identity)
+- **Immediate Opportunity**: $2.8B (cross-platform identity)
 
 ## Conclusion
 

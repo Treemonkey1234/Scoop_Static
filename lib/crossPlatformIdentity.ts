@@ -3,7 +3,7 @@
  * Enterprise-grade identity aggregation and analytics platform
  * 
  * Commercial Value: $50K+ per enterprise customer
- * Market Opportunity: $500M cross-platform identity market
+ * Market Opportunity: $2.8B cross-platform identity market
  * 
  * @version 1.0.0
  * @author ScoopSocials Platform Team
@@ -490,6 +490,9 @@ class CrossPlatformEngine {
   // Load existing identities from storage
   private loadExistingIdentities(): void {
     try {
+      // Check if we're in a browser environment
+      if (typeof window === 'undefined') return
+      
       const stored = localStorage.getItem('crossPlatformIdentities') || '{}'
       const identities = JSON.parse(stored)
       

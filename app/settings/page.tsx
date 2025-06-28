@@ -434,6 +434,23 @@ export default function SettingsPage() {
             </Link>
 
             <Link
+              href="/settings/unified-profile-engine"
+              className="flex items-center justify-between p-4 hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 rounded-xl transition-colors duration-200 border-l-4 border-gradient-to-r from-indigo-500 to-purple-600"
+              style={{ borderLeftColor: '#6366f1' }}
+            >
+              <div className="flex items-center space-x-3">
+                <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+                </svg>
+                <div>
+                  <span className="font-medium bg-gradient-to-r from-indigo-700 to-purple-700 bg-clip-text text-transparent">🧬 Unified Profile Engine</span>
+                  <p className="text-xs text-indigo-600">Cross-platform identity analytics showcase</p>
+                </div>
+              </div>
+              <ChevronRightIcon className="w-5 h-5 text-indigo-400" />
+            </Link>
+
+            <Link
               href="/profile/edit"
               className="flex items-center justify-between p-4 hover:bg-slate-50 rounded-xl transition-colors duration-200"
             >
