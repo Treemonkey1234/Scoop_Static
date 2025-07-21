@@ -119,76 +119,6 @@ async function handleCallback(request: NextRequest) {
     // Log user data for debugging
     console.log('Auth0 User Data:', JSON.stringify(user, null, 2));
     
-    // Create identities array from the user's sub (connection info)
-    // Auth0 user sub format: "provider|user_id" (e.g., "linkedin|18Q4GrE_N7")
-    const createIdentitiesFromSub = (sub: string, userData: any) => {
-      const identities = [];
-      
-      if (sub.startsWith('linkedin|')) {
-        identities.push({
-          provider: 'linkedin',
-          connection: 'linkedin',
-          user_id: sub.split('|')[1],
-          isSocial: true,
-          profileData: {
-            name: userData.name,
-            email: userData.email,
-            picture: userData.picture
-          }
-        });
-      } else if (sub.startsWith('google-oauth2|')) {
-        identities.push({
-          provider: 'google-oauth2',
-          connection: 'google-oauth2',
-          user_id: sub.split('|')[1],
-          isSocial: true,
-          profileData: {
-            name: userData.name,
-            email: userData.email,
-            picture: userData.picture
-          }
-        });
-      } else if (sub.startsWith('facebook|')) {
-        identities.push({
-          provider: 'facebook',
-          connection: 'facebook',
-          user_id: sub.split('|')[1],
-          isSocial: true,
-          profileData: {
-            name: userData.name,
-            email: userData.email,
-            picture: userData.picture
-          }
-        });
-      }
-      
-      return identities;
-    };
-    
-    // Add identities based on the sub field
-    user.identities = createIdentitiesFromSub(user.sub, user);
-    console.log('Created identities from sub:', JSON.stringify(user.identities, null, 2));
-    
-    // If this was a social connection from Connected Accounts, save the connection
-    if (stateData.connection && stateData.returnTo === '/connected-accounts') {
-      const platformMap: { [key: string]: string } = {
-        'google-oauth2': 'Google',
-        'facebook': 'Facebook',
-        'linkedin': 'LinkedIn'
-      };
-      
-      const platform = platformMap[stateData.connection];
-      if (platform && user.email) {
-        // Extract username from email or use email
-        const username = user.email.split('@')[0];
-        
-        // Call the connectSocialAccount function (we'll need to import this)
-        // For now, we'll add the connection data to the session
-        user.connectedPlatform = platform;
-        user.connectedUsername = username;
-      }
-    }
-    
     // Create session
     const sessionData = {
       user: user,
@@ -196,22 +126,8 @@ async function handleCallback(request: NextRequest) {
       expiresAt: Date.now() + (tokens.expires_in * 1000),
     };
     
-    // Check if this is a new user or existing user
-    // For new users, redirect to onboarding. For existing users adding accounts, go to returnTo
-    let redirectPath = stateData.returnTo;
-    
-    // If coming from connected-accounts page, user is adding an account to existing profile
-    if (stateData.returnTo === '/connected-accounts') {
-      // Mark this session as an account linking operation
-      user.isAccountLinking = true;
-      redirectPath = '/connected-accounts';
-    } else {
-      // This is a new user sign in, redirect to onboarding
-      redirectPath = '/onboarding';
-    }
-    
     // Redirect to appropriate page
-    const response = NextResponse.redirect(auth0Config.baseURL + redirectPath);
+    const response = NextResponse.redirect(auth0Config.baseURL + (stateData.returnTo || '/onboarding'));
     
     // Set session cookie
     response.cookies.set('appSession', JSON.stringify(sessionData), {

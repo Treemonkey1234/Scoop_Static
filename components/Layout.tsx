@@ -327,6 +327,31 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     setTimeout(() => setIsLoading(false), 800)
   }
 
+  // Navigation badges - using real data
+  const [friendRequests, setFriendRequests] = useState(0)
+  const [eventNotifications, setEventNotifications] = useState(0)
+
+  // Fetch real notification counts
+  useEffect(() => {
+    const fetchNotificationCounts = async () => {
+      if (currentUser?.id && typeof currentUser.id === 'number') {
+        try {
+          const { friendsAPI } = await import('../lib/api')
+          const requests = await friendsAPI.getFriendRequests(currentUser.id)
+          setFriendRequests(requests.length)
+        } catch (error) {
+          console.error('Error fetching friend requests:', error)
+          setFriendRequests(0)
+        }
+      } else {
+        setFriendRequests(0)
+        setEventNotifications(0)
+      }
+    }
+
+    fetchNotificationCounts()
+  }, [currentUser?.id])
+
   const navigationItems = [
     {
       name: 'Home',
@@ -340,7 +365,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       href: '/events', 
       icon: CalendarIcon,
       iconSolid: CalendarIconSolid,
-      badge: 2
+      badge: eventNotifications > 0 ? eventNotifications : null
     },
     {
       name: 'Search',
@@ -354,7 +379,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       href: '/friends',
       icon: UserGroupIcon,
       iconSolid: UserGroupIconSolid,
-      badge: 1
+      badge: friendRequests > 0 ? friendRequests : null
     },
     {
       name: 'Profile',

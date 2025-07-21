@@ -4,7 +4,7 @@ export const auth0Config = {
   clientId: process.env.AUTH0_CLIENT_ID!,
   clientSecret: process.env.AUTH0_CLIENT_SECRET!,
   secret: process.env.AUTH0_SECRET!,
-  baseURL: process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : process.env.AUTH0_BASE_URL || 'http://localhost:3001',
+  baseURL: process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : process.env.AUTH0_BASE_URL || 'http://localhost:3000',
   issuerBaseURL: process.env.AUTH0_ISSUER_BASE_URL || `https://${process.env.AUTH0_DOMAIN}`,
 };
 

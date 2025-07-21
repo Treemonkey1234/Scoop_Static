@@ -1,0 +1,151 @@
+{
+  "name": "scoop-social-backend",
+  "version": "1.0.0",
+  "description": "Backend API for Scoop Social Platform - Trust-based social networking",
+  "main": "dist/index.js",
+  "scripts": {
+    "start": "node dist/index.js",
+    "dev": "nodemon src/index.ts",
+    "build": "tsc",
+    "build:prod": "tsc --project tsconfig.prod.json",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "typecheck": "tsc --noEmit",
+    "migrate": "node dist/scripts/migrate.js",
+    "migrate:rollback": "node dist/scripts/rollback.js",
+    "seed:demo": "node dist/scripts/seed-demo.js",
+    "worker:trust-scores": "node dist/workers/trust-score-worker.js",
+    "db:reset": "npm run migrate:rollback && npm run migrate && npm run seed:demo",
+    "docker:build": "docker build -t scoop-social-backend .",
+    "docker:run": "docker run -p 3001:3001 scoop-social-backend",
+    "validate-env": "node dist/scripts/validate-env.js",
+    "health-check": "curl -f http://localhost:3001/api/v1/health || exit 1"
+  },
+  "keywords": [
+    "social-network",
+    "trust-score",
+    "nodejs",
+    "typescript",
+    "postgresql",
+    "redis",
+    "websockets",
+    "auth0"
+  ],
+  "author": "Scoop Social Team",
+  "license": "MIT",
+  "dependencies": {
+    "@types/node": "^20.10.0",
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "compression": "^1.7.4",
+    "morgan": "^1.10.0",
+    "dotenv": "^16.3.1",
+    "pg": "^8.11.3",
+    "redis": "^4.6.10",
+    "socket.io": "^4.7.5",
+    "jsonwebtoken": "^9.0.2",
+    "bcryptjs": "^2.4.3",
+    "express-rate-limit": "^7.1.5",
+    "express-validator": "^7.0.1",
+    "multer": "^1.4.5-lts.1",
+    "sharp": "^0.32.6",
+    "aws-sdk": "^2.1498.0",
+    "axios": "^1.6.2",
+    "nodemailer": "^6.9.7",
+    "ioredis": "^5.3.2",
+    "winston": "^3.11.0",
+    "express-winston": "^4.2.0",
+    "@sentry/node": "^7.84.0",
+    "@sentry/integrations": "^7.84.0",
+    "cron": "^3.1.6",
+    "bull": "^4.12.0",
+    "express-slow-down": "^2.0.1",
+    "express-session": "^1.17.3",
+    "connect-redis": "^7.1.0",
+    "passport": "^0.7.0",
+    "passport-jwt": "^4.0.1",
+    "uuid": "^9.0.1",
+    "moment": "^2.29.4",
+    "lodash": "^4.17.21",
+    "@types/express": "^4.17.21",
+    "@types/cors": "^2.8.17",
+    "@types/compression": "^1.7.5",
+    "@types/morgan": "^1.9.9",
+    "@types/pg": "^8.10.9",
+    "@types/jsonwebtoken": "^9.0.5",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/multer": "^1.4.11",
+    "@types/nodemailer": "^6.4.14",
+    "@types/express-session": "^1.17.10",
+    "@types/passport": "^1.0.16",
+    "@types/passport-jwt": "^3.0.13",
+    "@types/uuid": "^9.0.7",
+    "@types/moment": "^2.13.0",
+    "@types/lodash": "^4.14.202",
+    "typescript": "^5.3.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2",
+    "ts-node": "^10.9.1",
+    "@types/jest": "^29.5.8",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
+    "supertest": "^6.3.3",
+    "@types/supertest": "^2.0.16",
+    "eslint": "^8.54.0",
+    "@typescript-eslint/eslint-plugin": "^6.12.0",
+    "@typescript-eslint/parser": "^6.12.0",
+    "prettier": "^3.1.0",
+    "husky": "^8.0.3",
+    "lint-staged": "^15.1.0",
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/your-username/scoop-social-backend.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/scoop-social-backend/issues"
+  },
+  "homepage": "https://github.com/your-username/scoop-social-backend#readme",
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "roots": ["<rootDir>/src"],
+    "testMatch": ["**/__tests__/**/*.test.ts"],
+    "collectCoverageFrom": [
+      "src/**/*.ts",
+      "!src/**/*.d.ts",
+      "!src/index.ts",
+      "!src/**/__tests__/**"
+    ],
+    "coverageDirectory": "coverage",
+    "coverageReporters": ["text", "lcov", "html"]
+  },
+  "lint-staged": {
+    "*.{ts,js}": [
+      "eslint --fix",
+      "prettier --write"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged",
+      "pre-push": "npm test"
+    }
+  },
+  "nodemonConfig": {
+    "watch": ["src"],
+    "ext": "ts",
+    "ignore": ["src/**/*.test.ts"],
+    "exec": "ts-node src/index.ts"
+  }
+} 

@@ -24,7 +24,78 @@ import {
 } from '@heroicons/react/24/outline'
 import { useRouter } from 'next/navigation'
 
+// Backend Status Component
+function BackendStatus() {
+  const [health, setHealth] = useState<any>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
+  useEffect(() => {
+    import('../lib/api').then(({ healthAPI }) => {
+      healthAPI.checkHealth()
+        .then(data => {
+          setHealth(data)
+          setIsLoading(false)
+        })
+        .catch(err => {
+          setError(err.message)
+          setIsLoading(false)
+        })
+    })
+  }, [])
+
+  if (isLoading) return <div className="bg-blue-100 border border-blue-300 text-blue-700 px-3 py-2 rounded-md text-sm">Testing backend connection...</div>
+  if (error) return <div className="bg-red-100 border border-red-300 text-red-700 px-3 py-2 rounded-md text-sm">Backend error: {error}</div>
+
+  return (
+    <div className="bg-green-100 border border-green-300 text-green-700 px-3 py-2 rounded-md text-sm mb-4">
+      <div className="flex items-center space-x-2">
+        <span>✅ Backend connected: {health.status}</span>
+        <span className="text-xs opacity-75">({health.version})</span>
+      </div>
+    </div>
+  )
+}
+
+// Auth0 Status Component
+function Auth0Status() {
+  const [user, setUser] = useState<any>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    // Check current auth status
+    fetch('/api/auth/me')
+      .then(res => res.json())
+      .then(data => {
+        setUser(data.user)
+        setIsLoading(false)
+      })
+      .catch(err => {
+        setError(err.message)
+        setIsLoading(false)
+      })
+  }, [])
+
+  if (isLoading) return <div className="bg-blue-100 border border-blue-300 text-blue-700 px-3 py-2 rounded-md text-sm">Loading auth...</div>
+  if (error) return <div className="bg-red-100 border border-red-300 text-red-700 px-3 py-2 rounded-md text-sm">Auth error: {error}</div>
+
+  return (
+    <div className="bg-green-100 border border-green-300 text-green-700 px-3 py-2 rounded-md text-sm mb-4">
+      {user ? (
+        <div className="flex items-center space-x-2">
+          <span>✅ Authenticated as: {user.name} ({user.email})</span>
+          <a href="/api/auth/logout" className="text-red-600 hover:underline ml-4">Logout</a>
+        </div>
+      ) : (
+        <div className="flex items-center space-x-2">
+          <span>❌ Not authenticated</span>
+          <a href="/api/auth/login" className="text-blue-600 hover:underline ml-4">Login</a>
+        </div>
+      )}
+    </div>
+  )
+}
 
 export default function HomePage() {
   const [isLoading, setIsLoading] = useState(true)
@@ -179,6 +250,9 @@ export default function HomePage() {
   return (
     <Layout>
       <div className="space-y-4 p-4">
+        {/* Auth0 Status for Testing */}
+                  <BackendStatus />
+          <Auth0Status />
 
         {/* Enhanced Welcome Header */}
         <div className="card-premium relative overflow-hidden bg-gradient-to-r from-cyan-50 to-teal-50 border-cyan-200">

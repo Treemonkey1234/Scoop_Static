@@ -1,0 +1,562 @@
+# Digital Ocean App Platform Configuration for Scoop Social MVP
+# This file defines the complete infrastructure setup for immediate deployment
+
+name: scoop-social-platform
+region: nyc1
+
+# =============================================
+# SERVICES CONFIGURATION
+# =============================================
+
+services:
+  # Backend API Service
+  - name: scoop-social-api
+    type: backend
+    source_dir: /backend
+    github:
+      repo: Treemonkey1234/Scoop_Social_MVP
+      branch: master
+      deploy_on_push: true
+    
+    # Build and Runtime Configuration
+    build_command: |
+      npm ci --only=production &&
+      npm run build
+    run_command: npm start
+    
+    # Environment Configuration
+    environment_slug: node-js
+    instance_count: 1
+    instance_size_slug: basic-xxs  # $12/month
+    
+    # Health Check
+    health_check:
+      http_path: /api/v1/health
+      initial_delay_seconds: 30
+      period_seconds: 10
+      timeout_seconds: 5
+      success_threshold: 1
+      failure_threshold: 3
+    
+    # HTTP Configuration
+    http_port: 3001
+    
+    # Scaling Configuration
+    autoscaling:
+      min_instance_count: 1
+      max_instance_count: 3
+      metrics:
+        cpu_utilization_percent: 70
+    
+    # Environment Variables
+    envs:
+      # Core Application Settings
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "3001"
+      - key: API_VERSION
+        value: v1
+      - key: APP_NAME
+        value: scoop-social-backend
+      
+             # URLs and CORS
+       - key: API_BASE_URL
+         value: https://api.scoopsocials.com
+       - key: FRONTEND_URL
+         value: https://app.scoopsocials.com
+       - key: CORS_ORIGINS
+         value: https://app.scoopsocials.com,https://scoopsocials.com,https://www.scoopsocials.com
+      
+      # Database Connections (Auto-injected)
+      - key: DATABASE_URL
+        value: ${scoop-social-db.DATABASE_URL}
+      - key: REDIS_URL
+        value: ${scoop-social-redis.DATABASE_URL}
+      
+      # Security Settings
+      - key: JWT_SECRET
+        value: your_jwt_secret_32_characters_minimum
+        type: SECRET
+        scope: RUN_TIME
+      
+      - key: ENCRYPTION_KEY
+        value: your_encryption_key_32_characters_here
+        type: SECRET
+        scope: RUN_TIME
+      
+             # Auth0 Configuration (Secrets)
+       - key: AUTH0_DOMAIN
+         value: dev-av6q4m54qqcs5n00.us.auth0.com
+         type: SECRET
+         scope: RUN_TIME
+       
+       - key: AUTH0_CLIENT_ID
+         value: your_auth0_client_id
+         type: SECRET
+         scope: RUN_TIME
+       
+       - key: AUTH0_CLIENT_SECRET
+         value: your_auth0_client_secret
+         type: SECRET
+         scope: RUN_TIME
+       
+       - key: AUTH0_SECRET
+         value: your_auth0_secret_for_sessions
+         type: SECRET
+         scope: RUN_TIME
+       
+       - key: AUTH0_AUDIENCE
+         value: https://api.scoopsocials.com
+         type: SECRET
+         scope: RUN_TIME
+       
+       - key: AUTH0_ISSUER_BASE_URL
+         value: https://dev-av6q4m54qqcs5n00.us.auth0.com
+         type: SECRET
+         scope: RUN_TIME
+      
+      # File Storage (Digital Ocean Spaces)
+      - key: DO_SPACES_ENDPOINT
+        value: https://nyc3.digitaloceanspaces.com
+      
+      - key: DO_SPACES_BUCKET
+        value: scoop-social-assets
+      
+      - key: DO_SPACES_REGION
+        value: nyc3
+      
+      - key: DO_SPACES_ACCESS_KEY
+        value: your_spaces_access_key
+        type: SECRET
+        scope: RUN_TIME
+      
+      - key: DO_SPACES_SECRET_KEY
+        value: your_spaces_secret_key
+        type: SECRET
+        scope: RUN_TIME
+      
+      - key: DO_SPACES_CDN_URL
+        value: https://scoop-social-assets.nyc3.cdn.digitaloceanspaces.com
+      
+      # External API Keys
+      - key: SENDGRID_API_KEY
+        value: SG.your_sendgrid_api_key
+        type: SECRET
+        scope: RUN_TIME
+      
+      - key: TWITTER_API_KEY
+        value: your_twitter_api_key
+        type: SECRET
+        scope: RUN_TIME
+      
+      - key: TWITTER_API_SECRET
+        value: your_twitter_api_secret
+        type: SECRET
+        scope: RUN_TIME
+      
+      - key: TWITTER_BEARER_TOKEN
+        value: your_twitter_bearer_token
+        type: SECRET
+        scope: RUN_TIME
+      
+      - key: OPENAI_API_KEY
+        value: sk-your_openai_api_key
+        type: SECRET
+        scope: RUN_TIME
+      
+             # Monitoring and Logging (Sentry Error Tracking)
+       - key: SENTRY_DSN
+         value: https://your_sentry_dsn@sentry.io/project_id
+         type: SECRET
+         scope: RUN_TIME
+       
+       - key: SENTRY_ENVIRONMENT
+         value: production
+       
+       - key: SENTRY_RELEASE
+         value: scoop-social-mvp@1.0.0
+       
+       - key: SENTRY_SAMPLE_RATE
+         value: "1.0"
+       
+       - key: SENTRY_TRACES_SAMPLE_RATE
+         value: "0.1"
+       
+       - key: LOG_LEVEL
+         value: info
+       
+       - key: ENABLE_CONSOLE_LOGS
+         value: "false"
+       
+       - key: ENABLE_ERROR_TRACKING
+         value: "true"
+      
+      # Feature Flags
+      - key: ENABLE_REAL_TIME
+        value: "true"
+      
+      - key: ENABLE_TRUST_SCORE_CALCULATION
+        value: "true"
+      
+      - key: ENABLE_FILE_UPLOADS
+        value: "true"
+      
+      - key: ENABLE_EMAIL_NOTIFICATIONS
+        value: "true"
+      
+      - key: ENABLE_RATE_LIMITING
+        value: "true"
+      
+      # Trust Score Configuration
+      - key: TRUST_SCORE_INITIAL
+        value: "50"
+      
+      - key: TRUST_SCORE_MIN
+        value: "0"
+      
+      - key: TRUST_SCORE_MAX
+        value: "100"
+      
+      - key: TRUST_SCORE_RECALC_INTERVAL
+        value: "3600000"
+      
+      # File Upload Settings
+      - key: MAX_FILE_SIZE
+        value: "10485760"
+      
+      - key: ALLOWED_IMAGE_TYPES
+        value: image/jpeg,image/png,image/webp,image/gif
+      
+      - key: UPLOAD_TEMP_DIR
+        value: /tmp/uploads
+
+# =============================================
+# DATABASE CONFIGURATION
+# =============================================
+
+databases:
+  # PostgreSQL Database
+  - name: scoop-social-db
+    engine: PG
+    version: "15"
+    size: basic          # $15/month
+    num_nodes: 1
+    production: true
+    
+    # Database Configuration
+    db_name: scoop_social_prod
+    db_user: scoop_admin
+    
+    # Connection Pool Settings
+    connection_pool:
+      size: 20
+      mode: transaction
+    
+    # Backup Configuration
+    backup_restore:
+      enabled: true
+      
+  # Redis Cache
+  - name: scoop-social-redis
+    engine: REDIS
+    version: "7"
+    size: basic          # $10/month
+    num_nodes: 1
+    production: true
+    
+    # Redis Configuration
+    config:
+      maxmemory_policy: allkeys-lru
+      timeout: 300
+
+# =============================================
+# STATIC SITES (if hosting frontend on DO)
+# =============================================
+
+static_sites:
+  - name: scoop-social-frontend
+    github:
+      repo: Treemonkey1234/Scoop_Social_MVP
+      branch: master
+      deploy_on_push: true
+    
+    build_command: |
+      npm ci &&
+      npm run build
+    output_dir: out
+    
+         # Environment Variables for Frontend
+     envs:
+       - key: NEXT_PUBLIC_API_URL
+         value: https://api.scoopsocials.com/api/v1
+       
+       - key: NEXT_PUBLIC_WS_URL
+         value: https://api.scoopsocials.com
+      
+      - key: NEXT_PUBLIC_ENABLE_BACKEND
+        value: "true"
+      
+      - key: NEXT_PUBLIC_ENABLE_REALTIME
+        value: "true"
+      
+      - key: NEXT_PUBLIC_LIVE_TRUST_SCORE
+        value: "true"
+      
+             - key: NEXT_PUBLIC_SOCIAL_VERIFICATION
+         value: "true"
+       
+       # Sentry Error Tracking (Frontend)
+       - key: NEXT_PUBLIC_SENTRY_DSN
+         value: https://your_frontend_sentry_dsn@sentry.io/project_id
+       
+       - key: NEXT_PUBLIC_SENTRY_ENVIRONMENT
+         value: production
+       
+       # Auth0 Frontend Configuration
+       - key: AUTH0_DOMAIN
+         value: dev-av6q4m54qqcs5n00.us.auth0.com
+       
+       - key: AUTH0_CLIENT_ID
+         value: your_auth0_client_id
+       
+       - key: AUTH0_CLIENT_SECRET
+         value: your_auth0_client_secret
+         type: SECRET
+         scope: BUILD_TIME
+       
+       - key: AUTH0_SECRET
+         value: your_auth0_secret_for_sessions
+         type: SECRET
+         scope: BUILD_TIME
+       
+       - key: AUTH0_BASE_URL
+         value: https://app.scoopsocials.com
+       
+       - key: AUTH0_ISSUER_BASE_URL
+         value: https://dev-av6q4m54qqcs5n00.us.auth0.com
+
+# =============================================
+# WORKERS (for background tasks)
+# =============================================
+
+workers:
+  - name: trust-score-worker
+    source_dir: /backend
+    github:
+      repo: Treemonkey1234/Scoop_Social_MVP
+      branch: master
+    
+    build_command: npm ci --only=production
+    run_command: npm run worker:trust-scores
+    
+    environment_slug: node-js
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    
+    # Same environment variables as backend service
+    envs:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        value: ${scoop-social-db.DATABASE_URL}
+      - key: REDIS_URL
+        value: ${scoop-social-redis.DATABASE_URL}
+      - key: WORKER_TYPE
+        value: trust-scores
+
+# =============================================
+# JOBS (for one-time tasks)
+# =============================================
+
+jobs:
+  # Database Migration Job
+  - name: db-migrate
+    kind: POST_DEPLOY
+    source_dir: /backend
+    github:
+      repo: Treemonkey1234/Scoop_Social_MVP
+      branch: master
+    
+    build_command: npm ci --only=production
+    run_command: npm run migrate
+    
+    environment_slug: node-js
+    instance_size_slug: basic-xxs
+    
+    envs:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        value: ${scoop-social-db.DATABASE_URL}
+
+  # Seed Sample Data Job (optional for demo)
+  - name: seed-demo-data
+    kind: POST_DEPLOY
+    source_dir: /backend
+    github:
+      repo: Treemonkey1234/Scoop_Social_MVP
+      branch: master
+    
+    build_command: npm ci --only=production
+    run_command: npm run seed:demo
+    
+    environment_slug: node-js
+    instance_size_slug: basic-xxs
+    
+    envs:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        value: ${scoop-social-db.DATABASE_URL}
+             - key: SKIP_DEMO_SEED
+         value: "true"  # Fresh platform - no demo accounts
+
+# =============================================
+# FUNCTIONS (serverless functions)
+# =============================================
+
+functions:
+  # WebSocket connection handler
+  - name: websocket-handler
+    source_dir: /backend/functions
+    github:
+      repo: Treemonkey1234/Scoop_Social_MVP
+      branch: master
+    
+    runtime: nodejs18
+    
+    envs:
+      - key: REDIS_URL
+        value: ${scoop-social-redis.DATABASE_URL}
+
+# =============================================
+# INGRESS (custom domains and routing)
+# =============================================
+
+ingress:
+  rules:
+    # API Domain
+    - match:
+        path:
+          prefix: /api
+      component:
+        name: scoop-social-api
+    
+    # WebSocket Domain
+    - match:
+        path:
+          prefix: /socket.io
+      component:
+        name: scoop-social-api
+    
+    # Frontend Domain (if hosting on DO)
+    - match:
+        path:
+          prefix: /
+      component:
+        name: scoop-social-frontend
+
+# =============================================
+# ALERTS AND MONITORING
+# =============================================
+
+alerts:
+  - rule: CPU_UTILIZATION
+    value: 80
+    operator: GREATER_THAN
+    window: FIVE_MINUTES
+    disabled: false
+  
+  - rule: MEM_UTILIZATION
+    value: 90
+    operator: GREATER_THAN
+    window: FIVE_MINUTES
+    disabled: false
+  
+  - rule: RESTART_COUNT
+    value: 5
+    operator: GREATER_THAN
+    window: FIVE_MINUTES
+    disabled: false
+
+# =============================================
+# DOMAINS (custom domain configuration)
+# =============================================
+
+domains:
+  - domain: api.scoopsocials.com
+    type: PRIMARY
+    minimum_tls_version: "1.2"
+    certificate:
+      type: LETS_ENCRYPT
+  
+  - domain: app.scoopsocials.com
+    type: PRIMARY
+    minimum_tls_version: "1.2"
+    certificate:
+      type: LETS_ENCRYPT
+
+# =============================================
+# MAINTENANCE AND UPDATES
+# =============================================
+
+maintenance:
+  # Automatic OS updates
+  auto_os_upgrade: true
+  
+  # Scheduled maintenance window
+  maintenance_window:
+    day: SUNDAY
+    hour: 03
+    minute: 00
+
+# =============================================
+# COST BREAKDOWN
+# =============================================
+
+# Monthly Cost Summary:
+# - API Service (basic-xxs): $12/month
+# - PostgreSQL (basic): $15/month
+# - Redis (basic): $10/month
+# - Spaces Storage: $5/month (250GB)
+# - Bandwidth: $0 (1TB included)
+# - Total: $42/month
+
+# Additional costs if added:
+# - Frontend hosting: $0 (static site)
+# - Workers: $12/month each
+# - Custom domains: $0 (included)
+# - SSL certificates: $0 (Let's Encrypt)
+
+---
+
+# =============================================
+# DEPLOYMENT COMMANDS
+# =============================================
+
+# To deploy this configuration:
+# 1. Install doctl CLI: https://docs.digitalocean.com/reference/doctl/how-to/install/
+# 2. Authenticate: doctl auth init
+# 3. Create app: doctl apps create --spec .do/app.yaml
+# 4. Update app: doctl apps update <app-id> --spec .do/app.yaml
+
+# To check deployment status:
+# doctl apps list
+# doctl apps get <app-id>
+# doctl apps logs <app-id> --component scoop-social-api
+
+# To manage environment variables:
+# doctl apps update-env <app-id> --key AUTH0_SECRET --value "new_secret"
+
+# To scale services:
+# doctl apps update <app-id> --spec .do/app.yaml
+
+# To access database:
+# doctl databases connection <database-id>
+
+# To backup database:
+# doctl databases backups list <database-id>
+
+# To monitor logs:
+# doctl apps logs <app-id> --follow --component scoop-social-api 
