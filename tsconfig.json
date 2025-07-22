@@ -24,5 +24,5 @@
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "middleware.ts.bak"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "backend-prep/**/*", "Scoop_Social_MVP/**/*", "Scoop_Static_Demo_Backup/**/*", "scoop-social-backend/**/*"]
 } 
